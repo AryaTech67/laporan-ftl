@@ -1,0 +1,2410 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FTL Smart Rekap Laporan - Shopee & TikTok</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- PapaParse for robust CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <!-- SheetJS (xlsx) for instant Excel generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+    * { -webkit-tap-highlight-color: transparent; }
+    body { 
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      letter-spacing: -0.012em;
+    }
+    .font-mono, [class*="font-mono"] {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+      letter-spacing: -0.03em;
+    }
+    .tabular-nums, .num-tabular {
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1;
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    .shake-animation { animation: shake 0.35s ease-in-out; }
+    @media print {
+      body { background: white !important; color: black !important; }
+      header, #dropArea, #toolbarSection, #fileUploadList, #btnResetData, .no-print, #loginOverlay, footer, #platformTabsContainer { display: none !important; }
+      #contentSection { display: block !important; }
+      table { font-size: 8px !important; }
+      th, td { padding: 3px !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen antialiased flex flex-col relative selection:bg-orange-500 selection:text-white">
+
+  <!-- 🔒 SECURITY LOGIN OVERLAY (Clean & Private) -->
+  <div id="loginOverlay" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div id="loginCard" class="bg-white rounded-xl shadow-xl border border-slate-200/90 max-w-sm w-full p-6 sm:p-7 text-center relative overflow-hidden transition-all">
+      <div class="w-10 h-10 rounded-lg bg-slate-900 text-white flex items-center justify-center mx-auto mb-3 shadow-xs">
+        <i data-lucide="lock" class="w-5 h-5"></i>
+      </div>
+      
+      <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-500 block">SISTEM REKAP LAPORAN</span>
+      <h2 class="text-lg font-bold text-slate-900 tracking-tight mt-0.5">Akses Rekap Pesanan</h2>
+      <p class="text-xs text-slate-500 mt-1 mb-5">
+        Silakan masukkan password untuk membuka portal laporan.
+      </p>
+
+      <form onsubmit="handleLoginSubmit(event)" class="space-y-3.5">
+        <div class="relative">
+          <input type="password" id="accessPinInput" autofocus placeholder="Masukkan password..." 
+                 class="w-full text-center text-xs font-semibold tracking-wider px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800 transition">
+          <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1">
+            <i data-lucide="eye" id="eyeIcon" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+        
+        <p id="loginErrorMsg" class="hidden text-xs font-bold text-rose-600 bg-rose-50 py-1.5 rounded-lg border border-rose-200">
+          Password salah, silakan coba lagi!
+        </p>
+
+        <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-lg shadow-xs transition active:scale-[0.98] flex items-center justify-center gap-1.5">
+          <i data-lucide="unlock" class="w-3.5 h-3.5"></i>
+          <span>Buka Sistem</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Header / Navbar Brand FTL -->
+  <header class="bg-white border-b border-slate-200/90 sticky top-0 z-40 shadow-xs">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2.5 sm:gap-3">
+        <img src="logo-ftl.png" alt="For The Little" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0">
+        <div class="overflow-hidden">
+          <div class="flex items-center gap-2">
+            <h1 class="text-sm sm:text-base font-extrabold text-[#264D3B] tracking-tight leading-tight truncate">For The Little</h1>
+            <span class="text-[10px] font-bold bg-emerald-50 text-[#264D3B] px-2 py-0.5 rounded-full border border-emerald-200 hidden sm:inline">Rekap Transaksi v3.9</span>
+          </div>
+          <p class="text-[11px] text-[#8D6E54] font-semibold truncate hidden sm:block">Indonesia • Rekapitulasi Penjualan Shopee & TikTok</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="btnResetData" onclick="resetActiveTabData()" class="hidden px-3 py-1.5 text-xs font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg transition border border-rose-200 shadow-xs flex items-center gap-1.5 active:scale-95" title="Hapus data pada tab yang aktif">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Hapus Tab Ini</span>
+        </button>
+        <button onclick="lockScreen()" class="px-3 py-1.5 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 rounded-lg transition border border-slate-300 shadow-xs flex items-center gap-1.5 active:scale-95" title="Kunci Layar">
+          <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Kunci</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-5 space-y-4 sm:space-y-5 flex-1 w-full">
+
+    <!-- 📑 PLATFORM WORKSPACE TABS -->
+    <section id="platformTabsContainer" class="bg-white p-2.5 rounded-xl border border-slate-200/90 shadow-xs flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg w-full sm:w-auto">
+        <button id="tabShopee" onclick="setActivePlatformTab('Shopee')" 
+                class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-md font-semibold text-xs transition flex items-center justify-center gap-1.5 bg-[#EE4D2D] text-white shadow-xs">
+          <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
+          <span>Shopee (<span id="tabCountShopee">0</span>)</span>
+        </button>
+        <button id="tabTikTok" onclick="setActivePlatformTab('TikTok')" 
+                class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-md font-medium text-xs transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900">
+          <i data-lucide="music-2" class="w-3.5 h-3.5"></i>
+          <span>TikTok (<span id="tabCountTikTok">0</span>)</span>
+        </button>
+        <button id="tabGabungan" onclick="setActivePlatformTab('Gabungan')" 
+                class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-md font-medium text-xs transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900">
+          <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+          <span>Gabungan (<span id="tabCountGabungan">0</span>)</span>
+        </button>
+      </div>
+
+      <div class="text-[11px] text-slate-500 font-medium px-1 flex items-center gap-2.5">
+        <span class="flex items-center gap-1.5 font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 shadow-2xs">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          Tersimpan Otomatis di Browser
+        </span>
+        <button onclick="loadSampleDemoData()" class="text-slate-700 hover:text-slate-900 font-semibold underline">
+          Muat Data Demo
+        </button>
+      </div>
+    </section>
+
+    <!-- Upload Zone -->
+    <section class="bg-white rounded-xl border border-dashed border-slate-300 hover:border-slate-800 p-5 sm:p-6 text-center transition shadow-xs" id="dropArea">
+      <div class="max-w-xl mx-auto flex flex-col items-center">
+        <div class="w-10 h-10 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center mb-2.5 shadow-2xs">
+          <i data-lucide="file-up" class="w-5 h-5"></i>
+        </div>
+        
+        <h2 class="text-sm sm:text-base font-bold text-slate-900 mb-0.5" id="uploadTitle">
+          Upload Laporan Shopee
+        </h2>
+        <p class="text-xs text-slate-500 mb-3.5 leading-relaxed" id="uploadSubtitle">
+          Pilih file <b>.csv</b> atau <b>.xlsx</b> untuk dimasukkan ke tab yang sedang aktif.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-2 w-full sm:w-auto">
+          <div class="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200 text-xs font-medium text-slate-600">
+            <span>Target:</span>
+            <select id="targetUploadSelect" onchange="syncTargetUploadWithTab(this.value)" class="bg-white border border-slate-300 rounded-md px-2 py-1 font-semibold text-slate-800 focus:outline-none">
+              <option value="AUTO">🔍 Otomatis Kenali File</option>
+              <option value="Shopee">Shopee Tab</option>
+              <option value="TikTok">TikTok Tab</option>
+            </select>
+          </div>
+
+          <label class="cursor-pointer px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-lg shadow-xs transition flex items-center justify-center gap-1.5 active:scale-95">
+            <i data-lucide="folder-open" class="w-3.5 h-3.5"></i>
+            <span>Pilih File Laporan</span>
+            <input type="file" id="fileInput" class="hidden" multiple accept=".csv, .xlsx, .xls">
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dashboard Content (Stats, Filters & Table) -->
+    <div id="contentSection" class="space-y-4 sm:space-y-6">
+
+      <!-- 📊 BARIS 1: RINGKASAN OPERASIONAL & KATEGORI PESANAN (KOL, SALES, FO) -->
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between px-0.5">
+          <span class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-slate-700"></i>
+            <span>Rincian Kategori: KOL, Sales Real & FO</span>
+          </span>
+          <span class="text-[10px] text-slate-400 font-medium hidden sm:inline">Klik kartu untuk filter otomatis</span>
+        </div>
+
+        <!-- 4 KARTU OPERASIONAL: TOTAL, KOL, SALES, FO -->
+        <section class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <!-- Total Pesanan -->
+          <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/90 shadow-xs hover:border-slate-400 transition">
+            <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Total Pesanan</span>
+            <div class="text-xl sm:text-2xl font-bold text-slate-900 mt-1" id="statTotalOrder">0</div>
+            <p class="text-[11px] text-slate-500 font-medium truncate mt-1" id="statTotalBreakdown">KOL: 0 • SALES: 0 • FO: 0</p>
+          </div>
+
+          <!-- 1. KOL / AFFILIATE -->
+          <div onclick="filterByQuickCat('AFFILIATE / KOL')" 
+               class="bg-white p-3.5 sm:p-4 rounded-xl border border-purple-200 hover:border-purple-400 shadow-xs transition cursor-pointer group" 
+               title="Klik untuk melihat hanya pesanan KOL / Affiliate">
+            <span class="text-[10px] font-semibold text-purple-700 uppercase tracking-wider block">KOL / Affiliate</span>
+            <div class="text-xl sm:text-2xl font-bold text-purple-700 mt-1" id="statAffiliateKOL">0</div>
+            <p class="text-[11px] text-purple-600 font-medium truncate mt-1" id="statKOLSubtext">0 pcs produk</p>
+          </div>
+
+          <!-- 2. SALES REAL (PENJUALAN ASLI) -->
+          <div onclick="filterByQuickCat('SALES (Real)')" 
+               class="bg-white p-3.5 sm:p-4 rounded-xl border border-emerald-200 hover:border-emerald-400 shadow-xs transition cursor-pointer group" 
+               title="Klik untuk melihat hanya penjualan real toko">
+            <span class="text-[10px] font-semibold text-emerald-700 uppercase tracking-wider block">Sales (Penjualan Real)</span>
+            <div class="text-xl sm:text-2xl font-bold text-emerald-600 mt-1" id="statSalesReal">0</div>
+            <p class="text-[11px] text-emerald-600 font-medium truncate mt-1" id="statSalesSubtext">0 pcs produk</p>
+          </div>
+
+          <!-- 3. FO (FAKE ORDER) -->
+          <div onclick="filterByQuickCat('FO (Fake Order)')" 
+               class="bg-white p-3.5 sm:p-4 rounded-xl border border-amber-200 hover:border-amber-400 shadow-xs transition cursor-pointer group" 
+               title="Klik untuk melihat hanya pesanan Fake Order (FO)">
+            <span class="text-[10px] font-semibold text-amber-700 uppercase tracking-wider block">Fake Order (FO)</span>
+            <div class="text-xl sm:text-2xl font-bold text-amber-600 mt-1" id="statFOCount">0</div>
+            <p class="text-[11px] text-amber-600 font-medium truncate mt-1" id="statFOSubtext">0 pcs produk</p>
+          </div>
+        </section>
+
+        <!-- BANNER RINCIAN CEPAT / PILL BAR KATEGORI (KLIKABLE & SINKRON TOTAL) -->
+        <div class="bg-white border border-slate-200/90 p-2 sm:p-2.5 rounded-xl flex flex-wrap items-center justify-between gap-2 text-xs shadow-xs">
+          <div class="flex items-center gap-1.5 font-semibold text-slate-700">
+            <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-slate-800"></i>
+            <span>Filter Cepat (<span id="pillActivePlatformBadge" class="text-slate-900 font-bold">Gabungan</span>):</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5" id="quickPillsContainer">
+            <button id="pillBtnAll" onclick="filterByQuickCat('ALL')" class="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-bold text-xs transition border border-slate-900 active:scale-95 shadow-2xs flex items-center gap-1">
+              <span id="pillAllPrefix">Semua / Gabungan</span> (<span id="pillTotalCount">0</span>)
+            </button>
+            <button id="pillBtnKOL" onclick="filterByQuickCat('AFFILIATE / KOL')" class="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 font-medium text-xs transition border border-purple-200 active:scale-95 flex items-center gap-1">
+              ⭐ <span id="pillKOL">KOL: 0</span>
+            </button>
+            <button id="pillBtnSales" onclick="filterByQuickCat('SALES (Real)')" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-medium text-xs transition border border-emerald-200 active:scale-95 flex items-center gap-1">
+              🛒 <span id="pillSales">Sales: 0</span>
+            </button>
+            <button id="pillBtnFO" onclick="filterByQuickCat('FO (Fake Order)')" class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 font-medium text-xs transition border border-amber-200 active:scale-95 flex items-center gap-1">
+              📦 <span id="pillFO">FO: 0</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 💰 BARIS 2: PERHITUNGAN KEUANGAN LENGKAP & SUMBER PERHITUNGAN -->
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between px-0.5">
+          <span class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <i data-lucide="badge-percent" class="w-3.5 h-3.5 text-slate-700"></i>
+            <span>Perhitungan Finansial & Profitabilitas (Diskon, HPP & Laba)</span>
+          </span>
+          <span class="text-[10px] text-slate-400 font-medium hidden sm:inline">*Dihitung dari pesanan berstatus Selesai</span>
+        </div>
+
+        <!-- 6 KARTU FINANSIAL SESUAI DESIGN ASLI FTL -->
+        <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          
+          <!-- 1. Omset Kotor (Gross Sales) -->
+          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 shadow-2xs hover:border-slate-300 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[11px] font-bold text-slate-600 uppercase tracking-tight">1. OMSET KOTOR</span>
+                <i data-lucide="tag" class="w-4 h-4 text-slate-400"></i>
+              </div>
+              <div class="text-xl sm:text-2xl font-bold text-slate-900 mt-1 truncate tabular-nums tracking-tight" id="statOmsetKotor">Rp 0</div>
+              <p class="text-xs text-slate-400 font-medium truncate mt-1" id="card1Subtext">Harga sebelum diskon</p>
+            </div>
+            <div class="text-[9px] font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded-md mt-2.5 truncate tabular-nums" id="card1Source">
+              📁 Subtotal Pesanan
+            </div>
+          </div>
+
+          <!-- 2. TOTAL DISKON / POTONGAN -->
+          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-rose-200/90 shadow-2xs hover:border-rose-300 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[11px] font-bold text-rose-600 uppercase tracking-tight">2. TOTAL DISKON</span>
+                <i data-lucide="ticket-percent" class="w-4 h-4 text-rose-500"></i>
+              </div>
+              <div class="text-xl sm:text-2xl font-bold text-rose-600 mt-1 truncate tabular-nums tracking-tight" id="statPotonganBiaya">Rp 0</div>
+              <p class="text-xs text-rose-400 font-medium truncate mt-1" id="card2Subtext">Voucher & subsidi promo</p>
+            </div>
+            <div class="text-[9px] font-semibold text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded-md mt-2.5 truncate tabular-nums" id="card2Source">
+              📁 Diskon Riil Toko
+            </div>
+          </div>
+
+          <!-- 3. TOTAL HPP (MODAL BARANG) -->
+          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-indigo-200/90 shadow-2xs hover:border-indigo-300 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[11px] font-bold text-indigo-700 uppercase tracking-tight">3. TOTAL HPP (MODAL)</span>
+                <i data-lucide="package" class="w-4 h-4 text-indigo-500"></i>
+              </div>
+              <div class="text-xl sm:text-2xl font-bold text-indigo-600 mt-1 truncate tabular-nums tracking-tight" id="statTotalHpp">Rp 0</div>
+              <p class="text-xs text-indigo-400 font-medium truncate mt-1" id="statHppRateDesc">@Rp 25.000 / pcs</p>
+            </div>
+            <div class="text-[9px] font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded-md mt-2.5 truncate tabular-nums" id="card3Source">
+              📁 Qty Selesai × HPP
+            </div>
+          </div>
+
+          <!-- 4. OMSET BERSIH (PENERIMAAN) -->
+          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-emerald-200/90 shadow-2xs hover:border-emerald-300 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[11px] font-bold text-emerald-700 uppercase tracking-tight">4. OMSET BERSIH</span>
+                <i data-lucide="wallet" class="w-4 h-4 text-emerald-600"></i>
+              </div>
+              <div class="text-xl sm:text-2xl font-bold text-emerald-700 mt-1 truncate tabular-nums tracking-tight" id="statOmsetBersih">Rp 0</div>
+              <p class="text-xs text-emerald-500 font-medium truncate mt-1" id="card4Subtext">Pembayaran riil pembeli</p>
+            </div>
+            <div class="text-[9px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-md mt-2.5 truncate tabular-nums" id="card4Source">
+              📁 Total Pembayaran
+            </div>
+          </div>
+
+          <!-- 5. ESTIMASI LABA (PROFIT MARGIN) -->
+          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-blue-200/90 shadow-2xs hover:border-blue-300 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[11px] font-bold text-blue-700 uppercase tracking-tight">5. ESTIMASI LABA</span>
+                <i data-lucide="trending-up" class="w-4 h-4 text-blue-600"></i>
+              </div>
+              <div class="text-xl sm:text-2xl font-bold text-blue-600 mt-1 truncate tabular-nums tracking-tight" id="statLabaEstimasi">Rp 0</div>
+              <p class="text-xs text-blue-400 font-medium truncate mt-1" id="card5Subtext">Omset Bersih - HPP</p>
+            </div>
+            <div class="text-[9px] font-semibold text-blue-600 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded-md mt-2.5 truncate tabular-nums" id="card5Source">
+              📁 Bersih - Total HPP
+            </div>
+          </div>
+
+          <!-- 6. 🚨 TOTAL BATAL (LOSS MELAYANG) -->
+          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-rose-200/90 shadow-2xs hover:border-rose-300 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[11px] font-bold text-rose-600 uppercase tracking-tight">6. TOTAL BATAL</span>
+                <i data-lucide="x-circle" class="w-4 h-4 text-rose-500"></i>
+              </div>
+              <div class="text-xl sm:text-2xl font-bold text-rose-600 mt-1 flex items-baseline gap-1 tabular-nums tracking-tight">
+                <span id="statBatalCount">0</span>
+                <span class="text-xs font-semibold text-rose-400" id="statBatalPcs">(0 pcs)</span>
+              </div>
+              <p class="text-xs text-rose-400 font-medium truncate mt-1 tabular-nums" id="statBatalNominal">Rp 0 melayang</p>
+            </div>
+            <div class="text-[9px] font-semibold text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded-md mt-2.5 truncate tabular-nums" id="card6Source">
+              📁 Status Batal
+            </div>
+          </div>
+
+        </section>
+
+        <!-- 📋 PAPAN KALKULASI & TRANSPARANSI NOMINAL LENGKAP -->
+        <div class="bg-white border border-slate-200/90 rounded-xl p-3.5 sm:p-4 text-xs text-slate-800 space-y-3 shadow-xs">
+          <div class="flex flex-wrap items-center justify-between gap-1.5 border-b border-slate-100 pb-2.5">
+            <div class="flex items-center gap-1.5 font-bold text-slate-900">
+              <i data-lucide="calculator" class="w-4 h-4 text-slate-700"></i>
+              <span>Papan Rincian Kalkulasi Nominal (Rumus & Hasil Perhitungan):</span>
+            </div>
+            <span class="text-[10px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200" id="lblActivePlatformSource">
+              Aktif: Tab Shopee
+            </span>
+          </div>
+
+          <!-- 3 KARTU PERSAMAAN MATEMATIKA BESAR DENGAN NOMINAL ASLI -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+            <!-- 1. Kalkulasi Omset Bersih -->
+            <div class="bg-slate-50/70 p-3 rounded-lg border border-slate-200/80 shadow-2xs space-y-1">
+              <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                <span>1. Hitungan Omset Bersih</span>
+                <span class="text-[9px] text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded font-semibold border border-emerald-200">Kotor − Diskon</span>
+              </div>
+              <div class="font-mono text-[11px] font-bold text-slate-800 flex items-center flex-wrap gap-1 leading-normal" id="formulaOmsetBersih">
+                <span class="text-slate-900" id="fKotor">Rp 0</span>
+                <span class="text-rose-500">−</span>
+                <span class="text-rose-600" id="fDiskon">Rp 0</span>
+                <span class="text-slate-400">=</span>
+                <span class="text-emerald-700 font-extrabold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200" id="fBersih">Rp 0</span>
+              </div>
+              <p class="text-[10px] text-slate-500 leading-tight" id="fDescBersih">
+                Total Subtotal Pesanan dikurangi Diskon Voucher Promo toko.
+              </p>
+            </div>
+
+            <!-- 2. Kalkulasi Laba Bersih -->
+            <div class="bg-slate-50/70 p-3 rounded-lg border border-slate-200/80 shadow-2xs space-y-1">
+              <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                <span>2. Hitungan Estimasi Laba</span>
+                <span class="text-[9px] text-blue-700 bg-blue-50 px-1 py-0.5 rounded font-semibold border border-blue-200">Bersih − HPP</span>
+              </div>
+              <div class="font-mono text-[11px] font-bold text-slate-800 flex items-center flex-wrap gap-1 leading-normal" id="formulaLaba">
+                <span class="text-emerald-700" id="fBersih2">Rp 0</span>
+                <span class="text-slate-500">−</span>
+                <span class="text-slate-800" id="fHpp">Rp 0</span>
+                <span class="text-slate-400">=</span>
+                <span class="text-blue-700 font-extrabold bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200" id="fLaba">Rp 0</span>
+              </div>
+              <p class="text-[10px] text-slate-500 leading-tight" id="fDescLaba">
+                Omset Bersih dikurangi Modal Produk (Qty Selesai × Rp 25rb).
+              </p>
+            </div>
+
+            <!-- 3. Kalkulasi Kerugian Batal -->
+            <div class="bg-slate-50/70 p-3 rounded-lg border border-slate-200/80 shadow-2xs space-y-1">
+              <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                <span>3. Hitungan Pesanan Batal</span>
+                <span class="text-[9px] text-rose-700 bg-rose-50 px-1 py-0.5 rounded font-semibold border border-rose-200">Total Melayang</span>
+              </div>
+              <div class="font-mono text-[11px] font-bold text-slate-800 flex items-center flex-wrap gap-1 leading-normal" id="formulaBatal">
+                <span class="text-rose-600" id="fBatalCount">0 order</span>
+                <span class="text-slate-400">×</span>
+                <span class="text-rose-500" id="fBatalPcs">(0 pcs)</span>
+                <span class="text-slate-400">=</span>
+                <span class="text-rose-700 font-extrabold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200" id="fBatalNom">Rp 0 melayang</span>
+              </div>
+              <p class="text-[10px] text-slate-500 leading-tight" id="fDescBatal">
+                Total potensi uang transaksi yang gagal masuk kas toko.
+              </p>
+            </div>
+          </div>
+
+          <!-- Rincian Asal Kolom Mentah -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-[10px] text-slate-600 pt-1 border-t border-slate-100" id="transparencyDetailBox">
+            <!-- Dynamic column names -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- HPP Settings Bar -->
+      <div class="bg-white border border-slate-200/90 rounded-xl p-3 sm:p-3.5 flex flex-wrap items-center justify-between gap-2.5 text-xs text-slate-700 shadow-xs">
+        <div class="flex items-center gap-2">
+          <i data-lucide="calculator" class="w-4 h-4 text-slate-700"></i>
+          <span class="font-semibold text-slate-800">Pengaturan HPP Satuan per Pcs:</span>
+          <div class="flex items-center gap-1 bg-white px-2.5 py-1 rounded-lg border border-slate-300 shadow-2xs">
+            <span class="font-semibold text-slate-400">Rp</span>
+            <input type="number" id="defaultHppInput" value="25000" onchange="updateDefaultHPP(this.value)" 
+                   class="w-20 text-xs font-bold text-slate-900 focus:outline-none">
+          </div>
+        </div>
+        <div class="text-[11px] text-slate-500">
+          *Total HPP = Qty Produk Selesai × HPP Satuan. Laba Bersih = Omset Bersih - Total HPP.
+        </div>
+      </div>
+
+      <!-- 📦 MONTHLY VOLUME BREAKDOWN (Rincian Produk Keluar per Bulan) -->
+      <section class="bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-[#264D3B] flex items-center justify-center shadow-2xs">
+              <i data-lucide="calendar" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Rekapitulasi Volume Produk Keluar per Bulan</h3>
+              <p class="text-[10px] text-slate-500 font-medium">Klik salah satu bulan untuk menyaring tabel pesanan otomatis</p>
+            </div>
+          </div>
+          <button onclick="filterByMonth('ALL')" class="text-[11px] font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition active:scale-95 border border-slate-200 shadow-2xs">
+            Semua Bulan
+          </button>
+        </div>
+
+        <!-- Dynamic Monthly Cards -->
+        <div id="monthlyBreakdownContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+          <!-- Populated by JavaScript in refreshUI -->
+        </div>
+      </section>
+
+      <!-- Action & Toolbar Section -->
+      <section id="toolbarSection" class="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-xs space-y-3 scroll-mt-20">
+        
+        <!-- Baris Filter 1: Periode Tanggal Transaksi (Otomatis & Range Picker) -->
+        <div class="flex flex-wrap items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100 text-xs">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="font-bold text-slate-800 flex items-center gap-1.5">
+              <i data-lucide="calendar-range" class="w-4 h-4 text-[#264D3B]"></i>
+              <span>Periode Laporan:</span>
+            </span>
+            <span id="badgeDateRange" class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-[11px] tabular-nums flex items-center gap-1 shadow-2xs">
+              📅 Membaca tanggal pesanan...
+            </span>
+          </div>
+
+          <!-- Date Range Pickers (Dari - Sampai) -->
+          <div class="flex flex-wrap items-center gap-1.5">
+            <div class="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+              <span class="text-[10px] font-semibold text-slate-500 uppercase">Dari:</span>
+              <input type="date" id="filterStartDate" onchange="applyFilters()" 
+                     class="bg-transparent text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer">
+            </div>
+            <div class="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+              <span class="text-[10px] font-semibold text-slate-500 uppercase">Sampai:</span>
+              <input type="date" id="filterEndDate" onchange="applyFilters()" 
+                     class="bg-transparent text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer">
+            </div>
+            <button onclick="resetDateFilter()" title="Tampilkan semua rentang tanggal"
+                    class="px-2.5 py-1 text-[11px] font-semibold text-slate-600 bg-white hover:bg-slate-100 rounded-lg border border-slate-300 transition active:scale-95 shadow-2xs">
+              Semua Tgl
+            </button>
+          </div>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+          <!-- Search Input -->
+          <div class="relative sm:col-span-2 lg:col-span-1">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input type="text" id="searchInput" placeholder="Cari No. Pesanan, Resi, Nama..." 
+                   oninput="applyFilters()"
+                   class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#264D3B]/20 focus:border-[#264D3B] transition-all">
+          </div>
+
+          <!-- Kategori Filter -->
+          <select id="filterCategory" onchange="applyFilters()" class="text-xs py-2 px-2.5 bg-purple-50 border border-purple-200 text-purple-900 rounded-xl focus:outline-none font-bold">
+            <option value="ALL">Semua Kategori (KOL/Sales/FO)</option>
+            <option value="AFFILIATE / KOL">⭐ Affiliate / KOL</option>
+            <option value="SALES (Real)">🛒 Sales (Penjualan Real)</option>
+            <option value="FO (Fake Order)">📦 FO (Fake Order)</option>
+          </select>
+
+          <!-- Status Filter -->
+          <select id="filterStatus" onchange="applyFilters()" class="text-xs py-2 px-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none font-medium text-slate-700">
+            <option value="ALL">Semua Status</option>
+            <option value="Selesai">Hanya Selesai</option>
+            <option value="Dikirim">Hanya Dikirim</option>
+            <option value="Batal">Hanya Dibatalkan</option>
+          </select>
+
+          <!-- Tanggal Sort / Filter -->
+          <select id="filterDateMode" onchange="applyFilters()" class="text-xs py-2 px-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none font-medium text-slate-700">
+            <option value="ORDER_DATE">Urutkan Tanggal Pesanan</option>
+            <option value="BATAL_ONLY">Tampilkan Khusus Batal</option>
+          </select>
+        </div>
+
+        <!-- Export Buttons (Touch-Friendly) -->
+        <div class="grid grid-cols-2 sm:flex sm:items-center sm:justify-end gap-2 pt-2 border-t border-slate-100">
+          <button onclick="copyToClipboardSpreadsheet()" class="col-span-1 px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all flex items-center justify-center gap-1.5 border border-slate-200 active:scale-95">
+            <i data-lucide="clipboard" class="w-3.5 h-3.5 text-slate-500"></i>
+            <span>Copy ke Sheets</span>
+          </button>
+          
+          <button onclick="exportToExcel()" class="col-span-1 px-3.5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-1.5 active:scale-95">
+            <i data-lucide="sheet" class="w-3.5 h-3.5"></i>
+            <span id="lblBtnExport">Export Excel (<span id="lblExportPlatform">Shopee</span>)</span>
+          </button>
+        </div>
+
+        <!-- Bulk Tools & Retur Manager -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-[11px] text-slate-500">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="font-bold text-slate-700 hidden sm:inline">Ubah Massal:</span>
+            <button onclick="bulkSetCategory('AFFILIATE / KOL')" class="px-2 py-0.5 bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg font-bold">KOL / Affiliate</button>
+            <button onclick="bulkSetCategory('SALES (Real)')" class="px-2 py-0.5 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-lg font-bold">Sales Real</button>
+            <button onclick="bulkSetCategory('FO (Fake Order)')" class="px-2 py-0.5 bg-amber-100 text-amber-700 hover:bg-amber-200 rounded-lg font-bold">FO</button>
+            <button onclick="bulkSetStatus('Batal')" class="px-2 py-0.5 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg font-bold border border-rose-200">❌ Ubah ke Batal</button>
+            <button onclick="bulkMarkReturReceived()" class="px-2 py-0.5 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg font-bold border border-blue-200">📦 Retur Diambil</button>
+          </div>
+
+          <div class="text-[11px]">
+            Menampilkan <span id="lblShownCount" class="font-bold text-slate-800">0</span> dari <span id="lblTotalCount" class="font-bold text-slate-800">0</span> pesanan
+          </div>
+        </div>
+      </section>
+
+      <!-- Mobile Scroll Hint -->
+      <div class="flex sm:hidden items-center justify-center gap-1 text-[10px] text-slate-400 bg-slate-100 py-1.5 rounded-xl">
+        <i data-lucide="arrow-left-right" class="w-3 h-3 text-slate-400"></i>
+        <span>Geser tabel ke samping untuk melihat kolom Diskon, HPP & Margin</span>
+      </div>
+
+      <!-- Table Section (Full Financial & Operational Columns) -->
+      <section class="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+        <div class="overflow-x-auto custom-scrollbar max-h-[600px]">
+          <table class="w-full text-left text-xs text-slate-600 border-collapse">
+            <thead class="bg-slate-50/95 text-slate-700 uppercase font-bold sticky top-0 z-10 border-b border-slate-200 text-[10px] sm:text-[11px] tracking-wider backdrop-blur-xs">
+              <tr>
+                <th class="px-2.5 py-3 w-8 text-center no-print">
+                  <input type="checkbox" id="checkAll" onchange="toggleSelectAll(this.checked)" class="rounded text-orange-600 cursor-pointer">
+                </th>
+                <th class="px-2 py-3 w-8 text-center">No</th>
+                <th class="px-2.5 py-3">Platform</th>
+                <th class="px-2.5 py-3 min-w-[130px]">Tipe / Kategori</th>
+                <th class="px-2.5 py-3 min-w-[145px] bg-purple-50/70 text-purple-900 border-x border-purple-200/60">Jalur Checkout</th>
+                <th class="px-2.5 py-3 min-w-[110px]">Status Pesanan</th>
+                <th class="px-2.5 py-3">No. Pesanan</th>
+                <th class="px-2.5 py-3 min-w-[110px]">Tgl Pesan (Sistem)</th>
+                <th class="px-2.5 py-3 min-w-[110px]">Tgl Batal (Opsional)</th>
+                <th class="px-2.5 py-3 min-w-[140px]">Retur Sortiran</th>
+                <th class="px-3 py-3 min-w-[200px]">Nama Produk</th>
+                <th class="px-2 py-3 text-center">Qty</th>
+                <th class="px-2.5 py-3 text-right bg-slate-100/50">Omset Kotor</th>
+                <th class="px-2.5 py-3 text-right bg-rose-50/50 text-rose-700">Total Diskon</th>
+                <th class="px-2.5 py-3 text-right bg-emerald-50/50 text-emerald-800">Omset Bersih</th>
+                <th class="px-2.5 py-3 text-right bg-indigo-50/50 text-indigo-800">Total HPP</th>
+                <th class="px-2.5 py-3 text-right bg-blue-50/50 text-blue-800">Laba (Est)</th>
+                <th class="px-2.5 py-3">No. Resi</th>
+                <th class="px-2.5 py-3">Kurir</th>
+                <th class="px-2.5 py-3">Pembeli</th>
+                <th class="px-2.5 py-3">Penerima</th>
+                <th class="px-2.5 py-3 min-w-[120px]">Kota / Kab</th>
+                <th class="px-2.5 py-3">Provinsi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody" class="divide-y divide-slate-100 text-[11px] sm:text-xs">
+              <!-- Dynamic Rows inserted by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-3 mt-auto no-print">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between text-[11px] text-slate-400">
+      <div>FTL Smart Rekap Laporan • Multi-Workspace</div>
+      <div>v3.5 Auto-Save & Financial Edition</div>
+    </div>
+  </footer>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-4 right-4 left-4 sm:left-auto bg-slate-900 text-white text-xs font-semibold py-3 px-4 rounded-2xl shadow-2xl flex items-center gap-2 translate-y-24 opacity-0 transition-all z-50 pointer-events-none">
+    <i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0" id="toastIcon"></i>
+    <span id="toastMsg" class="truncate">Notifikasi</span>
+  </div>
+
+  <script>
+    // 🔐 AUTH / PIN ACCESS LOGIC
+    const SECRET_PIN = "FTL2026";
+
+    function checkAuth() {
+      const isAuth = sessionStorage.getItem('ftl_authenticated');
+      const overlay = document.getElementById('loginOverlay');
+      if (isAuth === 'true') {
+        overlay.classList.add('hidden');
+      } else {
+        overlay.classList.remove('hidden');
+        document.getElementById('accessPinInput').focus();
+      }
+    }
+
+    function togglePasswordVisibility() {
+      const input = document.getElementById('accessPinInput');
+      const icon = document.getElementById('eyeIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        input.type = 'password';
+        icon.setAttribute('data-lucide', 'eye');
+      }
+      lucide.createIcons();
+    }
+
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('accessPinInput');
+      const err = document.getElementById('loginErrorMsg');
+      const card = document.getElementById('loginCard');
+
+      if (input.value.trim().toUpperCase() === SECRET_PIN.toUpperCase()) {
+        sessionStorage.setItem('ftl_authenticated', 'true');
+        document.getElementById('loginOverlay').classList.add('hidden');
+        err.classList.add('hidden');
+        showToast('Login berhasil!');
+      } else {
+        err.classList.remove('hidden');
+        card.classList.add('shake-animation');
+        setTimeout(() => card.classList.remove('shake-animation'), 350);
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    function lockScreen() {
+      sessionStorage.removeItem('ftl_authenticated');
+      checkAuth();
+      showToast('Layar berhasil dikunci.');
+    }
+
+    checkAuth();
+
+    // 🗄️ STATE STORE
+    let shopeeOrders = [];
+    let tiktokOrders = [];
+    let activePlatformTab = 'Shopee'; // 'Shopee' | 'TikTok' | 'Gabungan'
+    let defaultHppPerPcs = 25000;
+    let selectedOrderIndices = new Set();
+
+    // 💾 LOCAL STORAGE PERSISTENCE (Anti-Hilang saat Refresh)
+    function saveStateToStorage() {
+      try {
+        localStorage.setItem('ftl_shopee_orders', JSON.stringify(shopeeOrders));
+        localStorage.setItem('ftl_tiktok_orders', JSON.stringify(tiktokOrders));
+        localStorage.setItem('ftl_default_hpp', defaultHppPerPcs.toString());
+        localStorage.setItem('ftl_active_tab', activePlatformTab);
+      } catch (e) {
+        console.warn('Gagal menyimpan ke LocalStorage:', e);
+      }
+    }
+
+    function loadStateFromStorage() {
+      try {
+        const savedShopee = localStorage.getItem('ftl_shopee_orders');
+        const savedTikTok = localStorage.getItem('ftl_tiktok_orders');
+        const savedHpp = localStorage.getItem('ftl_default_hpp');
+        const savedTab = localStorage.getItem('ftl_active_tab');
+
+        if (savedShopee) {
+          const parsed = JSON.parse(savedShopee);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            shopeeOrders = parsed.map(o => {
+              // Sanitize legacy Shopee discount if raw voucher exceeds subtotal
+              if (o.hargaKotor > 0 && o.totalBayar > 0 && o.hargaKotor >= o.totalBayar) {
+                if (o.potongan > o.hargaKotor || o.potongan === 11337008) {
+                  o.potongan = Math.max(0, o.hargaKotor - o.totalBayar);
+                }
+              }
+              if (!o.jalurCheckout) {
+                o.jalurCheckout = o.kategori.includes('FO') ? 'Fake Order (FO)' :
+                                  (o.kategori.includes('KOL') || o.kategori.includes('AFFILIATE')) ? 'KOL / Affiliate' :
+                                  'Etalase Toko Shopee';
+              }
+              return o;
+            });
+          }
+        }
+
+        if (savedTikTok) {
+          const parsed = JSON.parse(savedTikTok);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            tiktokOrders = parsed.map(o => {
+              if (!o.jalurCheckout) {
+                o.jalurCheckout = o.kategori.includes('KOL') ? 'KOL (Sample / Endorse)' :
+                                  o.kategori.includes('FO') ? 'Fake Order (FO)' :
+                                  o.kategori.includes('AFFILIATE') ? 'Affiliate Creator' :
+                                  'Product Cards (Etalase)';
+              }
+              return o;
+            });
+          }
+        }
+
+        if (savedHpp) {
+          const val = parseFloat(savedHpp);
+          if (!isNaN(val) && val > 0) {
+            defaultHppPerPcs = val;
+            const hppInput = document.getElementById('defaultHppInput');
+            if (hppInput) hppInput.value = val;
+            const hppDesc = document.getElementById('statHppRateDesc');
+            if (hppDesc) hppDesc.innerText = `@Rp ${val.toLocaleString('id-ID')} / pcs`;
+          }
+        }
+
+        if (savedTab && ['Shopee', 'TikTok', 'Gabungan'].includes(savedTab)) {
+          activePlatformTab = savedTab;
+        }
+      } catch (e) {
+        console.warn('Gagal memuat dari LocalStorage:', e);
+      }
+    }
+
+    // Load state from previous session
+    loadStateFromStorage();
+
+    lucide.createIcons();
+
+    // Setup Drag and Drop
+    const dropArea = document.getElementById('dropArea');
+    const fileInput = document.getElementById('fileInput');
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropArea.classList.add('border-orange-500', 'bg-orange-50/30');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropArea.classList.remove('border-orange-500', 'bg-orange-50/30');
+      }, false);
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      handleFiles(files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(e.target.files);
+    });
+
+    function showToast(msg, isSuccess = true) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      const toastIcon = document.getElementById('toastIcon');
+      
+      toastMsg.innerText = msg;
+      toastIcon.setAttribute('data-lucide', isSuccess ? 'check' : 'alert-circle');
+      toastIcon.className = isSuccess ? 'w-4 h-4 text-emerald-400 shrink-0' : 'w-4 h-4 text-rose-400 shrink-0';
+      lucide.createIcons();
+
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3500);
+    }
+
+    function updateDefaultHPP(val) {
+      defaultHppPerPcs = parseFloat(val) || 0;
+      document.getElementById('statHppRateDesc').innerText = `@Rp ${defaultHppPerPcs.toLocaleString('id-ID')} / pcs`;
+      saveStateToStorage();
+      refreshUI();
+      showToast('HPP default diperbarui: Rp ' + defaultHppPerPcs.toLocaleString('id-ID'));
+    }
+
+    function syncTargetUploadWithTab(val) {
+      if (val === 'Shopee') setActivePlatformTab('Shopee');
+      else if (val === 'TikTok') setActivePlatformTab('TikTok');
+    }
+
+    function setActivePlatformTab(tabName) {
+      activePlatformTab = tabName;
+      selectedOrderIndices.clear();
+      saveStateToStorage();
+
+      const btnShopee = document.getElementById('tabShopee');
+      const btnTikTok = document.getElementById('tabTikTok');
+      const btnGabungan = document.getElementById('tabGabungan');
+      const uploadTitle = document.getElementById('uploadTitle');
+      const lblExportPlatform = document.getElementById('lblExportPlatform');
+
+      [btnShopee, btnTikTok, btnGabungan].forEach(b => {
+        b.className = "flex-1 sm:flex-initial px-3.5 py-1.5 rounded-md font-medium text-xs transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900";
+      });
+
+      if (tabName === 'Shopee') {
+        btnShopee.className = "flex-1 sm:flex-initial px-3.5 py-1.5 rounded-md font-semibold text-xs transition flex items-center justify-center gap-1.5 bg-[#EE4D2D] text-white shadow-xs";
+        uploadTitle.innerText = "Upload Laporan Shopee";
+        lblExportPlatform.innerText = "Shopee";
+      } else if (tabName === 'TikTok') {
+        btnTikTok.className = "flex-1 sm:flex-initial px-3.5 py-1.5 rounded-md font-semibold text-xs transition flex items-center justify-center gap-1.5 bg-slate-900 text-white shadow-xs";
+        uploadTitle.innerText = "Upload Laporan TikTok";
+        lblExportPlatform.innerText = "TikTok";
+      } else {
+        btnGabungan.className = "flex-1 sm:flex-initial px-3.5 py-1.5 rounded-md font-semibold text-xs transition flex items-center justify-center gap-1.5 bg-[#264D3B] text-white shadow-xs";
+        uploadTitle.innerText = "Upload Laporan Shopee / TikTok";
+        lblExportPlatform.innerText = "Gabungan";
+      }
+
+      refreshUI();
+    }
+
+    function handleFiles(files) {
+      if (!files || files.length === 0) return;
+      Array.from(files).forEach(file => {
+        parseFile(file);
+      });
+    }
+
+    function parseFile(file) {
+      const fileName = file.name.toLowerCase();
+
+      if (fileName.endsWith('.csv') || fileName.endsWith('.txt')) {
+        Papa.parse(file, {
+          skipEmptyLines: false,
+          complete: function(results) {
+            processParsedRawRows(results.data, file.name);
+          },
+          error: function(err) {
+            showToast('Gagal membaca CSV: ' + err.message, false);
+          }
+        });
+      } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            processParsedRawRows(jsonRows, file.name);
+          } catch (err) {
+            showToast('Gagal membaca Excel: ' + err.message, false);
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      } else {
+        showToast('Format file tidak didukung: ' + file.name, false);
+      }
+    }
+
+    function processParsedRawRows(rows, fileName) {
+      if (!rows || rows.length === 0) return;
+
+      const manualOverride = document.getElementById('targetUploadSelect').value;
+      let detectedPlatform = manualOverride !== 'AUTO' ? manualOverride : 'UNKNOWN';
+      let headerRowIndex = -1;
+
+      // 1. TIKTOK DETECTION (Check TikTok FIRST)
+      for (let i = 0; i < Math.min(rows.length, 12); i++) {
+        const row = rows[i];
+        if (!row || !Array.isArray(row)) continue;
+        const rowStr = row.map(c => String(c || '').trim()).join('|').toLowerCase();
+
+        if (
+          rowStr.includes('creator handle') ||
+          rowStr.includes('order substatus') ||
+          rowStr.includes('sku subtotal before discount') ||
+          rowStr.includes('platform unique order id') ||
+          rowStr.includes('normal or pre-order') ||
+          rowStr.includes('sku id') ||
+          rowStr.includes('order refund amount') ||
+          rowStr.includes('package id')
+        ) {
+          detectedPlatform = 'TikTok';
+          headerRowIndex = i;
+          break;
+        }
+
+        if (
+          rowStr.includes('no. pesanan') ||
+          rowStr.includes('opsi pengiriman') ||
+          rowStr.includes('nomor referensi sku') ||
+          rowStr.includes('antar ke counter') ||
+          rowStr.includes('subtotal pesanan') ||
+          rowStr.includes('paket diskon') ||
+          rowStr.includes('waktu pesanan dibuat')
+        ) {
+          detectedPlatform = 'Shopee';
+          headerRowIndex = i;
+          break;
+        }
+      }
+
+      if (detectedPlatform === 'UNKNOWN') {
+        const lowerName = fileName.toLowerCase();
+        if (lowerName.includes('shopee')) {
+          detectedPlatform = 'Shopee';
+        } else if (lowerName.includes('tiktok') || lowerName.includes('order') || lowerName.includes('sku')) {
+          detectedPlatform = 'TikTok';
+        } else {
+          detectedPlatform = activePlatformTab !== 'Gabungan' ? activePlatformTab : 'TikTok';
+        }
+        headerRowIndex = 0;
+      }
+
+      const headers = rows[headerRowIndex].map(h => String(h || '').trim());
+      const rawDataRows = rows.slice(headerRowIndex + 1);
+
+      if (detectedPlatform === 'Shopee') {
+        const newShopee = parseShopeeRows(headers, rawDataRows);
+        if (newShopee.length > 0) {
+          shopeeOrders = newShopee;
+          saveStateToStorage();
+          setActivePlatformTab('Shopee');
+          showToast(`Berhasil upload ${newShopee.length} pesanan Shopee! Data tersimpan otomatis.`);
+        } else {
+          showToast(`Tidak ditemukan data pesanan Shopee di ${fileName}`, false);
+        }
+      } else {
+        const newTikTok = parseTikTokRows(headers, rawDataRows);
+        if (newTikTok.length > 0) {
+          tiktokOrders = newTikTok;
+          saveStateToStorage();
+          setActivePlatformTab('TikTok');
+          showToast(`Berhasil upload ${newTikTok.length} pesanan TikTok! Data tersimpan otomatis.`);
+        } else {
+          showToast(`Tidak ditemukan data pesanan TikTok di ${fileName}`, false);
+        }
+      }
+
+      refreshUI();
+    }
+
+    function parseShopeeRows(headers, rows) {
+      const colMap = {};
+      headers.forEach((h, idx) => {
+        const lower = h.toLowerCase().trim();
+        if (lower && colMap[lower] === undefined) colMap[lower] = idx;
+      });
+
+      const getVal = (row, keys, fallbackIdx = -1) => {
+        if (!Array.isArray(keys)) keys = [keys];
+        for (const k of keys) {
+          const idx = colMap[k.toLowerCase()];
+          if (idx !== undefined && row[idx] !== undefined && String(row[idx]).trim() !== '') {
+            return String(row[idx]).trim();
+          }
+        }
+        if (fallbackIdx >= 0 && row[fallbackIdx] !== undefined) {
+          return String(row[fallbackIdx] || '').trim();
+        }
+        return '';
+      };
+
+      const result = [];
+
+      rows.forEach(row => {
+        if (!row || row.length < 5) return;
+        
+        const noPesanan = getVal(row, ['No. Pesanan', 'Order ID'], 1);
+        if (!noPesanan || noPesanan.toLowerCase().includes('total') || noPesanan.length < 5) return;
+
+        const waktu = getVal(row, ['Waktu Pesanan Dibuat', 'Waktu Pesanan', 'Order Creation Date'], 0);
+        let status = getVal(row, ['Status Pesanan', 'Status', 'Order Status'], 2);
+        let keterangan = getVal(row, ['Keterangan', 'Kategori / Channel', 'Kategori', 'Channel', 'Note', 'Seller Note'], 3);
+        const resi = getVal(row, ['No. Resi', 'Tracking Number'], 7);
+        const kurir = getVal(row, ['Opsi Pengiriman', 'Kurir / Ekspedisi', 'Kurir', 'Shipping Option'], 8);
+        const metodeBayar = getVal(row, ['Metode Pembayaran', 'Payment Method'], 15);
+        const namaProduk = getVal(row, ['Nama Produk', 'Product Name'], 17);
+        const variasi = getVal(row, ['Nama Variasi', 'Variasi', 'Variation Name'], 19);
+        const qty = parseInt(getVal(row, ['Jumlah', 'Qty', 'Quantity'], 22)) || 1;
+        const subtotalKotor = parseFloat(getVal(row, ['Subtotal Pesanan', 'Harga Asli'], 24).replace(/[^0-9.]/g, '')) || 0;
+        let totalDiskonRaw = parseFloat(getVal(row, ['Total Diskon', 'Potongan'], 25).replace(/[^0-9.]/g, '')) || 0;
+        const totalBayar = parseFloat(getVal(row, ['Total Pembayaran', 'Total Amount'], 42).replace(/[^0-9.]/g, '')) || 0;
+        
+        // Diskon Riil: jika diskon bawaan Shopee menghitung dari harga coret (sehingga melebihi subtotal),
+        // gunakan diskon riil toko = Subtotal Pesanan - Total Pembayaran
+        let totalDiskon = totalDiskonRaw;
+        if (subtotalKotor > 0 && totalBayar > 0 && subtotalKotor >= totalBayar) {
+          totalDiskon = subtotalKotor - totalBayar;
+        }
+        const username = getVal(row, ['Username (Pembeli)', 'Username Pembeli', 'Buyer Username'], 46);
+        const penerima = getVal(row, ['Nama Penerima', 'Recipient Name'], 47);
+        const kota = getVal(row, ['Kota/Kabupaten', 'Kota / Kabupaten', 'City'], 50);
+        const provinsi = getVal(row, ['Provinsi', 'Province'], 51);
+        const alasanBatal = getVal(row, ['Alasan Pembatalan', 'Alasan Batal', 'Cancel Reason'], 5);
+
+        let category = 'SALES (Real)';
+        const ketUpper = (keterangan || '').trim().toUpperCase();
+        if (/\bFO\b/i.test(keterangan) || ketUpper === 'FO' || ketUpper.includes('FAKE ORDER')) {
+          category = 'FO (Fake Order)';
+        } else if (/\b(KOL|AFFILIATE)\b/i.test(keterangan) || ketUpper.includes('SAMPLE') || ketUpper.includes('ENDORSE')) {
+          category = 'AFFILIATE / KOL';
+        } else if (/\bSALES\b/i.test(keterangan) || ketUpper.includes('REAL')) {
+          category = 'SALES (Real)';
+        } else if (totalBayar === 0 || namaProduk.toLowerCase().includes('sample') || namaProduk.toLowerCase().includes('sampel')) {
+          category = 'AFFILIATE / KOL';
+        }
+
+        // Jalur Checkout Shopee
+        let jalurCheckout = 'Etalase Toko Shopee';
+        if (/\bFO\b/i.test(keterangan) || ketUpper === 'FO' || ketUpper.includes('FAKE ORDER')) {
+          jalurCheckout = 'Fake Order (FO)';
+        } else if (/\b(KOL|AFFILIATE)\b/i.test(keterangan) || ketUpper.includes('SAMPLE') || ketUpper.includes('ENDORSE')) {
+          jalurCheckout = 'Creator / Endorsement';
+        } else if (/\bSALES\b/i.test(keterangan)) {
+          jalurCheckout = 'Penjualan Toko Organik';
+        } else if (totalBayar === 0 || namaProduk.toLowerCase().includes('sample') || namaProduk.toLowerCase().includes('sampel')) {
+          jalurCheckout = 'Creator / Endorsement';
+        } else if (keterangan) {
+          jalurCheckout = keterangan;
+        }
+
+        let stdStatus = 'Selesai';
+        if (status.toLowerCase().includes('batal') || status.toLowerCase().includes('cancel')) stdStatus = 'Batal';
+        else if (status.toLowerCase().includes('kirim') || status.toLowerCase().includes('antar') || status.toLowerCase().includes('shipped')) stdStatus = 'Dikirim';
+
+        result.push({
+          platform: 'Shopee',
+          orderId: noPesanan,
+          waktuPesan: waktu,
+          waktuBatal: stdStatus === 'Batal' ? waktu : '',
+          kategori: category,
+          jalurCheckout: jalurCheckout,
+          status: stdStatus,
+          statusRaw: status,
+          alasanBatal: alasanBatal,
+          resi: resi,
+          kurir: kurir,
+          produk: namaProduk,
+          variasi: variasi || '-',
+          qty: qty,
+          hargaKotor: subtotalKotor > 0 ? subtotalKotor : totalBayar,
+          potongan: totalDiskon,
+          totalBayar: totalBayar,
+          pembeli: username,
+          penerima: penerima,
+          kota: kota,
+          provinsi: provinsi,
+          metodeBayar: metodeBayar,
+          statusReturFisik: stdStatus === 'Batal' ? 'Menunggu Sortiran' : '-',
+          tglReturFisik: ''
+        });
+      });
+
+      return result;
+    }
+
+    function parseTikTokRows(headers, rows) {
+      const result = [];
+
+      rows.forEach(row => {
+        if (!row || row.length < 5) return;
+
+        const firstCol = String(row[0] || '').trim();
+        if (!firstCol || firstCol.toLowerCase().includes('platform unique') || firstCol.toLowerCase().includes('order id')) {
+          return;
+        }
+
+        let orderId = firstCol;
+        if (orderId.includes('e+') || orderId.includes('E+')) {
+          try {
+            orderId = BigInt(Math.round(Number(orderId))).toString();
+          } catch(e) {}
+        }
+
+        if (orderId.length < 8 || isNaN(Number(orderId.substring(0, 5)))) {
+          return;
+        }
+
+        const col1Val = String(row[1] || '').trim();
+        const waktu = String(row[2] || '').trim();
+        const rawStatus = String(row[3] || '').trim();
+        const namaProduk = String(row[9] || '').trim();
+        const variasi = String(row[10] || '').trim();
+        const qty = parseInt(String(row[11] || '1').trim()) || 1;
+        const unitPrice = parseFloat(String(row[13] || '0').replace(/[^0-9.]/g, '')) || 0;
+        const subtotalBeforeDisc = parseFloat(String(row[14] || '0').replace(/[^0-9.]/g, '')) || 0;
+        const platformDisc = parseFloat(String(row[15] || '0').replace(/[^0-9.]/g, '')) || 0;
+        const sellerDisc = parseFloat(String(row[16] || '0').replace(/[^0-9.]/g, '')) || 0;
+        const totalBayar = parseFloat(String(row[30] || '0').replace(/[^0-9.]/g, '')) || 0;
+        const cancelTime = String(row[36] || '').trim();
+        const cancelReason = String(row[38] || '').trim();
+        const resi = String(row[41] || '').trim();
+        const kurir = (String(row[43] || '').trim() + ' ' + String(row[42] || '').trim()).trim();
+        const username = String(row[45] || '').trim();
+        const penerima = String(row[46] || '').trim();
+        const provinsi = String(row[50] || '').trim();
+        const kota = String(row[51] || '').trim();
+        const metodeBayar = String(row[56] || '').trim();
+        const orderChannel = String(row[64] || '').trim();
+        const creatorHandle = String(row[65] || '').trim();
+        const purchaseChannel = String(row[59] || '').trim();
+
+        let category = 'SALES (Real)';
+        const c1Upper = (col1Val || '').trim().toUpperCase();
+
+        if (/\b(KOL|AFFILIATE)\b/i.test(col1Val) || c1Upper.includes('SAMPLE') || c1Upper.includes('ENDORSE')) {
+          category = 'AFFILIATE / KOL';
+        } else if (/\bFO\b/i.test(col1Val) || c1Upper === 'FO' || c1Upper.includes('FAKE ORDER')) {
+          category = 'FO (Fake Order)';
+        } else if (/\bSALES\b/i.test(col1Val) || c1Upper.includes('REAL')) {
+          category = 'SALES (Real)';
+        } else if (totalBayar === 0 || unitPrice === 0 || namaProduk.toLowerCase().includes('sampel') || namaProduk.toLowerCase().includes('sample')) {
+          category = 'AFFILIATE / KOL';
+        } else if (orderChannel.toLowerCase() === 'videos' || orderChannel.toLowerCase() === 'live' || (creatorHandle && creatorHandle !== '0' && creatorHandle !== '-')) {
+          category = 'AFFILIATE / KOL';
+        }
+
+        // Jalur Checkout TikTok (Affiliate, Video, LIVE, Product Cards / Etalase, FO, KOL)
+        let jalurCheckout = 'Etalase Toko';
+        const crHandle = (creatorHandle && creatorHandle !== '0' && creatorHandle !== '-') ? creatorHandle : '';
+
+        if (crHandle) {
+          jalurCheckout = 'Creator / Endorsement';
+        } else if (col1Val && col1Val.toUpperCase().includes('KOL')) {
+          jalurCheckout = 'Creator / Endorsement';
+        } else if (orderChannel.toLowerCase() === 'videos') {
+          jalurCheckout = 'Video TikTok';
+        } else if (orderChannel.toLowerCase() === 'live') {
+          jalurCheckout = 'TikTok LIVE';
+        } else if (col1Val && col1Val.toUpperCase().includes('FO')) {
+          jalurCheckout = 'Fake Order (FO)';
+        } else if (col1Val && col1Val.toUpperCase().includes('SALES')) {
+          jalurCheckout = `Sales Real (${col1Val})`;
+        } else if (orderChannel.toLowerCase().includes('card') || orderChannel.toLowerCase().includes('product')) {
+          jalurCheckout = 'Product Cards (Etalase)';
+        } else if (orderChannel) {
+          jalurCheckout = orderChannel;
+        } else if (purchaseChannel) {
+          jalurCheckout = purchaseChannel;
+        }
+
+        let stdStatus = 'Selesai';
+        if (rawStatus.toLowerCase().includes('batal') || rawStatus.toLowerCase().includes('cancel')) {
+          stdStatus = 'Batal';
+        } else if (rawStatus.toLowerCase().includes('kirim') || rawStatus.toLowerCase().includes('transit')) {
+          stdStatus = 'Dikirim';
+        }
+
+        result.push({
+          platform: 'TikTok',
+          orderId: orderId,
+          waktuPesan: waktu,
+          waktuBatal: cancelTime || (stdStatus === 'Batal' ? waktu : ''),
+          kategori: category,
+          jalurCheckout: jalurCheckout,
+          status: stdStatus,
+          statusRaw: rawStatus,
+          alasanBatal: cancelReason,
+          resi: resi,
+          kurir: kurir,
+          produk: namaProduk,
+          variasi: variasi || '-',
+          qty: qty,
+          hargaKotor: subtotalBeforeDisc > 0 ? subtotalBeforeDisc : (unitPrice * qty),
+          potongan: platformDisc + sellerDisc,
+          totalBayar: totalBayar,
+          pembeli: username,
+          penerima: penerima,
+          kota: kota,
+          provinsi: provinsi,
+          metodeBayar: metodeBayar,
+          statusReturFisik: stdStatus === 'Batal' ? 'Menunggu Sortiran' : '-',
+          tglReturFisik: ''
+        });
+      });
+
+      return result;
+    }
+
+    function getActiveDataset() {
+      if (activePlatformTab === 'Shopee') {
+        return shopeeOrders;
+      } else if (activePlatformTab === 'TikTok') {
+        return tiktokOrders;
+      } else {
+        return [...shopeeOrders, ...tiktokOrders];
+      }
+    }
+
+    function refreshUI() {
+      const isShopee = activePlatformTab === 'Shopee';
+      const isTikTok = activePlatformTab === 'TikTok';
+
+      document.getElementById('tabCountShopee').innerText = shopeeOrders.length;
+      document.getElementById('tabCountTikTok').innerText = tiktokOrders.length;
+      document.getElementById('tabCountGabungan').innerText = shopeeOrders.length + tiktokOrders.length;
+
+      const currentData = getActiveDataset();
+
+      const btnReset = document.getElementById('btnResetData');
+      if (currentData.length > 0) {
+        btnReset.classList.remove('hidden');
+      } else {
+        btnReset.classList.add('hidden');
+      }
+
+      const totalOrders = currentData.length;
+      const totalPcs = currentData.reduce((acc, o) => acc + (o.qty || 1), 0);
+
+      // Kategori Breakdown: KOL, SALES, FO
+      const kolOrders = currentData.filter(o => o.kategori.includes('KOL') || o.kategori.includes('AFFILIATE'));
+      const kolCount = kolOrders.length;
+      const kolPcs = kolOrders.reduce((acc, o) => acc + (o.qty || 1), 0);
+
+      const salesOrders = currentData.filter(o => o.kategori.includes('Real') || o.kategori.includes('SALES'));
+      const salesCount = salesOrders.length;
+      const salesPcs = salesOrders.reduce((acc, o) => acc + (o.qty || 1), 0);
+
+      const foOrders = currentData.filter(o => o.kategori.includes('FO'));
+      const foCount = foOrders.length;
+      const foPcs = foOrders.reduce((acc, o) => acc + (o.qty || 1), 0);
+
+      // Canceled details
+      const batalOrders = currentData.filter(o => o.status === 'Batal');
+      const batalCount = batalOrders.length;
+      const batalPcs = batalOrders.reduce((acc, o) => acc + (o.qty || 1), 0);
+      const batalNominal = batalOrders.reduce((acc, o) => acc + (o.hargaKotor || o.totalBayar || 0), 0);
+
+      // Financials (Omset Kotor, Total Diskon, Omset Bersih, Total HPP, Laba)
+      const suksesOrders = currentData.filter(o => o.status === 'Selesai');
+      const omsetKotor = suksesOrders.reduce((acc, o) => acc + (o.hargaKotor || o.totalBayar || 0), 0);
+      const totalPotongan = suksesOrders.reduce((acc, o) => acc + (o.potongan || 0), 0);
+      const omsetBersih = suksesOrders.reduce((acc, o) => acc + (o.totalBayar || 0), 0);
+      
+      const suksesPcs = suksesOrders.reduce((acc, o) => acc + (o.qty || 1), 0);
+      const totalHpp = suksesPcs * defaultHppPerPcs;
+      const estimasiLaba = omsetBersih - totalHpp;
+
+      // Update Kategori & Operasional Cards
+      document.getElementById('statTotalOrder').innerText = totalOrders.toLocaleString('id-ID');
+      document.getElementById('statTotalBreakdown').innerText = `KOL: ${kolCount} • SALES: ${salesCount} • FO: ${foCount} (${totalPcs} pcs)`;
+
+      document.getElementById('statAffiliateKOL').innerText = kolCount.toLocaleString('id-ID');
+      document.getElementById('statKOLSubtext').innerText = `${kolPcs} Pcs • Endorse / Sample`;
+
+      document.getElementById('statSalesReal').innerText = salesCount.toLocaleString('id-ID');
+      document.getElementById('statSalesSubtext').innerText = `${salesPcs} Pcs • Penjualan Asli Toko`;
+
+      document.getElementById('statFOCount').innerText = foCount.toLocaleString('id-ID');
+      document.getElementById('statFOSubtext').innerText = `${foPcs} Pcs • Fake Order (Tembak)`;
+
+      // Update Pill Bar & Platform Indicator
+      const pillPlatformBadge = document.getElementById('pillActivePlatformBadge');
+      if (pillPlatformBadge) {
+        pillPlatformBadge.innerText = activePlatformTab === 'Gabungan' ? 'Gabungan' : `Tab ${activePlatformTab}`;
+      }
+
+      const pillAllPrefix = document.getElementById('pillAllPrefix');
+      if (pillAllPrefix) {
+        if (activePlatformTab === 'Gabungan') pillAllPrefix.innerText = 'Semua / Gabungan';
+        else if (activePlatformTab === 'Shopee') pillAllPrefix.innerText = 'Semua Shopee';
+        else pillAllPrefix.innerText = 'Semua TikTok';
+      }
+
+      document.getElementById('pillTotalCount').innerText = totalOrders;
+      document.getElementById('pillKOL').innerText = `KOL: ${kolCount} (${kolPcs} pcs)`;
+      document.getElementById('pillSales').innerText = `Sales: ${salesCount} (${salesPcs} pcs)`;
+      document.getElementById('pillFO').innerText = `FO: ${foCount} (${foPcs} pcs)`;
+
+      const currentCatVal = document.getElementById('filterCategory') ? document.getElementById('filterCategory').value : 'ALL';
+      updatePillButtonsActiveState(currentCatVal);
+      updatePlatformTabCounts();
+
+      // Helper safely setting innerText
+      const setTxt = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = val;
+      };
+
+      const fmtRp = (num) => 'Rp ' + Math.round(num || 0).toLocaleString('id-ID');
+      const strKotor = fmtRp(omsetKotor);
+      const strDiskon = fmtRp(totalPotongan);
+      const strBersih = fmtRp(omsetBersih);
+      const strHpp = fmtRp(totalHpp);
+      const strLaba = fmtRp(estimasiLaba);
+      const strBatalNom = fmtRp(batalNominal);
+
+      // Financial Big Cards
+      setTxt('statOmsetKotor', strKotor);
+      setTxt('statPotonganBiaya', strDiskon);
+      setTxt('statTotalHpp', strHpp);
+      setTxt('statOmsetBersih', strBersih);
+      setTxt('statLabaEstimasi', strLaba);
+
+      // Batal Card
+      setTxt('statBatalCount', batalCount.toLocaleString('id-ID'));
+      setTxt('statBatalPcs', `(${batalPcs} pcs)`);
+      setTxt('statBatalNominal', `${batalCount} order × ${batalPcs} pcs = ${strBatalNom}`);
+
+      setTxt('lblTotalCount', totalOrders);
+
+      // Card 7: Rincian Hitungan Nominal
+      setTxt('calcNomKotor', strKotor);
+      setTxt('calcNomDiskon', strDiskon);
+      setTxt('calcNomBersih', strBersih);
+      setTxt('calcNomHpp', strHpp);
+      setTxt('calcNomLaba', strLaba);
+
+      // Papan Kalkulasi 3 Persamaan
+      setTxt('fKotor', strKotor);
+      setTxt('fDiskon', strDiskon);
+      setTxt('fBersih', strBersih);
+      setTxt('fBersih2', strBersih);
+      setTxt('fHpp', strHpp);
+      setTxt('fLaba', strLaba);
+      setTxt('fBatalCount', `${batalCount} order`);
+      setTxt('fBatalPcs', `(${batalPcs} pcs)`);
+      setTxt('fBatalNom', `${strBatalNom} melayang`);
+
+      setTxt('fDescBersih', `Omset Kotor (${strKotor}) dikurangi Diskon Voucher (${strDiskon}) = Bersih ${strBersih}`);
+      setTxt('fDescLaba', `Omset Bersih (${strBersih}) dikurangi Total HPP (${strHpp}) = Laba ${strLaba}`);
+      setTxt('fDescBatal', `${batalCount} order (${batalPcs} pcs produk) batal dengan nilai transaksi ${strBatalNom}`);
+
+      // Subtitles & Source Badges per Card
+      setTxt('card1Subtext', isShopee ? 'Subtotal Pesanan (Harga Toko)' : (isTikTok ? 'SKU Subtotal Before Disc' : 'Subtotal Pesanan Gabungan'));
+      setTxt('card1Source', `📁 Total Kotor: ${strKotor}`);
+
+      setTxt('card2Subtext', `${strKotor} − ${strBersih}`);
+      setTxt('card2Source', `📁 Diskon Riil: -${strDiskon}`);
+
+      setTxt('statHppRateDesc', `${suksesPcs} pcs × Rp ${defaultHppPerPcs.toLocaleString('id-ID')}`);
+      setTxt('card3Source', `📁 ${suksesPcs} pcs × Rp ${defaultHppPerPcs.toLocaleString('id-ID')}`);
+
+      setTxt('card4Subtext', `${strKotor} − ${strDiskon} = ${strBersih}`);
+      setTxt('card4Source', `📁 Uang Masuk: ${strBersih}`);
+
+      setTxt('card5Subtext', `${strBersih} − ${strHpp} = ${strLaba}`);
+      setTxt('card5Source', `📁 Laba Bersih: ${strLaba}`);
+
+      setTxt('card6Source', `📁 Batal: ${strBatalNom} melayang`);
+
+      setTxt('lblActivePlatformSource', `Aktif: Tab ${activePlatformTab}`);
+
+      const transparencyBox = document.getElementById('transparencyDetailBox');
+
+      if (isShopee) {
+        setTxt('statSourcePlatform', 'Shopee Seller Center');
+        if (transparencyBox) {
+          transparencyBox.innerHTML = `
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-slate-800">1. Omset Kotor:</span>
+              <div class="text-slate-600">Kolom <b>Subtotal Pesanan</b> (Col 24): <span class="font-bold text-slate-900">${strKotor}</span>.</div>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-rose-700">2. Total Diskon Riil:</span>
+              <div class="text-slate-600">Selisih <b>Kotor (${strKotor}) − Bersih (${strBersih})</b> = <span class="font-bold text-rose-700">${strDiskon}</span>.</div>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-indigo-700">3. Total HPP:</span>
+              <div class="text-slate-600">Rumus: <b>${suksesPcs} pcs selesai × Rp ${defaultHppPerPcs.toLocaleString('id-ID')}</b> = <span class="font-bold text-indigo-700">${strHpp}</span>.</div>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-emerald-700">4. Omset Bersih:</span>
+              <div class="text-slate-600">Kolom <b>Total Pembayaran</b> (Col 42 - uang riil pembeli) = <span class="font-bold text-emerald-700">${strBersih}</span>.</div>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-blue-700">5. Estimasi Laba:</span>
+              <div class="text-slate-600">Rumus: <b>Bersih (${strBersih}) − HPP (${strHpp})</b> = <span class="font-bold text-blue-700">${strLaba}</span>.</div>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-rose-700">6. Total Batal:</span>
+              <div class="text-slate-600">Status <b>Batal</b> Shopee: <b>${batalCount} order (${batalPcs} pcs)</b> = <span class="font-bold text-rose-700">${strBatalNom} melayang</span>.</div>
+            </div>
+          `;
+        }
+      } else if (isTikTok) {
+        setTxt('statSourcePlatform', 'TikTok Seller Center');
+        if (transparencyBox) {
+          transparencyBox.innerHTML = `
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-slate-800">1. Omset Kotor:</span>
+              <div class="text-slate-600">Kolom TikTok <b>SKU Subtotal Before Discount</b> (Col 14) = <span class="font-bold text-slate-900">${strKotor}</span>.</div>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-rose-700">2. Total Diskon:</span>
+              <div class="text-slate-600">Kolom <b>SKU Platform Disc + SKU Seller Disc</b> (Col 15+16) = <span class="font-bold text-rose-700">${strDiskon}</span>.</div>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-indigo-700">3. Total HPP:</span>
+              <div class="text-slate-600">Rumus: <b>${suksesPcs} pcs selesai × Rp ${defaultHppPerPcs.toLocaleString('id-ID')}</b> = <span class="font-bold text-indigo-700">${strHpp}</span>.</div>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-emerald-700">4. Omset Bersih:</span>
+              <div class="text-slate-600">Kolom TikTok <b>Order Amount</b> (Col 30 - uang riil pembeli) = <span class="font-bold text-emerald-700">${strBersih}</span>.</div>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-blue-700">5. Estimasi Laba:</span>
+              <div class="text-slate-600">Rumus: <b>Bersih (${strBersih}) − HPP (${strHpp})</b> = <span class="font-bold text-blue-700">${strLaba}</span>.</div>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-rose-700">6. Total Batal:</span>
+              <div class="text-slate-600">Status <b>Dibatalkan</b> TikTok: <b>${batalCount} order (${batalPcs} pcs)</b> = <span class="font-bold text-rose-700">${strBatalNom} melayang</span>.</div>
+            </div>
+          `;
+        }
+      } else {
+        setTxt('statSourcePlatform', 'Shopee & TikTok Gabungan');
+        if (transparencyBox) {
+          transparencyBox.innerHTML = `
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-slate-800">1. Omset Kotor Gabungan:</span>
+              <div class="text-slate-600">Subtotal Shopee + Subtotal TikTok = <span class="font-bold text-slate-900">${strKotor}</span>.</div>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-rose-700">2. Total Diskon Gabungan:</span>
+              <div class="text-slate-600">Diskon Shopee + Diskon TikTok = <span class="font-bold text-rose-700">${strDiskon}</span>.</div>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-indigo-700">3. Total HPP Gabungan:</span>
+              <div class="text-slate-600">Rumus: <b>${suksesPcs} pcs selesai × Rp ${defaultHppPerPcs.toLocaleString('id-ID')}</b> = <span class="font-bold text-indigo-700">${strHpp}</span>.</div>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-emerald-700">4. Omset Bersih Gabungan:</span>
+              <div class="text-slate-600">Total Masuk Shopee + TikTok = <span class="font-bold text-emerald-700">${strBersih}</span>.</div>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-blue-700">5. Estimasi Laba Gabungan:</span>
+              <div class="text-slate-600">Rumus: <b>Bersih (${strBersih}) − HPP (${strHpp})</b> = <span class="font-bold text-blue-700">${strLaba}</span>.</div>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-indigo-100">
+              <span class="font-bold text-rose-700">6. Total Batal Gabungan:</span>
+              <div class="text-slate-600">Akumulasi Batal: <b>${batalCount} order (${batalPcs} pcs)</b> = <span class="font-bold text-rose-700">${strBatalNom} melayang</span>.</div>
+            </div>
+          `;
+        }
+      }
+
+      renderMonthlyBreakdown(currentData);
+      applyFilters();
+    }
+
+    function scrollToTableSection() {
+      const targetSec = document.getElementById('toolbarSection');
+      if (targetSec) {
+        targetSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function filterByQuickCat(cat) {
+      const catSelect = document.getElementById('filterCategory');
+      if (catSelect) {
+        catSelect.value = cat;
+        applyFilters();
+        showToast(cat === 'ALL' ? 'Menampilkan semua kategori' : `Menampilkan kategori: ${cat}`);
+        scrollToTableSection();
+      }
+    }
+
+    function updatePlatformTabCounts() {
+      const catSelect = document.getElementById('filterCategory');
+      const catFilter = (catSelect && catSelect.value) ? catSelect.value : 'ALL';
+
+      let sOrders = shopeeOrders;
+      let tOrders = tiktokOrders;
+
+      if (catFilter && catFilter !== 'ALL') {
+        sOrders = shopeeOrders.filter(o => o.kategori === catFilter);
+        tOrders = tiktokOrders.filter(o => o.kategori === catFilter);
+      }
+
+      const elShopee = document.getElementById('tabCountShopee');
+      const elTikTok = document.getElementById('tabCountTikTok');
+      const elGabungan = document.getElementById('tabCountGabungan');
+
+      if (elShopee) elShopee.innerText = sOrders.length;
+      if (elTikTok) elTikTok.innerText = tOrders.length;
+      if (elGabungan) elGabungan.innerText = sOrders.length + tOrders.length;
+    }
+
+    function updatePillButtonsActiveState(cat) {
+      const btnAll = document.getElementById('pillBtnAll');
+      const btnKOL = document.getElementById('pillBtnKOL');
+      const btnSales = document.getElementById('pillBtnSales');
+      const btnFO = document.getElementById('pillBtnFO');
+
+      if (!btnAll || !btnKOL || !btnSales || !btnFO) return;
+
+      const allActive = "px-2.5 py-1 rounded-lg bg-slate-900 text-white font-bold text-xs transition border border-slate-900 shadow-sm ring-2 ring-slate-400/40 active:scale-95 flex items-center gap-1 scale-[1.02]";
+      const allInactive = "px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs transition border border-slate-200 active:scale-95 flex items-center gap-1";
+
+      const kolActive = "px-2.5 py-1 rounded-lg bg-purple-700 text-white font-bold text-xs transition border border-purple-700 shadow-sm ring-2 ring-purple-400/40 active:scale-95 flex items-center gap-1 scale-[1.02]";
+      const kolInactive = "px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 font-medium text-xs transition border border-purple-200 active:scale-95 flex items-center gap-1";
+
+      const salesActive = "px-2.5 py-1 rounded-lg bg-emerald-700 text-white font-bold text-xs transition border border-emerald-700 shadow-sm ring-2 ring-emerald-400/40 active:scale-95 flex items-center gap-1 scale-[1.02]";
+      const salesInactive = "px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-medium text-xs transition border border-emerald-200 active:scale-95 flex items-center gap-1";
+
+      const foActive = "px-2.5 py-1 rounded-lg bg-amber-600 text-white font-bold text-xs transition border border-amber-600 shadow-sm ring-2 ring-amber-400/40 active:scale-95 flex items-center gap-1 scale-[1.02]";
+      const foInactive = "px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 font-medium text-xs transition border border-amber-200 active:scale-95 flex items-center gap-1";
+
+      btnAll.className = (cat === 'ALL') ? allActive : allInactive;
+      btnKOL.className = (cat === 'AFFILIATE / KOL') ? kolActive : kolInactive;
+      btnSales.className = (cat === 'SALES (Real)') ? salesActive : salesInactive;
+      btnFO.className = (cat === 'FO (Fake Order)') ? foActive : foInactive;
+    }
+
+    function extractYearMonth(dateStr) {
+      if (!dateStr) return '';
+      const s = String(dateStr).trim();
+      const m1 = s.match(/^(\d{4})[-/](\d{1,2})/);
+      if (m1) return m1[1] + '-' + m1[2].padStart(2, '0');
+      const m2 = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+      if (m2) return m2[3] + '-' + m2[2].padStart(2, '0');
+      return '';
+    }
+
+    function getMonthlyBreakdown(data) {
+      const monthMap = {};
+      const monthNames = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      ];
+
+      data.forEach(o => {
+        const ym = extractYearMonth(o.waktuPesan);
+        if (!ym) return;
+        if (!monthMap[ym]) {
+          const [y, m] = ym.split('-');
+          const mName = monthNames[parseInt(m, 10) - 1] || m;
+          monthMap[ym] = {
+            key: ym,
+            year: y,
+            month: m,
+            label: `${mName} ${y}`,
+            totalOrders: 0,
+            suksesOrders: 0,
+            batalOrders: 0,
+            totalPcs: 0,
+            suksesPcs: 0,
+            batalPcs: 0,
+            omsetKotor: 0,
+            totalDiskon: 0,
+            omsetBersih: 0,
+            totalHpp: 0,
+            laba: 0
+          };
+        }
+
+        const mObj = monthMap[ym];
+        const qty = o.qty || 1;
+        mObj.totalOrders += 1;
+        mObj.totalPcs += qty;
+
+        if (o.status === 'Batal') {
+          mObj.batalOrders += 1;
+          mObj.batalPcs += qty;
+        } else {
+          mObj.suksesOrders += 1;
+          mObj.suksesPcs += qty;
+          mObj.omsetKotor += (o.hargaKotor || o.totalBayar || 0);
+          mObj.totalDiskon += (o.potongan || 0);
+          mObj.omsetBersih += (o.totalBayar || 0);
+          const hpp = qty * defaultHppPerPcs;
+          mObj.totalHpp += hpp;
+          mObj.laba += ((o.totalBayar || 0) - hpp);
+        }
+      });
+
+      const sortedKeys = Object.keys(monthMap).sort();
+      return sortedKeys.map(k => monthMap[k]);
+    }
+
+    function renderMonthlyBreakdown(data) {
+      const mContainer = document.getElementById('monthlyBreakdownContainer');
+      if (!mContainer) return;
+
+      const monthlyData = getMonthlyBreakdown(data);
+      if (monthlyData.length === 0) {
+        mContainer.innerHTML = `
+          <div class="col-span-full py-4 text-center text-slate-400 text-xs">
+            <i data-lucide="inbox" class="w-5 h-5 mx-auto mb-1 opacity-40"></i>
+            Belum ada data tanggal pesanan untuk dihitung per bulan.
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      const activeStart = document.getElementById('filterStartDate') ? document.getElementById('filterStartDate').value : '';
+      const activeEnd = document.getElementById('filterEndDate') ? document.getElementById('filterEndDate').value : '';
+
+      mContainer.innerHTML = monthlyData.map(m => {
+        const isCurrentMonthFiltered = activeStart.startsWith(m.key) && activeEnd.startsWith(m.key);
+        return `
+          <div onclick="filterByMonth('${m.key}')" 
+               class="p-3 sm:p-3.5 rounded-xl border transition-all cursor-pointer shadow-2xs flex flex-col justify-between group ${
+                 isCurrentMonthFiltered 
+                   ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500/20' 
+                   : 'bg-white hover:bg-emerald-50/40 border-slate-200/90 hover:border-emerald-300'
+               }">
+            <div>
+              <div class="flex items-center justify-between gap-1 mb-1.5">
+                <span class="text-xs font-bold text-slate-900 group-hover:text-[#264D3B] flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full ${isCurrentMonthFiltered ? 'bg-emerald-600 animate-pulse' : 'bg-slate-400'}"></span>
+                  <span>${m.label}</span>
+                </span>
+                <span class="text-[10px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded">
+                  ${m.totalOrders} Pesanan
+                </span>
+              </div>
+              <div class="flex items-baseline gap-1.5 mt-1">
+                <span class="text-2xl font-extrabold text-[#264D3B] tabular-nums">${m.suksesPcs.toLocaleString('id-ID')}</span>
+                <span class="text-xs font-bold text-slate-700">pcs keluar</span>
+                ${m.batalPcs > 0 ? `<span class="text-[10px] font-medium text-rose-500 tabular-nums">(${m.batalPcs} batal)</span>` : ''}
+              </div>
+            </div>
+            <div class="mt-2.5 pt-2 border-t border-slate-100 text-[10px] flex items-center justify-between text-slate-600 font-medium">
+              <span>Bersih: <b class="text-slate-900 tabular-nums">Rp ${Math.round(m.omsetBersih).toLocaleString('id-ID')}</b></span>
+              <span>Laba: <b class="text-emerald-700 tabular-nums">Rp ${Math.round(m.laba).toLocaleString('id-ID')}</b></span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function filterByMonth(ym) {
+      if (ym === 'ALL') {
+        resetDateFilter();
+        scrollToTableSection();
+        return;
+      }
+      const parts = ym.split('-');
+      if (parts.length < 2) return;
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10);
+      
+      const start = `${parts[0]}-${parts[1]}-01`;
+      const lastDay = new Date(y, m, 0).getDate();
+      const end = `${parts[0]}-${parts[1]}-${String(lastDay).padStart(2, '0')}`;
+
+      const startEl = document.getElementById('filterStartDate');
+      const endEl = document.getElementById('filterEndDate');
+      if (startEl) startEl.value = start;
+      if (endEl) endEl.value = end;
+
+      applyFilters();
+      const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      showToast(`Menampilkan khusus pesanan bulan ${monthNames[m - 1]} ${y}`);
+      scrollToTableSection();
+    }
+
+    function extractISODate(dateStr) {
+      if (!dateStr) return '';
+      const s = String(dateStr).trim();
+      const m1 = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+      if (m1) return m1[1] + '-' + m1[2].padStart(2, '0') + '-' + m1[3].padStart(2, '0');
+      const m2 = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+      if (m2) return m2[3] + '-' + m2[2].padStart(2, '0') + '-' + m2[1].padStart(2, '0');
+      return '';
+    }
+
+    function formatIndoDate(iso) {
+      if (!iso) return '-';
+      const parts = iso.split('-');
+      if (parts.length < 3) return iso;
+      const [y, m, d] = parts;
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+      return `${parseInt(d, 10)} ${months[parseInt(m, 10) - 1]} ${y}`;
+    }
+
+    function getDatasetDateRange(data) {
+      const dates = [];
+      data.forEach(o => {
+        const d = extractISODate(o.waktuPesan);
+        if (d) dates.push(d);
+      });
+      if (dates.length === 0) return { minDate: '', maxDate: '', label: 'Semua Tanggal (Belum ada data)' };
+      dates.sort();
+      const minDate = dates[0];
+      const maxDate = dates[dates.length - 1];
+      const label = minDate === maxDate ? formatIndoDate(minDate) : `${formatIndoDate(minDate)} s/d ${formatIndoDate(maxDate)}`;
+      return { minDate, maxDate, label };
+    }
+
+    function resetDateFilter() {
+      const startEl = document.getElementById('filterStartDate');
+      const endEl = document.getElementById('filterEndDate');
+      if (startEl) startEl.value = '';
+      if (endEl) endEl.value = '';
+      applyFilters();
+      showToast('Menampilkan seluruh rentang tanggal pesanan');
+    }
+
+    function applyFilters() {
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const catFilter = document.getElementById('filterCategory').value;
+      const statusFilter = document.getElementById('filterStatus').value;
+      const dateMode = document.getElementById('filterDateMode').value;
+      const startDate = document.getElementById('filterStartDate') ? document.getElementById('filterStartDate').value : '';
+      const endDate = document.getElementById('filterEndDate') ? document.getElementById('filterEndDate').value : '';
+
+      updatePillButtonsActiveState(catFilter);
+      updatePlatformTabCounts();
+
+      const currentData = getActiveDataset();
+      const overallRange = getDatasetDateRange(currentData);
+
+      // Update badgeDateRange
+      const badgeDateRange = document.getElementById('badgeDateRange');
+      if (badgeDateRange) {
+        if (startDate || endDate) {
+          const sLabel = startDate ? formatIndoDate(startDate) : formatIndoDate(overallRange.minDate);
+          const eLabel = endDate ? formatIndoDate(endDate) : formatIndoDate(overallRange.maxDate);
+          badgeDateRange.innerHTML = `📅 Filter Tgl: <b>${sLabel} s/d ${eLabel}</b>`;
+          badgeDateRange.className = "px-2.5 py-1 rounded-lg bg-blue-50 text-blue-800 border border-blue-200 font-bold text-[11px] tabular-nums flex items-center gap-1 shadow-2xs";
+        } else {
+          badgeDateRange.innerHTML = `📅 Periode Data: <b>${overallRange.label}</b>`;
+          badgeDateRange.className = "px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-[11px] tabular-nums flex items-center gap-1 shadow-2xs";
+        }
+      }
+
+      const filtered = currentData.map((o, idxInPlatform) => ({ ...o, idxInPlatform })).filter(o => {
+        if (catFilter !== 'ALL' && o.kategori !== catFilter) return false;
+        if (statusFilter !== 'ALL' && o.status !== statusFilter) return false;
+        if (dateMode === 'BATAL_ONLY' && o.status !== 'Batal') return false;
+
+        if (startDate || endDate) {
+          const isoDate = extractISODate(o.waktuPesan);
+          if (isoDate) {
+            if (startDate && isoDate < startDate) return false;
+            if (endDate && isoDate > endDate) return false;
+          }
+        }
+
+        if (search) {
+          const match = 
+            (o.orderId && o.orderId.toLowerCase().includes(search)) ||
+            (o.resi && o.resi.toLowerCase().includes(search)) ||
+            (o.produk && o.produk.toLowerCase().includes(search)) ||
+            (o.jalurCheckout && o.jalurCheckout.toLowerCase().includes(search)) ||
+            (o.kategori && o.kategori.toLowerCase().includes(search)) ||
+            (o.pembeli && o.pembeli.toLowerCase().includes(search)) ||
+            (o.penerima && o.penerima.toLowerCase().includes(search)) ||
+            (o.kota && o.kota.toLowerCase().includes(search)) ||
+            (o.provinsi && o.provinsi.toLowerCase().includes(search));
+          if (!match) return false;
+        }
+        return true;
+      });
+
+      renderTable(filtered);
+      document.getElementById('lblShownCount').innerText = filtered.length;
+
+      const lblBtnExport = document.getElementById('lblBtnExport');
+      if (lblBtnExport) {
+        lblBtnExport.innerText = `Export Excel (${activePlatformTab})`;
+      }
+    }
+
+    function updateRowCategory(platform, idx, newCategory) {
+      const dataset = platform === 'Shopee' ? shopeeOrders : tiktokOrders;
+      if (dataset[idx]) {
+        dataset[idx].kategori = newCategory;
+        saveStateToStorage();
+        refreshUI();
+        showToast(`Kategori diubah ke ${newCategory}`);
+      }
+    }
+
+    function updateRowStatus(platform, idx, newStatus) {
+      const dataset = platform === 'Shopee' ? shopeeOrders : tiktokOrders;
+      if (dataset[idx]) {
+        dataset[idx].status = newStatus;
+        if (newStatus === 'Batal' && !dataset[idx].statusReturFisik) {
+          dataset[idx].statusReturFisik = 'Menunggu Sortiran';
+        }
+        saveStateToStorage();
+        refreshUI();
+        showToast(`Status pesanan diubah ke ${newStatus}!`);
+      }
+    }
+
+    function updateRowDate(platform, idx, field, newDate) {
+      const dataset = platform === 'Shopee' ? shopeeOrders : tiktokOrders;
+      if (dataset[idx]) {
+        dataset[idx][field] = newDate;
+        saveStateToStorage();
+        refreshUI();
+        showToast(`Tanggal berhasil diperbarui.`);
+      }
+    }
+
+    function updateReturStatus(platform, idx, newStatus) {
+      const dataset = platform === 'Shopee' ? shopeeOrders : tiktokOrders;
+      if (dataset[idx]) {
+        dataset[idx].statusReturFisik = newStatus;
+        if (newStatus === 'Sudah Diambil di Sortiran' && !dataset[idx].tglReturFisik) {
+          dataset[idx].tglReturFisik = new Date().toLocaleDateString('id-ID');
+        }
+        saveStateToStorage();
+        refreshUI();
+        showToast(`Status fisik retur diperbarui!`);
+      }
+    }
+
+    function toggleSelectRow(idx, isChecked) {
+      if (isChecked) {
+        selectedOrderIndices.add(idx);
+      } else {
+        selectedOrderIndices.delete(idx);
+      }
+    }
+
+    function toggleSelectAll(isChecked) {
+      selectedOrderIndices.clear();
+      const currentData = getActiveDataset();
+      if (isChecked) {
+        currentData.forEach((_, idx) => selectedOrderIndices.add(idx));
+      }
+      applyFilters();
+    }
+
+    function bulkSetCategory(cat) {
+      if (selectedOrderIndices.size === 0) {
+        showToast('Centang dulu pesanan di tabel yang ingin diubah!', false);
+        return;
+      }
+      const currentData = getActiveDataset();
+      selectedOrderIndices.forEach(idx => {
+        if (currentData[idx]) currentData[idx].kategori = cat;
+      });
+      selectedOrderIndices.clear();
+      const checkAllBox = document.getElementById('checkAll');
+      if (checkAllBox) checkAllBox.checked = false;
+      saveStateToStorage();
+      refreshUI();
+      showToast(`Kategori berhasil diubah massal ke ${cat}!`);
+    }
+
+    function bulkSetStatus(statusVal) {
+      if (selectedOrderIndices.size === 0) {
+        showToast('Centang dulu pesanan yang mau diubah statusnya!', false);
+        return;
+      }
+      const currentData = getActiveDataset();
+      selectedOrderIndices.forEach(idx => {
+        if (currentData[idx]) {
+          currentData[idx].status = statusVal;
+          if (statusVal === 'Batal') currentData[idx].statusReturFisik = 'Menunggu Sortiran';
+        }
+      });
+      selectedOrderIndices.clear();
+      const checkAllBox = document.getElementById('checkAll');
+      if (checkAllBox) checkAllBox.checked = false;
+      saveStateToStorage();
+      refreshUI();
+      showToast(`Berhasil mengubah status ke ${statusVal}!`);
+    }
+
+    function bulkMarkReturReceived() {
+      if (selectedOrderIndices.size === 0) {
+        showToast('Centang dulu pesanan batal yang sudah diambil di sortiran!', false);
+        return;
+      }
+      const todayStr = new Date().toLocaleDateString('id-ID');
+      const currentData = getActiveDataset();
+      let count = 0;
+      selectedOrderIndices.forEach(idx => {
+        if (currentData[idx]) {
+          currentData[idx].statusReturFisik = 'Sudah Diambil di Sortiran';
+          currentData[idx].tglReturFisik = todayStr;
+          count++;
+        }
+      });
+      selectedOrderIndices.clear();
+      const checkAllBox = document.getElementById('checkAll');
+      if (checkAllBox) checkAllBox.checked = false;
+      saveStateToStorage();
+      refreshUI();
+      showToast(`${count} pesanan ditandai: Fisik sudah diambil per ${todayStr}!`);
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('tableBody');
+      if (data.length === 0) {
+        const rawLen = getActiveDataset().length;
+        if (rawLen > 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="23" class="py-12 text-center text-slate-500">
+                <i data-lucide="filter-x" class="w-8 h-8 mx-auto mb-2 text-slate-400"></i>
+                <div class="font-semibold text-slate-700">Tidak ada pesanan yang sesuai filter aktif di tab <b>${activePlatformTab}</b></div>
+                <p class="text-xs text-slate-400 mt-1">Coba reset filter kategori, status, atau rentang tanggal.</p>
+                <button onclick="filterByQuickCat('ALL')" class="mt-3 px-3 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg border border-slate-300 transition active:scale-95 inline-flex items-center gap-1.5 shadow-2xs">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                  <span>Tampilkan Semua Data (${rawLen} Pesanan)</span>
+                </button>
+              </td>
+            </tr>
+          `;
+        } else {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="23" class="py-12 text-center text-slate-400">
+                <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
+                <div>Tidak ada data di tab <b>${activePlatformTab}</b>. Silakan upload file atau muat data demo.</div>
+              </td>
+            </tr>
+          `;
+        }
+        lucide.createIcons();
+        return;
+      }
+
+      tbody.innerHTML = data.map((o, idx) => {
+        const platBadge = o.platform === 'Shopee'
+          ? '<span class="font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-200">Shopee</span>'
+          : '<span class="font-bold text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300">TikTok</span>';
+
+        const isChecked = selectedOrderIndices.has(o.idxInPlatform) ? 'checked' : '';
+
+        const catSelect = `
+          <select onchange="updateRowCategory('${o.platform}', ${o.idxInPlatform}, this.value)" 
+                  class="text-[10px] sm:text-[11px] font-bold py-1 px-1 rounded-lg border focus:outline-none ${
+                    o.kategori.includes('KOL') || o.kategori.includes('AFFILIATE') ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                    o.kategori.includes('FO') ? 'bg-amber-50 text-amber-800 border-amber-200' :
+                    'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  }">
+            <option value="AFFILIATE / KOL" ${o.kategori.includes('KOL') || o.kategori.includes('AFFILIATE') ? 'selected' : ''}>KOL / Affiliate</option>
+            <option value="SALES (Real)" ${o.kategori.includes('Real') || o.kategori.includes('SALES') ? 'selected' : ''}>Sales Real</option>
+            <option value="FO (Fake Order)" ${o.kategori.includes('FO') ? 'selected' : ''}>FO</option>
+          </select>
+        `;
+
+        // Badge Jalur Checkout (Purple for Creator / Endorsement as requested)
+        const jc = (o.jalurCheckout || o.kategori || '').toLowerCase();
+        let checkoutBadge = '';
+        if (jc.includes('creator') || jc.includes('endorse') || jc.includes('kol') || jc.includes('affiliate') || jc.includes('@') || jc.includes('sample')) {
+          checkoutBadge = `<span class="inline-flex items-center gap-1 font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200 text-[10px] whitespace-nowrap">Creator / Endorsement</span>`;
+        } else if (jc.includes('video')) {
+          checkoutBadge = `<span class="inline-flex items-center gap-1 font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 text-[10px] whitespace-nowrap">🎥 Video FYP</span>`;
+        } else if (jc.includes('live')) {
+          checkoutBadge = `<span class="inline-flex items-center gap-1 font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200 text-[10px] whitespace-nowrap">🔴 TikTok LIVE</span>`;
+        } else if (jc.includes('fo') || jc.includes('fake')) {
+          checkoutBadge = `<span class="inline-flex items-center gap-1 font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 text-[10px] whitespace-nowrap">📦 Fake Order (FO)</span>`;
+        } else {
+          checkoutBadge = `<span class="inline-flex items-center gap-1 font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 text-[10px] whitespace-nowrap">🛍️ ${o.jalurCheckout || 'Etalase Toko'}</span>`;
+        }
+
+        const statusSelect = `
+          <select onchange="updateRowStatus('${o.platform}', ${o.idxInPlatform}, this.value)"
+                  class="text-[10px] font-bold py-1 px-1 rounded-lg border focus:outline-none ${
+                    o.status === 'Selesai' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
+                    o.status === 'Dikirim' ? 'bg-blue-100 text-blue-800 border-blue-300' :
+                    'bg-rose-100 text-rose-800 border-rose-300'
+                  }">
+            <option value="Selesai" ${o.status === 'Selesai' ? 'selected' : ''}>Selesai</option>
+            <option value="Dikirim" ${o.status === 'Dikirim' ? 'selected' : ''}>Dikirim</option>
+            <option value="Batal" ${o.status === 'Batal' ? 'selected' : ''}>❌ Batal</option>
+          </select>
+        `;
+
+        let returCell = '<span class="text-slate-300">-</span>';
+        if (o.status === 'Batal') {
+          returCell = `
+            <select onchange="updateReturStatus('${o.platform}', ${o.idxInPlatform}, this.value)"
+                    class="text-[10px] font-medium py-1 px-1 rounded-md border focus:outline-none ${
+                      o.statusReturFisik === 'Sudah Diambil di Sortiran'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 font-bold'
+                        : 'bg-rose-50 text-rose-700 border-rose-200'
+                    }">
+              <option value="Menunggu Sortiran" ${o.statusReturFisik === 'Menunggu Sortiran' ? 'selected' : ''}>⏳ Di Sortiran</option>
+              <option value="Sudah Diambil di Sortiran" ${o.statusReturFisik === 'Sudah Diambil di Sortiran' ? 'selected' : ''}>✅ Diambil ${o.tglReturFisik ? '(' + o.tglReturFisik + ')' : ''}</option>
+            </select>
+          `;
+        }
+
+        const estHpp = (o.qty || 1) * defaultHppPerPcs;
+        const rowMargin = (o.totalBayar || 0) - estHpp;
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition-colors ${o.status === 'Batal' ? 'bg-rose-50/30' : ''}">
+            <td class="px-2.5 py-2 text-center no-print">
+              <input type="checkbox" ${isChecked} onchange="toggleSelectRow(${o.idxInPlatform}, this.checked)" class="rounded text-orange-600 cursor-pointer">
+            </td>
+            <td class="px-2 py-2 text-center text-slate-400 font-medium">${idx + 1}</td>
+            <td class="px-2.5 py-2 whitespace-nowrap">${platBadge}</td>
+            <td class="px-2.5 py-2 whitespace-nowrap">${catSelect}</td>
+            <td class="px-2.5 py-2 whitespace-nowrap">${checkoutBadge}</td>
+            <td class="px-2.5 py-2 whitespace-nowrap">${statusSelect}</td>
+            <td class="px-2.5 py-2 font-mono font-semibold text-slate-900 whitespace-nowrap text-[11px] tracking-tight">${o.orderId}</td>
+            <td class="px-2.5 py-2 whitespace-nowrap text-slate-600 tabular-nums">${o.waktuPesan}</td>
+            <td class="px-2.5 py-2 whitespace-nowrap">
+              ${o.status === 'Batal' 
+                ? `<input type="text" value="${o.waktuBatal || o.waktuPesan}" 
+                          onchange="updateRowDate('${o.platform}', ${o.idxInPlatform}, 'waktuBatal', this.value)" 
+                          class="bg-white border border-rose-200 px-1 py-0.5 rounded text-[10px] w-28 text-rose-700 font-bold focus:outline-none tabular-nums" title="Bisa diubah ke tgl batal atau tgl pesan">`
+                : '<span class="text-slate-300">-</span>'
+              }
+            </td>
+            <td class="px-2.5 py-2 whitespace-nowrap">${returCell}</td>
+            <td class="px-3 py-2 font-medium text-slate-800 max-w-[200px] truncate" title="${o.produk}">${o.produk}</td>
+            <td class="px-2 py-2 text-center font-bold text-slate-900 tabular-nums">${o.qty}</td>
+            <td class="px-2.5 py-2 text-right font-medium text-slate-700 whitespace-nowrap bg-slate-50/50 tabular-nums">Rp ${Math.round(o.hargaKotor || o.totalBayar).toLocaleString('id-ID')}</td>
+            <td class="px-2.5 py-2 text-right font-medium text-rose-600 whitespace-nowrap bg-rose-50/30 tabular-nums">Rp ${Math.round(o.potongan || 0).toLocaleString('id-ID')}</td>
+            <td class="px-2.5 py-2 text-right font-bold text-emerald-700 whitespace-nowrap bg-emerald-50/30 tabular-nums">Rp ${Math.round(o.totalBayar).toLocaleString('id-ID')}</td>
+            <td class="px-2.5 py-2 text-right font-medium text-indigo-600 whitespace-nowrap bg-indigo-50/30 tabular-nums">Rp ${Math.round(estHpp).toLocaleString('id-ID')}</td>
+            <td class="px-2.5 py-2 text-right font-bold ${rowMargin >= 0 ? 'text-blue-700' : 'text-rose-600'} whitespace-nowrap bg-blue-50/30 tabular-nums">Rp ${Math.round(rowMargin).toLocaleString('id-ID')}</td>
+            <td class="px-2.5 py-2 font-mono font-medium text-slate-600 whitespace-nowrap text-[11px] tracking-tight">${o.resi || '-'}</td>
+            <td class="px-2.5 py-2 text-slate-500 whitespace-nowrap">${o.kurir || '-'}</td>
+            <td class="px-2.5 py-2 text-slate-600 whitespace-nowrap">${o.pembeli || '-'}</td>
+            <td class="px-2.5 py-2 text-slate-600 whitespace-nowrap">${o.penerima || '-'}</td>
+            <td class="px-2.5 py-2 text-slate-600 whitespace-nowrap">${o.kota || '-'}</td>
+            <td class="px-2.5 py-2 text-slate-600 whitespace-nowrap">${o.provinsi || '-'}</td>
+          </tr>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function getExportDataset() {
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const catFilter = document.getElementById('filterCategory').value;
+      const statusFilter = document.getElementById('filterStatus').value;
+      const dateMode = document.getElementById('filterDateMode').value;
+      const startDate = document.getElementById('filterStartDate') ? document.getElementById('filterStartDate').value : '';
+      const endDate = document.getElementById('filterEndDate') ? document.getElementById('filterEndDate').value : '';
+
+      const currentData = getActiveDataset();
+
+      return currentData.filter(o => {
+        if (catFilter !== 'ALL' && o.kategori !== catFilter) return false;
+        if (statusFilter !== 'ALL' && o.status !== statusFilter) return false;
+        if (dateMode === 'BATAL_ONLY' && o.status !== 'Batal') return false;
+
+        if (startDate || endDate) {
+          const isoDate = extractISODate(o.waktuPesan);
+          if (isoDate) {
+            if (startDate && isoDate < startDate) return false;
+            if (endDate && isoDate > endDate) return false;
+          }
+        }
+
+        if (search) {
+          const match = 
+            (o.orderId && o.orderId.toLowerCase().includes(search)) ||
+            (o.resi && o.resi.toLowerCase().includes(search)) ||
+            (o.produk && o.produk.toLowerCase().includes(search)) ||
+            (o.jalurCheckout && o.jalurCheckout.toLowerCase().includes(search)) ||
+            (o.kategori && o.kategori.toLowerCase().includes(search)) ||
+            (o.pembeli && o.pembeli.toLowerCase().includes(search)) ||
+            (o.penerima && o.penerima.toLowerCase().includes(search)) ||
+            (o.kota && o.kota.toLowerCase().includes(search)) ||
+            (o.provinsi && o.provinsi.toLowerCase().includes(search));
+          if (!match) return false;
+        }
+        return true;
+      });
+    }
+
+    function exportToExcel() {
+      const exportData = getExportDataset();
+      if (exportData.length === 0) {
+        showToast('Tidak ada data untuk diexport', false);
+        return;
+      }
+
+      const totalOrders = exportData.length;
+      const totalQty = exportData.reduce((acc, o) => acc + (o.qty || 1), 0);
+      const totalKotor = exportData.reduce((acc, o) => acc + (o.hargaKotor || o.totalBayar || 0), 0);
+      const totalDiskon = exportData.reduce((acc, o) => acc + (o.potongan || 0), 0);
+      const totalBersih = exportData.reduce((acc, o) => acc + (o.totalBayar || 0), 0);
+      const totalHpp = exportData.reduce((acc, o) => acc + ((o.status === 'Selesai' ? (o.qty || 1) : 0) * defaultHppPerPcs), 0);
+      const totalLaba = totalBersih - totalHpp;
+      const rangeInfo = getDatasetDateRange(exportData);
+
+      const aoa = [
+        ['FOR THE LITTLE INDONESIA'],
+        ['REKAP LAPORAN TRANSAKSI PENJUALAN & PROFITABILITAS'],
+        ['Platform:', activePlatformTab, '', 'Periode Transaksi:', rangeInfo.label, '', 'Tanggal Unduh:', new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })],
+        ['Total Pesanan:', `${totalOrders} Pesanan (${totalQty} Pcs)`, '', 'Omset Bersih:', totalBersih, '', 'Estimasi Laba:', totalLaba],
+        []
+      ];
+
+      // Rincian Volume per Bulan dalam Excel
+      const monthlyData = getMonthlyBreakdown(exportData);
+      if (monthlyData.length > 0) {
+        aoa.push(['RINGKASAN VOLUME PRODUK KELUAR PER BULAN:']);
+        aoa.push(['Bulan', 'Total Pesanan', 'Pcs Produk Keluar (Selesai)', 'Pcs Batal', 'Omset Bersih (Rp)', 'Estimasi Laba (Rp)']);
+        monthlyData.forEach(m => {
+          aoa.push([
+            m.label,
+            m.totalOrders,
+            m.suksesPcs,
+            m.batalPcs,
+            Math.round(m.omsetBersih),
+            Math.round(m.laba)
+          ]);
+        });
+        aoa.push([]); // Baris kosong pemisah
+      }
+
+      aoa.push([
+        'No',
+        'Platform',
+        'Tipe / Kategori',
+        'Jalur Checkout',
+        'Status Pesanan',
+        'No. Pesanan',
+        'Waktu Pesanan (Sistem)',
+        'Tgl Batal',
+        'Nama Produk',
+        'Variasi',
+        'Qty',
+        'Omset Kotor (Rp)',
+        'Total Diskon (Rp)',
+        'Omset Bersih (Rp)',
+        'Total HPP (Rp)',
+        'Estimasi Laba (Rp)',
+        'No. Resi',
+        'Kurir / Ekspedisi',
+        'Username Pembeli',
+        'Nama Penerima',
+        'Kota / Kabupaten',
+        'Provinsi',
+        'Metode Pembayaran',
+        'Status Retur Fisik'
+      ]);
+
+      exportData.forEach((o, idx) => {
+        const estHpp = (o.status === 'Selesai' ? (o.qty || 1) : 0) * defaultHppPerPcs;
+        const laba = (o.totalBayar || 0) - estHpp;
+        aoa.push([
+          idx + 1,
+          o.platform,
+          o.kategori,
+          o.jalurCheckout || o.kategori || '-',
+          o.status,
+          o.orderId,
+          o.waktuPesan,
+          o.waktuBatal || '',
+          o.produk,
+          o.variasi || '-',
+          o.qty,
+          Math.round(o.hargaKotor || o.totalBayar),
+          Math.round(o.potongan || 0),
+          Math.round(o.totalBayar),
+          Math.round(estHpp),
+          Math.round(laba),
+          o.resi || '-',
+          o.kurir || '-',
+          o.pembeli || '-',
+          o.penerima || '-',
+          o.kota || '-',
+          o.provinsi || '-',
+          o.metodeBayar || '-',
+          o.statusReturFisik || '-'
+        ]);
+      });
+
+      // Total Row at bottom
+      aoa.push([
+        'TOTAL', '', '', '', '', '', '', '', 'TOTAL KESELURUHAN', '',
+        totalQty,
+        Math.round(totalKotor),
+        Math.round(totalDiskon),
+        Math.round(totalBersih),
+        Math.round(totalHpp),
+        Math.round(totalLaba),
+        '', '', '', '', '', '', '', ''
+      ]);
+
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+      // Merge Title Header Rows & Total row labels
+      ws['!merges'] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } },
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 8 } },
+        { s: { r: aoa.length - 1, c: 0 }, e: { r: aoa.length - 1, c: 9 } }
+      ];
+
+      // Auto fit column widths
+      ws['!cols'] = [
+        { wch: 6 },  // No
+        { wch: 11 }, // Platform
+        { wch: 17 }, // Kategori
+        { wch: 23 }, // Jalur Checkout
+        { wch: 14 }, // Status
+        { wch: 22 }, // No. Pesanan
+        { wch: 20 }, // Waktu Pesanan
+        { wch: 19 }, // Tgl Batal
+        { wch: 42 }, // Nama Produk
+        { wch: 12 }, // Variasi
+        { wch: 8 },  // Qty
+        { wch: 18 }, // Kotor
+        { wch: 18 }, // Diskon
+        { wch: 18 }, // Bersih
+        { wch: 16 }, // HPP
+        { wch: 18 }, // Laba
+        { wch: 22 }, // Resi
+        { wch: 20 }, // Kurir
+        { wch: 18 }, // Pembeli
+        { wch: 18 }, // Penerima
+        { wch: 22 }, // Kota
+        { wch: 18 }, // Provinsi
+        { wch: 18 }, // Metode
+        { wch: 18 }  // Retur
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, `Laporan_${activePlatformTab}`);
+
+      const fileDateSuffix = (rangeInfo.minDate && rangeInfo.maxDate)
+        ? `${rangeInfo.minDate}_sd_${rangeInfo.maxDate}`
+        : new Date().toISOString().slice(0, 10);
+
+      XLSX.writeFile(wb, `Rekap_FTL_${activePlatformTab}_${fileDateSuffix}.xlsx`);
+      showToast(`File Excel ${activePlatformTab} (${rangeInfo.label}) berhasil diunduh!`);
+    }
+
+    function copyToClipboardSpreadsheet() {
+      const exportData = getExportDataset();
+      if (exportData.length === 0) {
+        showToast('Tidak ada data untuk dicopy', false);
+        return;
+      }
+
+      const totalOrders = exportData.length;
+      const totalQty = exportData.reduce((acc, o) => acc + (o.qty || 1), 0);
+      const totalKotor = exportData.reduce((acc, o) => acc + (o.hargaKotor || o.totalBayar || 0), 0);
+      const totalDiskon = exportData.reduce((acc, o) => acc + (o.potongan || 0), 0);
+      const totalBersih = exportData.reduce((acc, o) => acc + (o.totalBayar || 0), 0);
+      const totalHpp = exportData.reduce((acc, o) => acc + ((o.status === 'Selesai' ? (o.qty || 1) : 0) * defaultHppPerPcs), 0);
+      const totalLaba = totalBersih - totalHpp;
+      const rangeInfo = getDatasetDateRange(exportData);
+
+      const headers = [
+        'No', 'Platform', 'Tipe / Kategori', 'Jalur Checkout', 'Status Pesanan', 'No. Pesanan', 
+        'Waktu Pesanan', 'Tgl Batal', 'Nama Produk', 'Variasi', 'Qty', 
+        'Omset Kotor (Rp)', 'Total Diskon (Rp)', 'Omset Bersih (Rp)', 'Total HPP (Rp)', 'Estimasi Laba (Rp)', 
+        'No. Resi', 'Kurir / Ekspedisi', 'Pembeli', 'Penerima', 'Kota / Kab', 'Provinsi', 'Metode Bayar', 'Status Retur Fisik'
+      ];
+
+      const rows = exportData.map((o, idx) => {
+        const estHpp = (o.status === 'Selesai' ? (o.qty || 1) : 0) * defaultHppPerPcs;
+        const laba = (o.totalBayar || 0) - estHpp;
+        return [
+          idx + 1,
+          o.platform,
+          o.kategori,
+          o.jalurCheckout || o.kategori || '-',
+          o.status,
+          o.orderId,
+          o.waktuPesan,
+          o.waktuBatal || '',
+          `"${(o.produk || '').replace(/"/g, '""')}"`,
+          o.variasi || '-',
+          o.qty,
+          Math.round(o.hargaKotor || o.totalBayar),
+          Math.round(o.potongan || 0),
+          Math.round(o.totalBayar),
+          Math.round(estHpp),
+          Math.round(laba),
+          o.resi || '-',
+          o.kurir || '-',
+          o.pembeli || '-',
+          o.penerima || '-',
+          o.kota || '-',
+          o.provinsi || '-',
+          o.metodeBayar || '-',
+          o.statusReturFisik || '-'
+        ];
+      });
+
+      // Total Row
+      const totalRow = [
+        'TOTAL', '', '', '', '', '', '', '', 'TOTAL KESELURUHAN', '',
+        totalQty,
+        Math.round(totalKotor),
+        Math.round(totalDiskon),
+        Math.round(totalBersih),
+        Math.round(totalHpp),
+        Math.round(totalLaba),
+        '', '', '', '', '', '', '', ''
+      ];
+
+      const headerBlock = [
+        `FOR THE LITTLE INDONESIA - REKAP LAPORAN TRANSAKSI PENJUALAN`,
+        `Platform: ${activePlatformTab}\tPeriode: ${rangeInfo.label}\tTotal: ${totalOrders} Pesanan (${totalQty} Pcs)\tBersih: Rp ${Math.round(totalBersih).toLocaleString('id-ID')}\tLaba: Rp ${Math.round(totalLaba).toLocaleString('id-ID')}`,
+        ''
+      ];
+
+      const tsvContent = [
+        ...headerBlock,
+        headers.join('\t'),
+        ...rows.map(r => r.join('\t')),
+        totalRow.join('\t')
+      ].join('\n');
+
+      navigator.clipboard.writeText(tsvContent).then(() => {
+        showToast(`Tabel rapi & Periode (${rangeInfo.label}) berhasil disalin! Buka Google Sheets / Excel lalu Ctrl+V`);
+      }).catch(err => {
+        showToast('Gagal menyalin: ' + err.message, false);
+      });
+    }
+
+    function resetActiveTabData() {
+      if (confirm(`Yakin ingin mengosongkan data di tab ${activePlatformTab}?`)) {
+        if (activePlatformTab === 'Shopee') {
+          shopeeOrders = [];
+          localStorage.removeItem('ftl_shopee_orders');
+        } else if (activePlatformTab === 'TikTok') {
+          tiktokOrders = [];
+          localStorage.removeItem('ftl_tiktok_orders');
+        } else {
+          shopeeOrders = [];
+          tiktokOrders = [];
+          localStorage.removeItem('ftl_shopee_orders');
+          localStorage.removeItem('ftl_tiktok_orders');
+        }
+        selectedOrderIndices.clear();
+        saveStateToStorage();
+        refreshUI();
+        showToast(`Data tab ${activePlatformTab} berhasil dikosongkan.`);
+      }
+    }
+
+    function loadSampleDemoData() {
+      shopeeOrders = [
+        { platform: 'Shopee', orderId: '261001FFPWDP7T', waktuPesan: '2026-10-01 12:37', waktuBatal: '', kategori: 'FO (Fake Order)', status: 'Selesai', alasanBatal: '', resi: 'SPXID06048105384A', kurir: 'Hemat Kargo-SPX Hemat', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: '-', qty: 3, hargaKotor: 353997, potongan: 206859, totalBayar: 147138, pembeli: 'giawaridea', penerima: 'L***a', kota: 'KOTA JAKARTA UTARA', provinsi: 'DKI JAKARTA', metodeBayar: 'COD (Bayar di Tempat)', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'Shopee', orderId: '261001FJ7QRGW7', waktuPesan: '2026-10-01 13:23', waktuBatal: '', kategori: 'FO (Fake Order)', status: 'Selesai', alasanBatal: '', resi: 'SPXID06010479239A', kurir: 'SPX Hemat', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: '-', qty: 3, hargaKotor: 353997, potongan: 205859, totalBayar: 148138, pembeli: '3dyva', penerima: 'T**a', kota: 'KOTA JAKARTA SELATAN', provinsi: 'DKI JAKARTA', metodeBayar: 'COD (Bayar di Tempat)', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'Shopee', orderId: '261001FJPFUK11', waktuPesan: '2026-10-01 13:31', waktuBatal: '', kategori: 'FO (Fake Order)', status: 'Selesai', alasanBatal: '', resi: 'SPXID06219682975A', kurir: 'Hemat Kargo-SPX Hemat', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: '-', qty: 3, hargaKotor: 353997, potongan: 206859, totalBayar: 147138, pembeli: 'kalkalisa', penerima: 'T**a', kota: 'KOTA JAKARTA SELATAN', provinsi: 'DKI JAKARTA', metodeBayar: 'COD (Bayar di Tempat)', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'Shopee', orderId: '261001FNJ2H4S5', waktuPesan: '2026-10-01 14:22', waktuBatal: '', kategori: 'FO (Fake Order)', status: 'Selesai', alasanBatal: '', resi: 'SPXID06507721701A', kurir: 'Hemat Kargo-SPX Hemat', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: '-', qty: 3, hargaKotor: 353997, potongan: 206659, totalBayar: 147338, pembeli: 'bonsaydellio', penerima: 'B******O', kota: 'KOTA BOGOR', provinsi: 'JAWA BARAT', metodeBayar: 'COD (Bayar di Tempat)', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'Shopee', orderId: '261002JSTSS7Q8', waktuPesan: '2026-10-02 20:16', waktuBatal: '2026-10-02 20:16', kategori: 'FO (Fake Order)', status: 'Batal', alasanBatal: 'Pesanan belum dibayar otomatis sistem Shopee', resi: '-', kurir: 'Hemat Kargo', produk: 'For The Little Baby Calming Rub | Krim Pijat Bayi', variasi: '-', qty: 1, hargaKotor: 117999, potongan: 0, totalBayar: 0, pembeli: 'julianada07', penerima: 'n**a', kota: 'KOTA BOGOR', provinsi: 'JAWA BARAT', metodeBayar: 'Kartu Kredit/Debit', statusReturFisik: 'Sudah Diambil di Sortiran', tglReturFisik: '05/10/2026' },
+        { platform: 'Shopee', orderId: '2610084H0RFX5P', waktuPesan: '2026-10-08 17:48', waktuBatal: '', kategori: 'SALES (Real)', status: 'Selesai', alasanBatal: '', resi: 'SPXID06171557818A', kurir: 'Reguler-SPX Standard', produk: 'For The Little Baby Calming Rub Cream Paket 4 Pcs', variasi: '-', qty: 1, hargaKotor: 401999, potongan: 73560, totalBayar: 328439, pembeli: 'annisamutiarayu', penerima: 'A******l', kota: 'KOTA SURABAYA', provinsi: 'JAWA TIMUR', metodeBayar: 'QRIS', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'Shopee', orderId: '261022AETSTY4H', waktuPesan: '2026-10-22 16:12', waktuBatal: '', kategori: 'SALES (Real)', status: 'Selesai', alasanBatal: '', resi: 'SPXID06894319597A', kurir: 'Hemat Kargo-SPX Hemat', produk: 'For The Little Calming Rub Cream 50g Bayi & Anak', variasi: '-', qty: 1, hargaKotor: 117999, potongan: 3100, totalBayar: 114899, pembeli: 'chikandhfna', penerima: 'I******f', kota: 'KOTA BOGOR', provinsi: 'JAWA BARAT', metodeBayar: 'QRIS', statusReturFisik: '-', tglReturFisik: '' }
+      ];
+
+      tiktokOrders = [
+        { platform: 'TikTok', orderId: '586848248216650862', waktuPesan: '29/10/2026 11:30', waktuBatal: '', kategori: 'AFFILIATE / KOL', status: 'Dikirim', alasanBatal: '', resi: 'JY2113504550', kurir: 'J&T Express Hemat', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: 'Default', qty: 1, hargaKotor: 299999, potongan: 243562, totalBayar: 56437, pembeli: 'a***ahakbari_', penerima: 'S*** a*****', kota: 'Kota Medan', provinsi: 'Sumatera Utara', metodeBayar: 'PayLater', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'TikTok', orderId: '586809925081269752', waktuPesan: '27/10/2026 08:17', waktuBatal: '', kategori: 'AFFILIATE / KOL', status: 'Dikirim', alasanBatal: '', resi: 'JY2035762228', kurir: 'J&T Express Hemat', produk: 'For The Little - Bundling 2 Pcs Baby Calming Rub Cream', variasi: 'Default', qty: 1, hargaKotor: 399999, potongan: 206888, totalBayar: 193111, pembeli: 'r***1_69', penerima: 'R****', kota: 'Kab. Gowa', provinsi: 'Sulawesi Selatan', metodeBayar: 'Bayar di tempat', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'TikTok', orderId: '586599186071783206', waktuPesan: '15/10/2026 11:15', waktuBatal: '', kategori: 'AFFILIATE / KOL', status: 'Selesai', alasanBatal: '', resi: 'JY1944843088', kurir: 'J&T Express Standar', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: 'Default', qty: 1, hargaKotor: 0, potongan: 0, totalBayar: 0, pembeli: 'h***ianr', penerima: 'D*** r**** s***', kota: 'Kab. Demak', provinsi: 'Jawa Tengah', metodeBayar: 'Sample/Endorse', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'TikTok', orderId: '586350605994919268', waktuPesan: '01/10/2026 14:07', waktuBatal: '02/10/2026 13:30', kategori: 'AFFILIATE / KOL', status: 'Batal', alasanBatal: 'Stok habis', resi: '-', kurir: 'Hemat', produk: 'Internal Only FTL - sampel Baby Calming Rub Cream 50g', variasi: 'Default', qty: 1, hargaKotor: 0, potongan: 0, totalBayar: 0, pembeli: '_***mamiraaaa', penerima: 'I** R******', kota: 'Kota Pangkal Pinang', provinsi: 'Kepulauan Bangka Belitung', metodeBayar: 'Sample/Endorse', statusReturFisik: 'Sudah Diambil di Sortiran', tglReturFisik: '02/10/2026' },
+        { platform: 'TikTok', orderId: '586349960609630081', waktuPesan: '01/10/2026 13:27', waktuBatal: '', kategori: 'FO (Fake Order)', status: 'Selesai', alasanBatal: '', resi: 'JY1833530165', kurir: 'J&T Express Standar', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: 'Default', qty: 2, hargaKotor: 599998, potongan: 478639, totalBayar: 121359, pembeli: 's***ummm198', penerima: 'R**** a*********', kota: 'Kab. Kediri', provinsi: 'Jawa Timur', metodeBayar: 'Transfer bank', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'TikTok', orderId: '586349245456222011', waktuPesan: '01/10/2026 12:40', waktuBatal: '02/10/2026 12:40', kategori: 'SALES (Real)', status: 'Batal', alasanBatal: 'Pesanan dibatalkan karena pembeli terlambat membayar', resi: '-', kurir: 'Pengiriman standar', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: 'Default', qty: 1, hargaKotor: 299999, potongan: 184000, totalBayar: 115999, pembeli: 'o***eee676', penerima: 'D**************', kota: 'Kabupaten Kediri', provinsi: 'Jawa Timur', metodeBayar: 'Transfer bank', statusReturFisik: 'Menunggu Sortiran', tglReturFisik: '' }
+      ];
+
+      saveStateToStorage();
+      setActivePlatformTab('Shopee');
+      showToast('Data demo berhasil dimuat ke Tab Shopee dan Tab TikTok!');
+    }
+
+    // Inisialisasi awal UI dengan data yang tersimpan di LocalStorage
+    setActivePlatformTab(activePlatformTab);
+  </script>
+</body>
+</html>
