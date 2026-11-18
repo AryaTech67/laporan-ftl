@@ -65,9 +65,10 @@
         Silakan masukkan password untuk membuka portal laporan.
       </p>
 
-      <form onsubmit="handleLoginSubmit(event)" class="space-y-3.5">
+      <form onsubmit="handleLoginSubmit(event); return false;" class="space-y-3.5">
         <div class="relative">
           <input type="password" id="accessPinInput" autofocus placeholder="Masukkan password..." 
+                 onkeydown="if(event.key==='Enter'){event.preventDefault();handleLoginSubmit(event);}"
                  class="w-full text-center text-xs font-semibold tracking-wider px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800 transition">
           <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1">
             <i data-lucide="eye" id="eyeIcon" class="w-3.5 h-3.5"></i>
@@ -78,7 +79,7 @@
           Password salah, silakan coba lagi!
         </p>
 
-        <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-lg shadow-xs transition active:scale-[0.98] flex items-center justify-center gap-1.5">
+        <button type="button" onclick="handleLoginSubmit(event)" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-lg shadow-xs transition active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer">
           <i data-lucide="unlock" class="w-3.5 h-3.5"></i>
           <span>Buka Sistem</span>
         </button>
@@ -640,15 +641,25 @@
   <script>
     // 🔐 AUTH / PIN ACCESS LOGIC
     const SECRET_PIN = "FTL2026";
+    let isInMemoryAuth = false;
 
     function checkAuth() {
-      const isAuth = sessionStorage.getItem('ftl_authenticated');
-      const overlay = document.getElementById('loginOverlay');
-      if (isAuth === 'true') {
-        overlay.classList.add('hidden');
-      } else {
-        overlay.classList.remove('hidden');
-        document.getElementById('accessPinInput').focus();
+      try {
+        const isAuth = isInMemoryAuth || sessionStorage.getItem('ftl_authenticated') === 'true' || localStorage.getItem('ftl_authenticated') === 'true';
+        const overlay = document.getElementById('loginOverlay');
+        if (overlay) {
+          if (isAuth) {
+            overlay.classList.add('hidden');
+            overlay.style.display = 'none';
+          } else {
+            overlay.classList.remove('hidden');
+            overlay.style.display = 'flex';
+            const pinInp = document.getElementById('accessPinInput');
+            if (pinInp) setTimeout(() => pinInp.focus(), 100);
+          }
+        }
+      } catch (err) {
+        console.warn('Storage check error:', err);
       }
     }
 
@@ -666,27 +677,51 @@
     }
 
     function handleLoginSubmit(e) {
-      e.preventDefault();
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       const input = document.getElementById('accessPinInput');
       const err = document.getElementById('loginErrorMsg');
       const card = document.getElementById('loginCard');
+      const overlay = document.getElementById('loginOverlay');
 
-      if (input.value.trim().toUpperCase() === SECRET_PIN.toUpperCase()) {
-        sessionStorage.setItem('ftl_authenticated', 'true');
-        document.getElementById('loginOverlay').classList.add('hidden');
-        err.classList.add('hidden');
-        showToast('Login berhasil!');
+      const enteredPin = input ? input.value.trim().toUpperCase() : '';
+
+      if (enteredPin === SECRET_PIN.toUpperCase() || enteredPin === 'FTL2026') {
+        isInMemoryAuth = true;
+        try {
+          sessionStorage.setItem('ftl_authenticated', 'true');
+          localStorage.setItem('ftl_authenticated', 'true');
+        } catch (storageErr) {
+          console.warn('Storage write error (private mode), fallback to memory:', storageErr);
+        }
+        if (overlay) {
+          overlay.classList.add('hidden');
+          overlay.style.display = 'none';
+        }
+        if (err) err.classList.add('hidden');
+        showToast('Login berhasil! Selamat datang.');
       } else {
-        err.classList.remove('hidden');
-        card.classList.add('shake-animation');
-        setTimeout(() => card.classList.remove('shake-animation'), 350);
-        input.value = '';
-        input.focus();
+        if (err) err.classList.remove('hidden');
+        if (card) {
+          card.classList.add('shake-animation');
+          setTimeout(() => card.classList.remove('shake-animation'), 350);
+        }
+        if (input) {
+          input.value = '';
+          input.focus();
+        }
       }
+      return false;
     }
 
     function lockScreen() {
-      sessionStorage.removeItem('ftl_authenticated');
+      isInMemoryAuth = false;
+      try {
+        sessionStorage.removeItem('ftl_authenticated');
+        localStorage.removeItem('ftl_authenticated');
+      } catch (e) {}
       checkAuth();
       showToast('Layar berhasil dikunci.');
     }
