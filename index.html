@@ -13,6 +13,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js for interactive analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
@@ -465,6 +467,184 @@
         </div>
       </div>
 
+      <!-- 🎯 TARGET PENJUALAN BULANAN & KALKULATOR POTONGAN MARKETPLACE -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        
+        <!-- KIRI: 🎯 GOAL TRACKER (TARGET PENJUALAN) -->
+        <div class="bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs space-y-3 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-emerald-100 text-[#264D3B] flex items-center justify-center shadow-2xs">
+                  <i data-lucide="target" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Target Penjualan (Goal Tracker)</h3>
+                  <p class="text-[10px] text-slate-500 font-medium">Monitoring capaian omset & kuantitas produk FTL</p>
+                </div>
+              </div>
+              
+              <!-- Target Type Toggle -->
+              <div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg text-[10px] font-bold">
+                <button type="button" id="btnTargetModeRp" onclick="setTargetMode('RP')" class="px-2 py-0.5 rounded-md bg-white text-slate-900 shadow-2xs transition">Rupiah (Rp)</button>
+                <button type="button" id="btnTargetModePcs" onclick="setTargetMode('PCS')" class="px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-900 transition">Pcs Produk</button>
+              </div>
+            </div>
+
+            <div class="mt-3 flex items-center justify-between gap-2">
+              <div class="flex items-baseline gap-1.5">
+                <span class="text-xl sm:text-2xl font-extrabold text-[#264D3B] tabular-nums" id="statTargetAchieved">Rp 0</span>
+                <span class="text-xs font-semibold text-slate-400">/ <span id="statTargetGoalLabel">Rp 250.000.000</span></span>
+              </div>
+              <span id="badgeTargetStatus" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                0% Tercapai
+              </span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden mt-2.5 relative border border-slate-200/60 p-0.5">
+              <div id="targetProgressBar" class="h-full rounded-full bg-gradient-to-r from-emerald-600 to-[#264D3B] transition-all duration-700" style="width: 0%;"></div>
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] text-slate-500 mt-2 font-medium">
+              <span id="targetRemainingText">Kurang: Rp 0 lagi</span>
+              <span id="targetPacingText" class="font-semibold text-slate-700">⚡ Status: Menghitung...</span>
+            </div>
+          </div>
+
+          <!-- Target Setting Input -->
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+            <span class="font-medium text-[11px]">Ubah Nilai Target:</span>
+            <div class="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200">
+              <span class="font-bold text-slate-400 text-[11px]" id="lblTargetInputPrefix">Rp</span>
+              <input type="number" id="inputTargetGoal" value="250000000" onchange="updateTargetGoal(this.value)" class="w-28 text-xs font-bold text-slate-900 bg-transparent focus:outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- KANAN: 🏷️ ESTIMASI POTONGAN MARKETPLACE & NET CASH-IN -->
+        <div class="bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs space-y-3 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center shadow-2xs">
+                  <i data-lucide="percent" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Estimasi Fee Marketplace & Uang Bersih</h3>
+                  <p class="text-[10px] text-slate-500 font-medium">Kalkulasi potongan admin fee Shopee & TikTok</p>
+                </div>
+              </div>
+              <div class="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200" id="lblFeeActiveTabBadge">Tab Shopee</div>
+            </div>
+
+            <!-- Grid Metrik Fee & Net Payout -->
+            <div class="grid grid-cols-2 gap-2 mt-3">
+              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Potongan Platform</span>
+                <div class="text-base sm:text-lg font-bold text-rose-600 mt-0.5 tabular-nums" id="statEstMarketplaceFee">Rp 0</div>
+                <p class="text-[10px] text-slate-400 truncate" id="statFeeRateSummary">Shopee 6.5% • TikTok 8.0%</p>
+              </div>
+
+              <div class="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200">
+                <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Uang Masuk Kas (Net)</span>
+                <div class="text-base sm:text-lg font-extrabold text-emerald-700 mt-0.5 tabular-nums" id="statNetCashIn">Rp 0</div>
+                <p class="text-[10px] text-emerald-600 truncate">Omset Bersih - Fee Admin</p>
+              </div>
+            </div>
+
+            <div class="mt-2.5 p-2 rounded-lg bg-blue-50/60 border border-blue-100 flex items-center justify-between text-xs">
+              <span class="text-blue-900 font-medium text-[11px]">Laba Bersih Riil (Setelah HPP & Fee Platform):</span>
+              <span class="text-xs font-bold text-blue-700 tabular-nums" id="statRealNetProfit">Rp 0</span>
+            </div>
+          </div>
+
+          <!-- Fee Rate Inputs -->
+          <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <span class="text-[11px] font-medium text-slate-600">Setting Fee Admin:</span>
+            <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-200 text-[11px]">
+                <span class="font-bold text-orange-600">Shopee:</span>
+                <input type="number" step="0.1" id="inputShopeeFee" value="6.5" onchange="updateMarketplaceFees(this.value, null)" class="w-12 text-center font-bold text-slate-800 bg-transparent focus:outline-none">%
+              </div>
+              <div class="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-200 text-[11px]">
+                <span class="font-bold text-slate-900">TikTok:</span>
+                <input type="number" step="0.1" id="inputTikTokFee" value="8.0" onchange="updateMarketplaceFees(null, this.value)" class="w-12 text-center font-bold text-slate-800 bg-transparent focus:outline-none">%
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 📊 ANALISIS VISUAL & GRAFIK BISNIS -->
+      <section class="bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center shadow-2xs">
+              <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Analisis Grafik & Proporsi Bisnis</h3>
+              <p class="text-[10px] text-slate-500 font-medium">Visualisasi pergerakan transaksi dan jalur penjualan real-time</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200" id="lblChartPlatformActive">
+            Data: Gabungan
+          </span>
+        </div>
+
+        <!-- 2 Chart Containers -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-1">
+          <!-- Donut Chart: Proporsi Jalur Penjualan (5 cols on lg) -->
+          <div class="lg:col-span-5 bg-slate-50/60 rounded-xl p-3 border border-slate-200/80 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-slate-800">Proporsi Kategori Pesanan</span>
+              <span class="text-[10px] font-medium text-slate-500">Sales vs KOL vs FO</span>
+            </div>
+            <div class="relative w-full h-52 sm:h-56 flex items-center justify-center">
+              <canvas id="categoryDonutChart"></canvas>
+            </div>
+            <div class="grid grid-cols-3 gap-1 pt-2 border-t border-slate-200/60 text-center text-[10px] font-medium">
+              <div class="bg-emerald-50 text-emerald-800 rounded p-1">
+                <span class="block font-bold text-xs" id="donutPctSales">0%</span>
+                <span class="text-[9px]">🛒 Sales Real</span>
+              </div>
+              <div class="bg-purple-50 text-purple-800 rounded p-1">
+                <span class="block font-bold text-xs" id="donutPctKOL">0%</span>
+                <span class="text-[9px]">⭐ KOL / Sample</span>
+              </div>
+              <div class="bg-amber-50 text-amber-800 rounded p-1">
+                <span class="block font-bold text-xs" id="donutPctFO">0%</span>
+                <span class="text-[9px]">📦 Fake Order</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bar & Line Chart: Pergerakan Omset & Pcs per Bulan (7 cols on lg) -->
+          <div class="lg:col-span-7 bg-slate-50/60 rounded-xl p-3 border border-slate-200/80 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-slate-800">Tren Omset & Volume per Bulan</span>
+              <span class="text-[10px] font-medium text-slate-500">Omset Bersih (Rp) & Pcs Keluar</span>
+            </div>
+            <div class="relative w-full h-52 sm:h-56">
+              <canvas id="monthlyTrendChart"></canvas>
+            </div>
+            <div class="flex items-center justify-center gap-4 pt-2 border-t border-slate-200/60 text-[10px] text-slate-600 font-medium">
+              <span class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-sm bg-[#264D3B]"></span>
+                <span>Omset Bersih (Rp)</span>
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-[#8D6E54]"></span>
+                <span>Pcs Keluar (Qty)</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
       <!-- 📦 MONTHLY VOLUME BREAKDOWN (Rincian Produk Keluar per Bulan) -->
       <section class="bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs space-y-3">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
@@ -488,24 +668,63 @@
         </div>
       </section>
 
-      <!-- 📦 REKAPITULASI PRODUK & SKU TERLARIS -->
-      <section class="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-xs space-y-3">
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center shadow-2xs">
-              <i data-lucide="package-search" class="w-4 h-4"></i>
+      <!-- 📍 DEMOGRAFI KOTA & 📦 REKAPITULASI PRODUK & SKU -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        
+        <!-- KIRI: 📍 TOP 5 KOTA PEMBELI (TARGET IKLAN ADS) -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-xs space-y-3 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shadow-2xs">
+                  <i data-lucide="map-pin" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Top Kota Pembeli (Rekomendasi Ads)</h3>
+                  <p class="text-[10px] text-slate-500 font-medium">Kota dengan pesanan terbanyak untuk acuan targeting iklan</p>
+                </div>
+              </div>
+              <span class="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">5 Kota Teratas</span>
             </div>
-            <div>
-              <h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Rekapitulasi Produk & Varian (SKU Terlaris)</h3>
-              <p class="text-[10px] text-slate-500 font-medium">Rincian kuantitas produk keluar untuk memudahkan pengecekan stok fisik gudang</p>
+
+            <div id="topCitiesContainer" class="space-y-2 mt-3">
+              <!-- Populated by JavaScript in refreshUI -->
             </div>
           </div>
-          <span id="badgeTotalSkuCount" class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">0 Varian</span>
+
+          <div class="pt-2 border-t border-slate-100 text-[10px] text-slate-500 flex items-center gap-1.5">
+            <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i>
+            <span>Gunakan daftar kota ini saat set lokasi campaign di TikTok Ads & Meta Ads.</span>
+          </div>
         </div>
 
-        <div id="productBreakdownContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-          <!-- Populated by JavaScript in refreshUI -->
+        <!-- KANAN: 📦 REKAPITULASI PRODUK & SKU TERLARIS -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-xs space-y-3 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center shadow-2xs">
+                  <i data-lucide="package-search" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Rekapitulasi Produk & Varian (SKU)</h3>
+                  <p class="text-[10px] text-slate-500 font-medium">Rincian kuantitas produk keluar untuk stok fisik gudang</p>
+                </div>
+              </div>
+              <span id="badgeTotalSkuCount" class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">0 Varian</span>
+            </div>
+
+            <div id="productBreakdownContainer" class="space-y-2 mt-3 max-h-80 overflow-y-auto custom-scrollbar pr-1">
+              <!-- Populated by JavaScript in refreshUI -->
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-100 text-[10px] text-slate-500 flex items-center justify-between">
+            <span>*Berdasarkan pesanan berstatus Selesai</span>
+            <span class="font-semibold text-slate-700">Gudang FTL</span>
+          </div>
         </div>
+
       </section>
 
       <!-- Action & Toolbar Section -->
@@ -771,6 +990,17 @@
     let defaultHppPerPcs = 25000;
     let selectedOrderIndices = new Set();
 
+    // 🎯 TARGET BULANAN & FEE MARKETPLACE STATE
+    let monthlyTargetRp = 250000000;
+    let monthlyTargetPcs = 3000;
+    let targetMode = 'RP'; // 'RP' | 'PCS'
+    let shopeeFeePct = 6.5;
+    let tiktokFeePct = 8.0;
+
+    // 📊 CHART INSTANCES
+    let categoryDonutChart = null;
+    let monthlyTrendChart = null;
+
     // 💾 LOCAL STORAGE PERSISTENCE (Anti-Hilang saat Refresh)
     function saveStateToStorage() {
       try {
@@ -778,6 +1008,11 @@
         localStorage.setItem('ftl_tiktok_orders', JSON.stringify(tiktokOrders));
         localStorage.setItem('ftl_default_hpp', defaultHppPerPcs.toString());
         localStorage.setItem('ftl_active_tab', activePlatformTab);
+        localStorage.setItem('ftl_monthly_target_rp', monthlyTargetRp.toString());
+        localStorage.setItem('ftl_monthly_target_pcs', monthlyTargetPcs.toString());
+        localStorage.setItem('ftl_target_mode', targetMode);
+        localStorage.setItem('ftl_shopee_fee_pct', shopeeFeePct.toString());
+        localStorage.setItem('ftl_tiktok_fee_pct', tiktokFeePct.toString());
       } catch (e) {
         console.warn('Gagal menyimpan ke LocalStorage:', e);
       }
@@ -834,6 +1069,35 @@
             const hppDesc = document.getElementById('statHppRateDesc');
             if (hppDesc) hppDesc.innerText = `@Rp ${val.toLocaleString('id-ID')} / pcs`;
           }
+        }
+
+        const savedTargetRp = localStorage.getItem('ftl_monthly_target_rp');
+        if (savedTargetRp) {
+          const val = parseFloat(savedTargetRp);
+          if (!isNaN(val) && val > 0) monthlyTargetRp = val;
+        }
+
+        const savedTargetPcs = localStorage.getItem('ftl_monthly_target_pcs');
+        if (savedTargetPcs) {
+          const val = parseFloat(savedTargetPcs);
+          if (!isNaN(val) && val > 0) monthlyTargetPcs = val;
+        }
+
+        const savedTargetMode = localStorage.getItem('ftl_target_mode');
+        if (savedTargetMode && ['RP', 'PCS'].includes(savedTargetMode)) {
+          targetMode = savedTargetMode;
+        }
+
+        const savedShopeeFee = localStorage.getItem('ftl_shopee_fee_pct');
+        if (savedShopeeFee) {
+          const val = parseFloat(savedShopeeFee);
+          if (!isNaN(val) && val >= 0) shopeeFeePct = val;
+        }
+
+        const savedTikTokFee = localStorage.getItem('ftl_tiktok_fee_pct');
+        if (savedTikTokFee) {
+          const val = parseFloat(savedTikTokFee);
+          if (!isNaN(val) && val >= 0) tiktokFeePct = val;
         }
 
         if (savedTab && ['Shopee', 'TikTok', 'Gabungan'].includes(savedTab)) {
@@ -1557,8 +1821,40 @@
         }
       }
 
+      // 🏷️ Kalkulasi Fee Marketplace & Net Cash In
+      let estFee = 0;
+      if (activePlatformTab === 'Shopee') {
+        estFee = omsetBersih * (shopeeFeePct / 100);
+      } else if (activePlatformTab === 'TikTok') {
+        estFee = omsetBersih * (tiktokFeePct / 100);
+      } else {
+        const sSukses = shopeeOrders.filter(o => o.status === 'Selesai');
+        const tSukses = tiktokOrders.filter(o => o.status === 'Selesai');
+        const sBersih = sSukses.reduce((acc, o) => acc + (o.totalBayar || 0), 0);
+        const tBersih = tSukses.reduce((acc, o) => acc + (o.totalBayar || 0), 0);
+        estFee = (sBersih * (shopeeFeePct / 100)) + (tBersih * (tiktokFeePct / 100));
+      }
+
+      const netCashIn = Math.max(0, omsetBersih - estFee);
+      const realNetProfit = estimasiLaba - estFee;
+
+      setTxt('statEstMarketplaceFee', '- ' + fmtRp(estFee));
+      setTxt('statNetCashIn', fmtRp(netCashIn));
+      setTxt('statRealNetProfit', fmtRp(realNetProfit));
+      setTxt('lblFeeActiveTabBadge', `Tab ${activePlatformTab}`);
+      setTxt('statFeeRateSummary', `Shopee ${shopeeFeePct}% • TikTok ${tiktokFeePct}%`);
+
+      // Sinkronkan input fee & target ke input box jika elemen ada
+      const inpShopee = document.getElementById('inputShopeeFee');
+      if (inpShopee && document.activeElement !== inpShopee) inpShopee.value = shopeeFeePct;
+      const inpTikTok = document.getElementById('inputTikTokFee');
+      if (inpTikTok && document.activeElement !== inpTikTok) inpTikTok.value = tiktokFeePct;
+
+      updateTargetTrackerUI(currentData);
+      renderTopCities(currentData);
       renderMonthlyBreakdown(currentData);
       renderProductBreakdown(currentData);
+      renderCharts(currentData);
       applyFilters();
     }
 
@@ -1837,9 +2133,14 @@
     function exportBackupJSON() {
       const backupObj = {
         app: 'FTL_SMART_REKAP',
-        version: '3.9',
+        version: '4.0',
         exportDate: new Date().toISOString(),
         defaultHppPerPcs: defaultHppPerPcs,
+        monthlyTargetRp: monthlyTargetRp,
+        monthlyTargetPcs: monthlyTargetPcs,
+        targetMode: targetMode,
+        shopeeFeePct: shopeeFeePct,
+        tiktokFeePct: tiktokFeePct,
         shopeeOrders: shopeeOrders,
         tiktokOrders: tiktokOrders
       };
@@ -1864,6 +2165,11 @@
             shopeeOrders = parsed.shopeeOrders;
             tiktokOrders = parsed.tiktokOrders;
             if (parsed.defaultHppPerPcs) defaultHppPerPcs = parsed.defaultHppPerPcs;
+            if (parsed.monthlyTargetRp) monthlyTargetRp = parsed.monthlyTargetRp;
+            if (parsed.monthlyTargetPcs) monthlyTargetPcs = parsed.monthlyTargetPcs;
+            if (parsed.targetMode) targetMode = parsed.targetMode;
+            if (parsed.shopeeFeePct) shopeeFeePct = parsed.shopeeFeePct;
+            if (parsed.tiktokFeePct) tiktokFeePct = parsed.tiktokFeePct;
             saveStateToStorage();
             refreshUI();
             showToast(`Berhasil restore backup: ${shopeeOrders.length} Shopee, ${tiktokOrders.length} TikTok!`);
@@ -2555,24 +2861,417 @@
       }
     }
 
+
+    // 🎯 GOAL TRACKER (TARGET PENJUALAN) FUNCTIONS
+    function setTargetMode(mode) {
+      targetMode = mode;
+      saveStateToStorage();
+      const btnRp = document.getElementById('btnTargetModeRp');
+      const btnPcs = document.getElementById('btnTargetModePcs');
+      const lblPrefix = document.getElementById('lblTargetInputPrefix');
+      const inputGoal = document.getElementById('inputTargetGoal');
+
+      if (btnRp && btnPcs && lblPrefix && inputGoal) {
+        if (mode === 'RP') {
+          btnRp.className = "px-2 py-0.5 rounded-md bg-white text-slate-900 shadow-2xs font-bold transition";
+          btnPcs.className = "px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-900 font-medium transition";
+          lblPrefix.innerText = 'Rp';
+          inputGoal.value = monthlyTargetRp;
+        } else {
+          btnPcs.className = "px-2 py-0.5 rounded-md bg-white text-slate-900 shadow-2xs font-bold transition";
+          btnRp.className = "px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-900 font-medium transition";
+          lblPrefix.innerText = 'Pcs';
+          inputGoal.value = monthlyTargetPcs;
+        }
+      }
+      refreshUI();
+      showToast(mode === 'RP' ? 'Target diubah ke format Rupiah (Omset)' : 'Target diubah ke format Pcs (Volume)');
+    }
+
+    function updateTargetGoal(val) {
+      const num = parseFloat(val) || 0;
+      if (targetMode === 'RP') {
+        monthlyTargetRp = num;
+      } else {
+        monthlyTargetPcs = num;
+      }
+      saveStateToStorage();
+      refreshUI();
+      showToast('Nilai target berhasil diperbarui!');
+    }
+
+    function updateTargetTrackerUI(currentData) {
+      const suksesOrders = currentData.filter(o => o.status === 'Selesai');
+      const omsetBersih = suksesOrders.reduce((acc, o) => acc + (o.totalBayar || 0), 0);
+      const totalPcs = suksesOrders.reduce((acc, o) => acc + (o.qty || 1), 0);
+
+      const isRp = targetMode === 'RP';
+      const goal = isRp ? monthlyTargetRp : monthlyTargetPcs;
+      const achieved = isRp ? omsetBersih : totalPcs;
+
+      const pct = goal > 0 ? Math.round((achieved / goal) * 1000) / 10 : 0;
+      const remaining = Math.max(0, goal - achieved);
+
+      const elAchieved = document.getElementById('statTargetAchieved');
+      const elGoalLabel = document.getElementById('statTargetGoalLabel');
+      const elBadge = document.getElementById('badgeTargetStatus');
+      const elBar = document.getElementById('targetProgressBar');
+      const elRem = document.getElementById('targetRemainingText');
+      const elPacing = document.getElementById('targetPacingText');
+      const inpGoal = document.getElementById('inputTargetGoal');
+      const btnRp = document.getElementById('btnTargetModeRp');
+      const btnPcs = document.getElementById('btnTargetModePcs');
+      const lblPrefix = document.getElementById('lblTargetInputPrefix');
+
+      if (btnRp && btnPcs && lblPrefix) {
+        if (isRp) {
+          btnRp.className = "px-2 py-0.5 rounded-md bg-white text-slate-900 shadow-2xs font-bold transition";
+          btnPcs.className = "px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-900 font-medium transition";
+          lblPrefix.innerText = 'Rp';
+        } else {
+          btnPcs.className = "px-2 py-0.5 rounded-md bg-white text-slate-900 shadow-2xs font-bold transition";
+          btnRp.className = "px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-900 font-medium transition";
+          lblPrefix.innerText = 'Pcs';
+        }
+      }
+
+      if (inpGoal && document.activeElement !== inpGoal) {
+        inpGoal.value = goal;
+      }
+
+      if (elAchieved) {
+        elAchieved.innerText = isRp ? ('Rp ' + Math.round(achieved).toLocaleString('id-ID')) : (achieved.toLocaleString('id-ID') + ' pcs');
+      }
+      if (elGoalLabel) {
+        elGoalLabel.innerText = isRp ? ('Rp ' + Math.round(goal).toLocaleString('id-ID')) : (goal.toLocaleString('id-ID') + ' pcs');
+      }
+      if (elBadge) {
+        elBadge.innerText = `${pct}% Tercapai`;
+        if (pct >= 100) {
+          elBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300";
+        } else if (pct >= 60) {
+          elBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-300";
+        } else {
+          elBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300";
+        }
+      }
+      if (elBar) {
+        elBar.style.width = Math.min(100, pct) + '%';
+        if (pct >= 100) {
+          elBar.className = "h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 transition-all duration-700";
+        } else {
+          elBar.className = "h-full rounded-full bg-gradient-to-r from-emerald-600 to-[#264D3B] transition-all duration-700";
+        }
+      }
+      if (elRem) {
+        if (remaining <= 0) {
+          elRem.innerHTML = `<b class="text-emerald-700 font-bold">🎉 Target Terpenuhi! (+${isRp ? 'Rp ' + Math.round(achieved - goal).toLocaleString('id-ID') : (achieved - goal) + ' pcs'} melampaui target)</b>`;
+        } else {
+          elRem.innerText = isRp ? `Kurang: Rp ${Math.round(remaining).toLocaleString('id-ID')} lagi` : `Kurang: ${remaining.toLocaleString('id-ID')} pcs lagi`;
+        }
+      }
+      if (elPacing) {
+        if (pct >= 100) {
+          elPacing.innerText = '🏆 Luar Biasa! Target Tercapai';
+          elPacing.className = 'font-bold text-emerald-700';
+        } else if (pct >= 50) {
+          elPacing.innerText = '🚀 On Track! Pertahankan pacing';
+          elPacing.className = 'font-semibold text-blue-700';
+        } else {
+          elPacing.innerText = '⚡ Kejar Target! Dorong penjualan';
+          elPacing.className = 'font-semibold text-amber-700';
+        }
+      }
+    }
+
+    // 🏷️ MARKETPLACE FEE FUNCTIONS
+    function updateMarketplaceFees(sVal, tVal) {
+      if (sVal !== null && sVal !== undefined) {
+        shopeeFeePct = parseFloat(sVal) || 0;
+      }
+      if (tVal !== null && tVal !== undefined) {
+        tiktokFeePct = parseFloat(tVal) || 0;
+      }
+      saveStateToStorage();
+      refreshUI();
+      showToast(`Fee marketplace diperbarui (Shopee ${shopeeFeePct}%, TikTok ${tiktokFeePct}%)`);
+    }
+
+    // 📍 TOP 5 KOTA PEMBELI (TARGET IKLAN ADS) FUNCTIONS
+    function getTopCities(data) {
+      const cityMap = {};
+      data.forEach(o => {
+        let raw = (o.kota || o.provinsi || '').trim();
+        if (!raw) raw = 'Lainnya';
+        let clean = raw.replace(/^(KOTA|KABUPATEN|KAB\.?)\s+/i, '').trim();
+        if (!clean) clean = 'Lainnya';
+        clean = clean.toUpperCase();
+
+        if (!cityMap[clean]) {
+          cityMap[clean] = {
+            city: clean,
+            orders: 0,
+            pcs: 0,
+            omsetBersih: 0
+          };
+        }
+        cityMap[clean].orders += 1;
+        cityMap[clean].pcs += (o.qty || 1);
+        if (o.status === 'Selesai') {
+          cityMap[clean].omsetBersih += (o.totalBayar || 0);
+        }
+      });
+      const list = Object.values(cityMap).sort((a, b) => b.orders - a.orders || b.pcs - a.pcs);
+      return list.slice(0, 5);
+    }
+
+    function renderTopCities(data) {
+      const container = document.getElementById('topCitiesContainer');
+      if (!container) return;
+      const topCities = getTopCities(data);
+      if (topCities.length === 0) {
+        container.innerHTML = `
+          <div class="py-6 text-center text-slate-400 text-xs">
+            <i data-lucide="map-pin-off" class="w-5 h-5 mx-auto mb-1 opacity-40"></i>
+            Belum ada data kota/kabupaten pembeli.
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+      const totalOrdersInScope = data.length || 1;
+      const rankBadges = [
+        '<span class="w-5 h-5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold flex items-center justify-center shrink-0 border border-amber-300">1</span>',
+        '<span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-extrabold flex items-center justify-center shrink-0 border border-slate-300">2</span>',
+        '<span class="w-5 h-5 rounded-full bg-orange-100 text-orange-800 text-[10px] font-extrabold flex items-center justify-center shrink-0 border border-orange-300">3</span>',
+        '<span class="w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-extrabold flex items-center justify-center shrink-0 border border-slate-200">4</span>',
+        '<span class="w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-extrabold flex items-center justify-center shrink-0 border border-slate-200">5</span>'
+      ];
+
+      container.innerHTML = topCities.map((c, idx) => {
+        const pct = Math.round((c.orders / totalOrdersInScope) * 100);
+        return `
+          <div class="p-2.5 rounded-xl border border-slate-200/90 bg-white hover:border-rose-300 transition shadow-2xs space-y-1.5">
+            <div class="flex items-center justify-between gap-1.5">
+              <div class="flex items-center gap-2 min-w-0">
+                ${rankBadges[idx] || `<span class="text-[10px] font-bold text-slate-500">${idx+1}</span>`}
+                <span class="text-xs font-bold text-slate-800 truncate" title="${c.city}">${c.city}</span>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="text-xs font-extrabold text-[#264D3B] tabular-nums">${c.orders} <span class="text-[10px] font-semibold text-slate-500">order</span></span>
+                <span class="text-[10px] font-medium text-slate-400">(${c.pcs} pcs)</span>
+              </div>
+            </div>
+            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+              <div class="h-full rounded-full bg-gradient-to-r from-rose-500 to-rose-600" style="width: ${pct}%;"></div>
+            </div>
+            <div class="flex items-center justify-between text-[9px] text-slate-500 pt-0.5">
+              <span>Porsi Transaksi: <b>${pct}%</b></span>
+              <span>Omset: <b class="text-emerald-700">Rp ${Math.round(c.omsetBersih).toLocaleString('id-ID')}</b></span>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    // 📊 CHART.JS VISUAL ANALYTICS FUNCTIONS
+    function renderCharts(currentData) {
+      if (typeof Chart === 'undefined') return;
+
+      const lblChartPlat = document.getElementById('lblChartPlatformActive');
+      if (lblChartPlat) {
+        lblChartPlat.innerText = `Data: ${activePlatformTab}`;
+      }
+
+      // 1. Donut Chart - Proporsi Jalur Penjualan
+      const kolOrders = currentData.filter(o => o.kategori.includes('KOL') || o.kategori.includes('AFFILIATE'));
+      const salesOrders = currentData.filter(o => o.kategori.includes('Real') || o.kategori.includes('SALES'));
+      const foOrders = currentData.filter(o => o.kategori.includes('FO'));
+
+      const kCount = kolOrders.length;
+      const sCount = salesOrders.length;
+      const fCount = foOrders.length;
+      const totalCount = kCount + sCount + fCount || 1;
+
+      const sPct = Math.round((sCount / totalCount) * 100);
+      const kPct = Math.round((kCount / totalCount) * 100);
+      const fPct = Math.max(0, 100 - sPct - kPct);
+
+      const elSPct = document.getElementById('donutPctSales');
+      const elKPct = document.getElementById('donutPctKOL');
+      const elFPct = document.getElementById('donutPctFO');
+      if (elSPct) elSPct.innerText = `${sPct}%`;
+      if (elKPct) elKPct.innerText = `${kPct}%`;
+      if (elFPct) elFPct.innerText = `${fPct}%`;
+
+      const donutCanvas = document.getElementById('categoryDonutChart');
+      if (donutCanvas) {
+        if (categoryDonutChart) {
+          categoryDonutChart.destroy();
+        }
+
+        categoryDonutChart = new Chart(donutCanvas, {
+          type: 'doughnut',
+          data: {
+            labels: ['Sales Real', 'KOL / Affiliate', 'Fake Order (FO)'],
+            datasets: [{
+              data: [sCount, kCount, fCount],
+              backgroundColor: ['#10B981', '#8B5CF6', '#F59E0B'],
+              borderWidth: 2,
+              borderColor: '#ffffff',
+              hoverOffset: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  boxWidth: 10,
+                  font: { family: 'Plus Jakarta Sans', size: 10, weight: '600' },
+                  color: '#475569'
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) {
+                    const val = ctx.raw || 0;
+                    const pct = Math.round((val / totalCount) * 100);
+                    return ` ${ctx.label}: ${val} order (${pct}%)`;
+                  }
+                }
+              }
+            },
+            cutout: '68%'
+          }
+        });
+      }
+
+      // 2. Bar & Line Chart - Monthly Trend
+      const monthlyData = getMonthlyBreakdown(currentData);
+      const trendCanvas = document.getElementById('monthlyTrendChart');
+      if (trendCanvas) {
+        if (monthlyTrendChart) {
+          monthlyTrendChart.destroy();
+        }
+
+        const labels = monthlyData.map(m => m.label);
+        const omsetData = monthlyData.map(m => m.omsetBersih);
+        const pcsData = monthlyData.map(m => m.suksesPcs);
+
+        monthlyTrendChart = new Chart(trendCanvas, {
+          type: 'bar',
+          data: {
+            labels: labels.length > 0 ? labels : ['Belum Ada Data'],
+            datasets: [
+              {
+                type: 'bar',
+                label: 'Omset Bersih (Rp)',
+                data: omsetData.length > 0 ? omsetData : [0],
+                backgroundColor: '#264D3B',
+                borderRadius: 6,
+                yAxisID: 'y'
+              },
+              {
+                type: 'line',
+                label: 'Pcs Terjual',
+                data: pcsData.length > 0 ? pcsData : [0],
+                borderColor: '#8D6E54',
+                backgroundColor: '#8D6E54',
+                pointBackgroundColor: '#8D6E54',
+                pointRadius: 4,
+                borderWidth: 2.5,
+                tension: 0.3,
+                yAxisID: 'y1'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              mode: 'index',
+              intersect: false
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: {
+                  font: { family: 'Plus Jakarta Sans', size: 10, weight: '600' },
+                  color: '#64748b'
+                }
+              },
+              y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                grid: { color: '#f1f5f9' },
+                ticks: {
+                  font: { family: 'JetBrains Mono', size: 9 },
+                  color: '#64748b',
+                  callback: function(val) {
+                    if (val >= 1000000) return 'Rp ' + (val / 1000000).toFixed(0) + 'jt';
+                    if (val >= 1000) return 'Rp ' + (val / 1000).toFixed(0) + 'rb';
+                    return 'Rp ' + val;
+                  }
+                }
+              },
+              y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                grid: { drawOnChartArea: false },
+                ticks: {
+                  font: { family: 'JetBrains Mono', size: 9 },
+                  color: '#8D6E54',
+                  callback: function(val) { return val + ' pcs'; }
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) {
+                    if (ctx.dataset.label.includes('Omset')) {
+                      return ` Omset: Rp ${Math.round(ctx.raw).toLocaleString('id-ID')}`;
+                    }
+                    return ` Volume: ${ctx.raw} pcs`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+
     function loadSampleDemoData() {
       shopeeOrders = [
-        { platform: 'Shopee', orderId: '261001FFPWDP7T', waktuPesan: '2026-10-01 12:37', waktuBatal: '', kategori: 'FO (Fake Order)', status: 'Selesai', alasanBatal: '', resi: 'SPXID06048105384A', kurir: 'Hemat Kargo-SPX Hemat', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: '-', qty: 3, hargaKotor: 353997, potongan: 206859, totalBayar: 147138, pembeli: 'giawaridea', penerima: 'L***a', kota: 'KOTA JAKARTA UTARA', provinsi: 'DKI JAKARTA', metodeBayar: 'COD (Bayar di Tempat)', statusReturFisik: '-', tglReturFisik: '' },
-        { platform: 'Shopee', orderId: '261001FJ7QRGW7', waktuPesan: '2026-10-01 13:23', waktuBatal: '', kategori: 'FO (Fake Order)', status: 'Selesai', alasanBatal: '', resi: 'SPXID06010479239A', kurir: 'SPX Hemat', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: '-', qty: 3, hargaKotor: 353997, potongan: 205859, totalBayar: 148138, pembeli: '3dyva', penerima: 'T**a', kota: 'KOTA JAKARTA SELATAN', provinsi: 'DKI JAKARTA', metodeBayar: 'COD (Bayar di Tempat)', statusReturFisik: '-', tglReturFisik: '' },
-        { platform: 'Shopee', orderId: '261001FJPFUK11', waktuPesan: '2026-10-01 13:31', waktuBatal: '', kategori: 'FO (Fake Order)', status: 'Selesai', alasanBatal: '', resi: 'SPXID06219682975A', kurir: 'Hemat Kargo-SPX Hemat', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: '-', qty: 3, hargaKotor: 353997, potongan: 206859, totalBayar: 147138, pembeli: 'kalkalisa', penerima: 'T**a', kota: 'KOTA JAKARTA SELATAN', provinsi: 'DKI JAKARTA', metodeBayar: 'COD (Bayar di Tempat)', statusReturFisik: '-', tglReturFisik: '' },
-        { platform: 'Shopee', orderId: '261001FNJ2H4S5', waktuPesan: '2026-10-01 14:22', waktuBatal: '', kategori: 'FO (Fake Order)', status: 'Selesai', alasanBatal: '', resi: 'SPXID06507721701A', kurir: 'Hemat Kargo-SPX Hemat', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: '-', qty: 3, hargaKotor: 353997, potongan: 206659, totalBayar: 147338, pembeli: 'bonsaydellio', penerima: 'B******O', kota: 'KOTA BOGOR', provinsi: 'JAWA BARAT', metodeBayar: 'COD (Bayar di Tempat)', statusReturFisik: '-', tglReturFisik: '' },
-        { platform: 'Shopee', orderId: '261002JSTSS7Q8', waktuPesan: '2026-10-02 20:16', waktuBatal: '2026-10-02 20:16', kategori: 'FO (Fake Order)', status: 'Batal', alasanBatal: 'Pesanan belum dibayar otomatis sistem Shopee', resi: '-', kurir: 'Hemat Kargo', produk: 'For The Little Baby Calming Rub | Krim Pijat Bayi', variasi: '-', qty: 1, hargaKotor: 117999, potongan: 0, totalBayar: 0, pembeli: 'julianada07', penerima: 'n**a', kota: 'KOTA BOGOR', provinsi: 'JAWA BARAT', metodeBayar: 'Kartu Kredit/Debit', statusReturFisik: 'Sudah Diambil di Sortiran', tglReturFisik: '05/10/2026' },
-        { platform: 'Shopee', orderId: '2610084H0RFX5P', waktuPesan: '2026-10-08 17:48', waktuBatal: '', kategori: 'SALES (Real)', status: 'Selesai', alasanBatal: '', resi: 'SPXID06171557818A', kurir: 'Reguler-SPX Standard', produk: 'For The Little Baby Calming Rub Cream Paket 4 Pcs', variasi: '-', qty: 1, hargaKotor: 401999, potongan: 73560, totalBayar: 328439, pembeli: 'annisamutiarayu', penerima: 'A******l', kota: 'KOTA SURABAYA', provinsi: 'JAWA TIMUR', metodeBayar: 'QRIS', statusReturFisik: '-', tglReturFisik: '' },
-        { platform: 'Shopee', orderId: '261022AETSTY4H', waktuPesan: '2026-10-22 16:12', waktuBatal: '', kategori: 'SALES (Real)', status: 'Selesai', alasanBatal: '', resi: 'SPXID06894319597A', kurir: 'Hemat Kargo-SPX Hemat', produk: 'For The Little Calming Rub Cream 50g Bayi & Anak', variasi: '-', qty: 1, hargaKotor: 117999, potongan: 3100, totalBayar: 114899, pembeli: 'chikandhfna', penerima: 'I******f', kota: 'KOTA BOGOR', provinsi: 'JAWA BARAT', metodeBayar: 'QRIS', statusReturFisik: '-', tglReturFisik: '' }
+        { platform: 'Shopee', orderId: '261001FFPWDP7T', waktuPesan: '2026-10-01 12:37', waktuBatal: '', kategori: 'FO (Fake Order)', jalurCheckout: 'Fake Order (FO)', status: 'Selesai', alasanBatal: '', resi: 'SPXID06048105384A', kurir: 'Hemat Kargo-SPX Hemat', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: '-', qty: 3, hargaKotor: 353997, potongan: 206859, totalBayar: 147138, pembeli: 'giawaridea', penerima: 'L***a', kota: 'KOTA JAKARTA UTARA', provinsi: 'DKI JAKARTA', metodeBayar: 'COD (Bayar di Tempat)', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'Shopee', orderId: '261001FJ7QRGW7', waktuPesan: '2026-10-01 13:23', waktuBatal: '', kategori: 'FO (Fake Order)', jalurCheckout: 'Fake Order (FO)', status: 'Selesai', alasanBatal: '', resi: 'SPXID06010479239A', kurir: 'SPX Hemat', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: '-', qty: 3, hargaKotor: 353997, potongan: 205859, totalBayar: 148138, pembeli: '3dyva', penerima: 'T**a', kota: 'KOTA JAKARTA SELATAN', provinsi: 'DKI JAKARTA', metodeBayar: 'COD (Bayar di Tempat)', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'Shopee', orderId: '261001FJPFUK11', waktuPesan: '2026-10-01 13:31', waktuBatal: '', kategori: 'FO (Fake Order)', jalurCheckout: 'Fake Order (FO)', status: 'Selesai', alasanBatal: '', resi: 'SPXID06219682975A', kurir: 'Hemat Kargo-SPX Hemat', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: '-', qty: 3, hargaKotor: 353997, potongan: 206859, totalBayar: 147138, pembeli: 'kalkalisa', penerima: 'T**a', kota: 'KOTA JAKARTA SELATAN', provinsi: 'DKI JAKARTA', metodeBayar: 'COD (Bayar di Tempat)', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'Shopee', orderId: '261001FNJ2H4S5', waktuPesan: '2026-10-01 14:22', waktuBatal: '', kategori: 'FO (Fake Order)', jalurCheckout: 'Fake Order (FO)', status: 'Selesai', alasanBatal: '', resi: 'SPXID06507721701A', kurir: 'Hemat Kargo-SPX Hemat', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: '-', qty: 3, hargaKotor: 353997, potongan: 206659, totalBayar: 147338, pembeli: 'bonsaydellio', penerima: 'B******O', kota: 'KOTA BOGOR', provinsi: 'JAWA BARAT', metodeBayar: 'COD (Bayar di Tempat)', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'Shopee', orderId: '261002JSTSS7Q8', waktuPesan: '2026-10-02 20:16', waktuBatal: '2026-10-02 20:16', kategori: 'FO (Fake Order)', jalurCheckout: 'Fake Order (FO)', status: 'Batal', alasanBatal: 'Pesanan belum dibayar otomatis sistem Shopee', resi: '-', kurir: 'Hemat Kargo', produk: 'For The Little Baby Calming Rub | Krim Pijat Bayi', variasi: '-', qty: 1, hargaKotor: 117999, potongan: 0, totalBayar: 0, pembeli: 'julianada07', penerima: 'n**a', kota: 'KOTA BOGOR', provinsi: 'JAWA BARAT', metodeBayar: 'Kartu Kredit/Debit', statusReturFisik: 'Sudah Diambil di Sortiran', tglReturFisik: '05/10/2026' },
+        { platform: 'Shopee', orderId: '2610084H0RFX5P', waktuPesan: '2026-10-08 17:48', waktuBatal: '', kategori: 'SALES (Real)', jalurCheckout: 'Etalase Toko Shopee', status: 'Selesai', alasanBatal: '', resi: 'SPXID06171557818A', kurir: 'Reguler-SPX Standard', produk: 'For The Little Baby Calming Rub Cream Paket 4 Pcs', variasi: '-', qty: 1, hargaKotor: 401999, potongan: 73560, totalBayar: 328439, pembeli: 'annisamutiarayu', penerima: 'A******l', kota: 'KOTA SURABAYA', provinsi: 'JAWA TIMUR', metodeBayar: 'QRIS', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'Shopee', orderId: '261022AETSTY4H', waktuPesan: '2026-10-22 16:12', waktuBatal: '', kategori: 'SALES (Real)', jalurCheckout: 'Etalase Toko Shopee', status: 'Selesai', alasanBatal: '', resi: 'SPXID06894319597A', kurir: 'Hemat Kargo-SPX Hemat', produk: 'For The Little Calming Rub Cream 50g Bayi & Anak', variasi: '-', qty: 1, hargaKotor: 117999, potongan: 3100, totalBayar: 114899, pembeli: 'chikandhfna', penerima: 'I******f', kota: 'KOTA BOGOR', provinsi: 'JAWA BARAT', metodeBayar: 'QRIS', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'Shopee', orderId: '261105BR99182K', waktuPesan: '2026-11-05 10:14', waktuBatal: '', kategori: 'SALES (Real)', jalurCheckout: 'Etalase Toko Shopee', status: 'Selesai', alasanBatal: '', resi: 'SPXID06928172635B', kurir: 'SPX Standard', produk: 'For The Little - Bundling 2 Pcs Baby Calming Rub Cream', variasi: '-', qty: 2, hargaKotor: 235998, potongan: 25000, totalBayar: 210998, pembeli: 'diana_lestari', penerima: 'D***a', kota: 'KOTA BANDUNG', provinsi: 'JAWA BARAT', metodeBayar: 'ShopeePay', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'Shopee', orderId: '261112KL81729Z', waktuPesan: '2026-11-12 15:45', waktuBatal: '', kategori: 'AFFILIATE / KOL', jalurCheckout: 'Creator / Endorsement', status: 'Selesai', alasanBatal: '', resi: 'SPXID06981726351A', kurir: 'SPX Standard', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: '-', qty: 1, hargaKotor: 117999, potongan: 117999, totalBayar: 0, pembeli: 'kol_reviewmoms', penerima: 'S*****a', kota: 'KOTA JAKARTA SELATAN', provinsi: 'DKI JAKARTA', metodeBayar: 'Sample/Endorse', statusReturFisik: '-', tglReturFisik: '' }
       ];
 
       tiktokOrders = [
-        { platform: 'TikTok', orderId: '586848248216650862', waktuPesan: '29/10/2026 11:30', waktuBatal: '', kategori: 'AFFILIATE / KOL', status: 'Dikirim', alasanBatal: '', resi: 'JY2113504550', kurir: 'J&T Express Hemat', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: 'Default', qty: 1, hargaKotor: 299999, potongan: 243562, totalBayar: 56437, pembeli: 'a***ahakbari_', penerima: 'S*** a*****', kota: 'Kota Medan', provinsi: 'Sumatera Utara', metodeBayar: 'PayLater', statusReturFisik: '-', tglReturFisik: '' },
-        { platform: 'TikTok', orderId: '586809925081269752', waktuPesan: '27/10/2026 08:17', waktuBatal: '', kategori: 'AFFILIATE / KOL', status: 'Dikirim', alasanBatal: '', resi: 'JY2035762228', kurir: 'J&T Express Hemat', produk: 'For The Little - Bundling 2 Pcs Baby Calming Rub Cream', variasi: 'Default', qty: 1, hargaKotor: 399999, potongan: 206888, totalBayar: 193111, pembeli: 'r***1_69', penerima: 'R****', kota: 'Kab. Gowa', provinsi: 'Sulawesi Selatan', metodeBayar: 'Bayar di tempat', statusReturFisik: '-', tglReturFisik: '' },
-        { platform: 'TikTok', orderId: '586599186071783206', waktuPesan: '15/10/2026 11:15', waktuBatal: '', kategori: 'AFFILIATE / KOL', status: 'Selesai', alasanBatal: '', resi: 'JY1944843088', kurir: 'J&T Express Standar', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: 'Default', qty: 1, hargaKotor: 0, potongan: 0, totalBayar: 0, pembeli: 'h***ianr', penerima: 'D*** r**** s***', kota: 'Kab. Demak', provinsi: 'Jawa Tengah', metodeBayar: 'Sample/Endorse', statusReturFisik: '-', tglReturFisik: '' },
-        { platform: 'TikTok', orderId: '586350605994919268', waktuPesan: '01/10/2026 14:07', waktuBatal: '02/10/2026 13:30', kategori: 'AFFILIATE / KOL', status: 'Batal', alasanBatal: 'Stok habis', resi: '-', kurir: 'Hemat', produk: 'Internal Only FTL - sampel Baby Calming Rub Cream 50g', variasi: 'Default', qty: 1, hargaKotor: 0, potongan: 0, totalBayar: 0, pembeli: '_***mamiraaaa', penerima: 'I** R******', kota: 'Kota Pangkal Pinang', provinsi: 'Kepulauan Bangka Belitung', metodeBayar: 'Sample/Endorse', statusReturFisik: 'Sudah Diambil di Sortiran', tglReturFisik: '02/10/2026' },
-        { platform: 'TikTok', orderId: '586349960609630081', waktuPesan: '01/10/2026 13:27', waktuBatal: '', kategori: 'FO (Fake Order)', status: 'Selesai', alasanBatal: '', resi: 'JY1833530165', kurir: 'J&T Express Standar', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: 'Default', qty: 2, hargaKotor: 599998, potongan: 478639, totalBayar: 121359, pembeli: 's***ummm198', penerima: 'R**** a*********', kota: 'Kab. Kediri', provinsi: 'Jawa Timur', metodeBayar: 'Transfer bank', statusReturFisik: '-', tglReturFisik: '' },
-        { platform: 'TikTok', orderId: '586349245456222011', waktuPesan: '01/10/2026 12:40', waktuBatal: '02/10/2026 12:40', kategori: 'SALES (Real)', status: 'Batal', alasanBatal: 'Pesanan dibatalkan karena pembeli terlambat membayar', resi: '-', kurir: 'Pengiriman standar', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: 'Default', qty: 1, hargaKotor: 299999, potongan: 184000, totalBayar: 115999, pembeli: 'o***eee676', penerima: 'D**************', kota: 'Kabupaten Kediri', provinsi: 'Jawa Timur', metodeBayar: 'Transfer bank', statusReturFisik: 'Menunggu Sortiran', tglReturFisik: '' }
+        { platform: 'TikTok', orderId: '586848248216650862', waktuPesan: '29/10/2026 11:30', waktuBatal: '', kategori: 'AFFILIATE / KOL', jalurCheckout: 'Creator / Endorsement', status: 'Selesai', alasanBatal: '', resi: 'JY2113504550', kurir: 'J&T Express Hemat', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: 'Default', qty: 1, hargaKotor: 299999, potongan: 243562, totalBayar: 56437, pembeli: 'a***ahakbari_', penerima: 'S*** a*****', kota: 'Kota Medan', provinsi: 'Sumatera Utara', metodeBayar: 'PayLater', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'TikTok', orderId: '586809925081269752', waktuPesan: '27/10/2026 08:17', waktuBatal: '', kategori: 'AFFILIATE / KOL', jalurCheckout: 'Creator / Endorsement', status: 'Selesai', alasanBatal: '', resi: 'JY2035762228', kurir: 'J&T Express Hemat', produk: 'For The Little - Bundling 2 Pcs Baby Calming Rub Cream', variasi: 'Default', qty: 1, hargaKotor: 399999, potongan: 206888, totalBayar: 193111, pembeli: 'r***1_69', penerima: 'R****', kota: 'Kab. Gowa', provinsi: 'Sulawesi Selatan', metodeBayar: 'Bayar di tempat', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'TikTok', orderId: '586599186071783206', waktuPesan: '15/10/2026 11:15', waktuBatal: '', kategori: 'AFFILIATE / KOL', jalurCheckout: 'Creator / Endorsement', status: 'Selesai', alasanBatal: '', resi: 'JY1944843088', kurir: 'J&T Express Standar', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: 'Default', qty: 1, hargaKotor: 0, potongan: 0, totalBayar: 0, pembeli: 'h***ianr', penerima: 'D*** r**** s***', kota: 'Kab. Demak', provinsi: 'Jawa Tengah', metodeBayar: 'Sample/Endorse', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'TikTok', orderId: '586350605994919268', waktuPesan: '01/10/2026 14:07', waktuBatal: '02/10/2026 13:30', kategori: 'AFFILIATE / KOL', jalurCheckout: 'Creator / Endorsement', status: 'Batal', alasanBatal: 'Stok habis', resi: '-', kurir: 'Hemat', produk: 'Internal Only FTL - sampel Baby Calming Rub Cream 50g', variasi: 'Default', qty: 1, hargaKotor: 0, potongan: 0, totalBayar: 0, pembeli: '_***mamiraaaa', penerima: 'I** R******', kota: 'Kota Pangkal Pinang', provinsi: 'Kepulauan Bangka Belitung', metodeBayar: 'Sample/Endorse', statusReturFisik: 'Sudah Diambil di Sortiran', tglReturFisik: '02/10/2026' },
+        { platform: 'TikTok', orderId: '586349960609630081', waktuPesan: '01/10/2026 13:27', waktuBatal: '', kategori: 'FO (Fake Order)', jalurCheckout: 'Fake Order (FO)', status: 'Selesai', alasanBatal: '', resi: 'JY1833530165', kurir: 'J&T Express Standar', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: 'Default', qty: 2, hargaKotor: 599998, potongan: 478639, totalBayar: 121359, pembeli: 's***ummm198', penerima: 'R**** a*********', kota: 'Kab. Kediri', provinsi: 'Jawa Timur', metodeBayar: 'Transfer bank', statusReturFisik: '-', tglReturFisik: '' },
+        { platform: 'TikTok', orderId: '586349245456222011', waktuPesan: '01/10/2026 12:40', waktuBatal: '02/10/2026 12:40', kategori: 'SALES (Real)', jalurCheckout: 'Etalase Toko', status: 'Batal', alasanBatal: 'Pesanan dibatalkan karena pembeli terlambat membayar', resi: '-', kurir: 'Pengiriman standar', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: 'Default', qty: 1, hargaKotor: 299999, potongan: 184000, totalBayar: 115999, pembeli: 'o***eee676', penerima: 'D**************', kota: 'Kabupaten Kediri', provinsi: 'Jawa Timur', metodeBayar: 'Transfer bank', statusReturFisik: 'Menunggu Sortiran', tglReturFisik: '' },
+        { platform: 'TikTok', orderId: '587189182716298101', waktuPesan: '10/11/2026 14:20', waktuBatal: '', kategori: 'SALES (Real)', jalurCheckout: 'Video FYP', status: 'Selesai', alasanBatal: '', resi: 'JY2291827361', kurir: 'J&T Express Standar', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: 'Default', qty: 2, hargaKotor: 299998, potongan: 35000, totalBayar: 264998, pembeli: 'sarah_mommies', penerima: 'S***h', kota: 'Kota Surabaya', provinsi: 'Jawa Timur', metodeBayar: 'Transfer bank', statusReturFisik: '-', tglReturFisik: '' }
       ];
 
       saveStateToStorage();
