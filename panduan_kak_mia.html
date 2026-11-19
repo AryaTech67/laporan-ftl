@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Panduan Fitur Rekap Laporan FTL - Kak Mia</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+    
+    @page {
+      size: A4 portrait;
+      margin: 12mm 14mm 12mm 14mm;
+    }
+    
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      color: #1e293b;
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #264D3B;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-img {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #264D3B;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      font-weight: 600;
+      color: #8D6E54;
+      margin: 2px 0 0 0;
+    }
+
+    .meta-box {
+      text-align: right;
+    }
+
+    .badge-portal {
+      display: inline-block;
+      background: #ecfdf5;
+      color: #264D3B;
+      border: 1px solid #a7f3d0;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .badge-pin {
+      font-family: 'JetBrains Mono', monospace;
+      color: #0f172a;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    /* QUICK START BANNER */
+    .quick-start {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #264D3B;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10.5px;
+    }
+
+    .step-num {
+      width: 18px;
+      height: 18px;
+      background: #264D3B;
+      color: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9.5px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #0f172a;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* GRID FEATURES */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 9px;
+    }
+
+    .card {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 9px 11px;
+      background: #ffffff;
+      break-inside: avoid;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .card-tag {
+      font-size: 8.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .tag-green { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .tag-blue { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .tag-purple { background: #faf5ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+    .tag-amber { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+    .tag-rose { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
+
+    .card-body {
+      font-size: 10px;
+      color: #475569;
+      margin: 0;
+      padding-left: 14px;
+    }
+
+    .card-body li {
+      margin-bottom: 3px;
+    }
+
+    .card-body b {
+      color: #1e293b;
+    }
+
+    /* HIGHLIGHT FULL WIDTH */
+    .full-width {
+      grid-column: span 2;
+    }
+
+    .footer {
+      margin-top: 14px;
+      padding-top: 8px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 9.5px;
+      color: #94a3b8;
+    }
+
+    .footer b {
+      color: #264D3B;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="brand-section">
+      <img src="logo-ftl.png" alt="Logo FTL" class="logo-img">
+      <div>
+        <h1 class="brand-title">For The Little Indonesia</h1>
+        <p class="brand-subtitle">Panduan & Ringkasan Fitur Sistem Rekap Penjualan (Shopee & TikTok)</p>
+      </div>
+    </div>
+    <div class="meta-box">
+      <div class="badge-portal">🌐 https://laporanftl.vercel.app</div>
+      <div>Password Akses: <span class="badge-pin">FTL2026</span></div>
+    </div>
+  </div>
+
+  <!-- QUICK START WORKFLOW -->
+  <div class="quick-start">
+    <div class="step-item">
+      <span class="step-num">1</span>
+      <span>Download Laporan Mentah dari <b>Shopee / TikTok Seller Center</b> (.xlsx / .csv).</span>
+    </div>
+    <div class="step-item">
+      <span class="step-num">2</span>
+      <span>Buka Web & Klik <b>"Pilih File Laporan"</b> (Otomatis filter 50+ kolom jadi rapi).</span>
+    </div>
+    <div class="step-item">
+      <span class="step-num">3</span>
+      <span>Klik Tombol Hijau <b>"Export Excel"</b> (Langsung jadi laporan resmi siap kirim ke atasan).</span>
+    </div>
+  </div>
+
+  <div class="section-title">
+    <span>📌 11 Fitur Utama Website (Detail & Ringkas)</span>
+  </div>
+
+  <!-- 11 FEATURES GRID -->
+  <div class="grid-container">
+
+    <!-- 1. Auto-Detect & Pembersih -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">1. Auto-Detect & Bersihkan Kolom</span>
+        <span class="card-tag tag-green">Otomasi</span>
+      </div>
+      <ul class="card-body">
+        <li>Menerima file mentah <b>.xlsx</b> dan <b>.csv</b> dari Shopee & TikTok.</li>
+        <li>Menyaring <b>50–60 kolom</b> mentah jadi <b>24 kolom inti</b> transaksi.</li>
+        <li>Memperbaiki no. pesanan TikTok rusak (<code>5.86E+17</code>) jadi angka utuh.</li>
+      </ul>
+    </div>
+
+    <!-- 2. Multi-Platform Workspace -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">2. Tab Platform Terpisah & Gabungan</span>
+        <span class="card-tag tag-blue">Workspace</span>
+      </div>
+      <ul class="card-body">
+        <li><b>Tab Shopee:</b> Khusus membaca data transaksi pesanan Shopee.</li>
+        <li><b>Tab TikTok:</b> Khusus membaca data transaksi TikTok Shop.</li>
+        <li><b>Tab Gabungan:</b> Menyatukan kedua platform untuk total omset brand FTL.</li>
+      </ul>
+    </div>
+
+    <!-- 3. Klasifikasi Jalur Order -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">3. Klasifikasi Jalur Order (KOL, Sales, FO)</span>
+        <span class="card-tag tag-purple">Segmentasi</span>
+      </div>
+      <ul class="card-body">
+        <li><b>Sales Real:</b> Penjualan asli etalase toko yang menghasilkan uang.</li>
+        <li><b>KOL / Affiliate:</b> Sampel endorse creator & live streaming.</li>
+        <li><b>FO (Fake Order):</b> Pesanan tembak bantuan ulasan/rating toko.</li>
+        <li>Tersedia tombol filter cepat (Pill Bar) sinkron 2 arah dengan tabel.</li>
+      </ul>
+    </div>
+
+    <!-- 4. Keuangan & Profitabilitas -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">4. Perhitungan Keuangan & Laba Bersih</span>
+        <span class="card-tag tag-green">Finansial</span>
+      </div>
+      <ul class="card-body">
+        <li>6 Kartu otomatis: <b>Omset Kotor</b>, <b>Diskon</b>, <b>HPP Modal</b>, <b>Omset Bersih</b>, <b>Estimasi Laba</b>, dan <b>Pesanan Batal</b>.</li>
+        <li>Papan rumus matematika transparan (Kotor − Diskon = Bersih; Bersih − HPP = Laba).</li>
+        <li>Setting HPP satuan per pcs fleksibel (default: Rp 25.000/pcs).</li>
+      </ul>
+    </div>
+
+    <!-- 5. Estimasi Fee Marketplace -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">5. Kalkulator Fee Marketplace (Net Cash)</span>
+        <span class="card-tag tag-amber">Kas Masuk</span>
+      </div>
+      <ul class="card-body">
+        <li>Input persentase potongan admin toko (Shopee 6.5%, TikTok 8.0%).</li>
+        <li>Menghitung estimasi <b>Uang Bersih yang beneran cair masuk kas rekening FTL</b>.</li>
+        <li>Menghitung Laba Bersih Riil (setelah modal HPP + fee admin marketplace).</li>
+      </ul>
+    </div>
+
+    <!-- 6. Goal Tracker -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">6. Target Penjualan (Goal Tracker)</span>
+        <span class="card-tag tag-blue">Pacing</span>
+      </div>
+      <ul class="card-body">
+        <li>Bisa pilih target berdasarkan <b>Nominal Rupiah (Rp)</b> atau <b>Pcs Produk</b>.</li>
+        <li>Progress bar animasi hijau khas FTL dengan indikator persentase capaian.</li>
+        <li>Status pacing otomatis: <i>"🚀 On Track"</i>, <i>"⚡ Kejar Target"</i>, atau <i>"🏆 Tercapai"</i>.</li>
+      </ul>
+    </div>
+
+    <!-- 7. Grafik Visual -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">7. Grafik Visual Interaktif (Chart.js)</span>
+        <span class="card-tag tag-purple">Grafis</span>
+      </div>
+      <ul class="card-body">
+        <li><b>Donut Chart:</b> Visual diagram lingkaran porsi % Sales Real vs KOL vs FO.</li>
+        <li><b>Bar & Line Chart:</b> Grafik tren perkembangan omset bersih & pcs per bulan.</li>
+        <li>Membantu owner melihat performa toko dalam 1 detik tanpa pusing baca angka.</li>
+      </ul>
+    </div>
+
+    <!-- 8. Top 5 Kota & SKU Gudang -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">8. Top 5 Kota Pembeli & Rekap SKU Gudang</span>
+        <span class="card-tag tag-rose">Marketing & Stok</span>
+      </div>
+      <ul class="card-body">
+        <li><b>Top 5 Kota:</b> Meranking kota pembeli terbanyak untuk acuan ads TikTok/Meta.</li>
+        <li><b>Rekap SKU:</b> Total pcs terjual per varian untuk pencocokan fisik stok gudang.</li>
+      </ul>
+    </div>
+
+    <!-- 9. Filter Tanggal & Pencarian -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">9. Filter Tanggal & Smart Search</span>
+        <span class="card-tag tag-green">Pencarian</span>
+      </div>
+      <ul class="card-body">
+        <li>Filter periode tanggal bebas (Dari tanggal – Sampai tanggal).</li>
+        <li>Filter bulan 1-klik (misal klik kartu <i>Oktober 2026</i> untuk menyaring data sebulan).</li>
+        <li>Cari instan: No. pesanan, resi, nama pembeli, nama produk, hingga kota.</li>
+      </ul>
+    </div>
+
+    <!-- 10. Edit Tabel & Retur Manager -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">10. Edit Langsung di Tabel & Pelacak Retur</span>
+        <span class="card-tag tag-amber">Operasional</span>
+      </div>
+      <ul class="card-body">
+        <li>Bisa ubah kategori & status pesanan langsung lewat dropdown tabel.</li>
+        <li><b>Pelacak Retur Fisik:</b> Pantau paket batal apakah masih di sortiran / sudah diambil.</li>
+        <li>Tersedia tombol centang massal (<i>Bulk Action</i>) untuk ubah data sekaligus.</li>
+      </ul>
+    </div>
+
+    <!-- 11. Export & Keamanan (Full Width) -->
+    <div class="card full-width">
+      <div class="card-header">
+        <span class="card-title">11. Export Laporan Resmi Siap Kirim, Cetak PDF & Auto-Save</span>
+        <span class="card-tag tag-green">Output & Keamanan</span>
+      </div>
+      <ul class="card-body" style="columns: 2; column-gap: 20px;">
+        <li><b>Export Excel 1-Klik:</b> Format rapi ber-kop resmi FTL, auto-lebar kolom, ringkasan bulanan, dan baris TOTAL di bawah (siap kirim ke atasan).</li>
+        <li><b>Cetak PDF:</b> Tampilan cetak bersih tanpa tombol menu (rapi di kertas A4).</li>
+        <li><b>Backup & Restore JSON:</b> Simpan seluruh data untuk dipindah antar-laptop.</li>
+        <li><b>Anti-Hilang saat Refresh:</b> Data tersimpan otomatis di memori browser.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div>Dokumen Resmi: <b>Sistem Rekap Laporan For The Little Indonesia</b> • v4.0 Production</div>
+    <div>Akses: <b>https://laporanftl.vercel.app</b> (PIN: FTL2026)</div>
+  </div>
+
+</body>
+</html>
