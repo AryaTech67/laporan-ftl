@@ -101,12 +101,23 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
-        <button id="btnResetData" onclick="resetActiveTabData()" class="hidden px-3 py-1.5 text-xs font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg transition border border-rose-200 shadow-xs flex items-center gap-1.5 active:scale-95" title="Hapus data pada tab yang aktif">
-          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">Hapus Tab Ini</span>
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <button onclick="exportBackupJSON()" class="px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 rounded-lg transition border border-slate-300 shadow-2xs flex items-center gap-1.5 active:scale-95" title="Download backup data ke file JSON agar bisa dipindah antar-laptop/HP">
+          <i data-lucide="download" class="w-3.5 h-3.5 text-slate-600"></i>
+          <span class="hidden md:inline">Backup</span>
         </button>
-        <button onclick="lockScreen()" class="px-3 py-1.5 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 rounded-lg transition border border-slate-300 shadow-xs flex items-center gap-1.5 active:scale-95" title="Kunci Layar">
+
+        <label class="cursor-pointer px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 rounded-lg transition border border-slate-300 shadow-2xs flex items-center gap-1.5 active:scale-95" title="Pulihkan data dari file JSON backup">
+          <i data-lucide="upload" class="w-3.5 h-3.5 text-slate-600"></i>
+          <span class="hidden md:inline">Restore</span>
+          <input type="file" accept=".json" onchange="importBackupJSON(event)" class="hidden">
+        </label>
+
+        <button id="btnResetData" onclick="resetActiveTabData()" class="hidden px-2.5 py-1.5 text-xs font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg transition border border-rose-200 shadow-xs flex items-center gap-1.5 active:scale-95" title="Hapus data pada tab yang aktif">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">Hapus Tab</span>
+        </button>
+        <button onclick="lockScreen()" class="px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 rounded-lg transition border border-slate-300 shadow-xs flex items-center gap-1.5 active:scale-95" title="Kunci Layar">
           <i data-lucide="lock" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">Kunci</span>
         </button>
@@ -477,6 +488,26 @@
         </div>
       </section>
 
+      <!-- 📦 REKAPITULASI PRODUK & SKU TERLARIS -->
+      <section class="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-xs space-y-3">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center shadow-2xs">
+              <i data-lucide="package-search" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Rekapitulasi Produk & Varian (SKU Terlaris)</h3>
+              <p class="text-[10px] text-slate-500 font-medium">Rincian kuantitas produk keluar untuk memudahkan pengecekan stok fisik gudang</p>
+            </div>
+          </div>
+          <span id="badgeTotalSkuCount" class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">0 Varian</span>
+        </div>
+
+        <div id="productBreakdownContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+          <!-- Populated by JavaScript in refreshUI -->
+        </div>
+      </section>
+
       <!-- Action & Toolbar Section -->
       <section id="toolbarSection" class="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-xs space-y-3 scroll-mt-20">
         
@@ -545,7 +576,12 @@
         </div>
 
         <!-- Export Buttons (Touch-Friendly) -->
-        <div class="grid grid-cols-2 sm:flex sm:items-center sm:justify-end gap-2 pt-2 border-t border-slate-100">
+        <div class="grid grid-cols-3 sm:flex sm:items-center sm:justify-end gap-2 pt-2 border-t border-slate-100">
+          <button onclick="window.print()" class="col-span-1 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 rounded-xl transition-all flex items-center justify-center gap-1.5 border border-slate-300 active:scale-95 shadow-2xs" title="Cetak atau Simpan sebagai PDF">
+            <i data-lucide="printer" class="w-3.5 h-3.5 text-slate-600"></i>
+            <span>Cetak PDF</span>
+          </button>
+
           <button onclick="copyToClipboardSpreadsheet()" class="col-span-1 px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all flex items-center justify-center gap-1.5 border border-slate-200 active:scale-95">
             <i data-lucide="clipboard" class="w-3.5 h-3.5 text-slate-500"></i>
             <span>Copy ke Sheets</span>
@@ -1522,12 +1558,13 @@
       }
 
       renderMonthlyBreakdown(currentData);
+      renderProductBreakdown(currentData);
       applyFilters();
     }
 
     function scrollToTableSection() {
       const targetSec = document.getElementById('toolbarSection');
-      if (targetSec) {
+      if (targetSec && typeof targetSec.scrollIntoView === 'function') {
         targetSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
@@ -1734,6 +1771,111 @@
       const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
       showToast(`Menampilkan khusus pesanan bulan ${monthNames[m - 1]} ${y}`);
       scrollToTableSection();
+    }
+
+    function getProductBreakdown(data) {
+      const prodMap = {};
+      data.forEach(o => {
+        const name = (o.produk || 'Tanpa Nama Produk').trim();
+        if (!prodMap[name]) {
+          prodMap[name] = {
+            name: name,
+            orders: 0,
+            qty: 0,
+            selesaiOrders: 0,
+            selesaiQty: 0,
+            totalBayar: 0
+          };
+        }
+        prodMap[name].orders += 1;
+        prodMap[name].qty += (o.qty || 1);
+        if (o.status === 'Selesai') {
+          prodMap[name].selesaiOrders += 1;
+          prodMap[name].selesaiQty += (o.qty || 1);
+          prodMap[name].totalBayar += (o.totalBayar || 0);
+        }
+      });
+      return Object.values(prodMap).sort((a, b) => b.selesaiQty - a.selesaiQty);
+    }
+
+    function renderProductBreakdown(data) {
+      const pContainer = document.getElementById('productBreakdownContainer');
+      const badgeCount = document.getElementById('badgeTotalSkuCount');
+      if (!pContainer) return;
+
+      const prods = getProductBreakdown(data);
+      if (badgeCount) badgeCount.innerText = `${prods.length} Varian Terdeteksi`;
+
+      if (prods.length === 0) {
+        pContainer.innerHTML = `
+          <div class="col-span-full py-4 text-center text-slate-400 text-xs">
+            <i data-lucide="inbox" class="w-5 h-5 mx-auto mb-1 opacity-40"></i>
+            Belum ada data produk untuk ditampilkan.
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      pContainer.innerHTML = prods.map((p, idx) => `
+        <div class="p-3 sm:p-3.5 rounded-xl border border-slate-200/90 bg-white hover:border-indigo-300 transition shadow-2xs flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between gap-1.5 mb-1.5">
+              <span class="text-xs font-bold text-slate-800 line-clamp-2" title="${p.name}">#${idx + 1}. ${p.name}</span>
+            </div>
+          </div>
+          <div class="pt-2 mt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span class="text-slate-500 font-medium">Terjual (Selesai):</span>
+            <span class="font-extrabold text-[#264D3B] text-sm tabular-nums">${p.selesaiQty.toLocaleString('id-ID')} <span class="text-xs font-semibold text-slate-700">pcs</span> <span class="text-[10px] text-slate-400 font-normal">(${p.selesaiOrders} order)</span></span>
+          </div>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    function exportBackupJSON() {
+      const backupObj = {
+        app: 'FTL_SMART_REKAP',
+        version: '3.9',
+        exportDate: new Date().toISOString(),
+        defaultHppPerPcs: defaultHppPerPcs,
+        shopeeOrders: shopeeOrders,
+        tiktokOrders: tiktokOrders
+      };
+      const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `FTL_Backup_Data_${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('File backup data (.json) berhasil di-download!');
+    }
+
+    function importBackupJSON(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          if (parsed && Array.isArray(parsed.shopeeOrders) && Array.isArray(parsed.tiktokOrders)) {
+            shopeeOrders = parsed.shopeeOrders;
+            tiktokOrders = parsed.tiktokOrders;
+            if (parsed.defaultHppPerPcs) defaultHppPerPcs = parsed.defaultHppPerPcs;
+            saveStateToStorage();
+            refreshUI();
+            showToast(`Berhasil restore backup: ${shopeeOrders.length} Shopee, ${tiktokOrders.length} TikTok!`);
+          } else {
+            showToast('Format file backup JSON tidak sesuai!', false);
+          }
+        } catch(err) {
+          showToast('Gagal membaca file JSON backup: ' + err.message, false);
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
     }
 
     function extractISODate(dateStr) {
