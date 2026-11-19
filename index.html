@@ -1240,10 +1240,10 @@
         reader.onload = function(e) {
           try {
             const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
+            const workbook = XLSX.read(data, { type: 'array', cellDates: true, dateNF: 'yyyy-mm-dd hh:mm:ss' });
             const firstSheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[firstSheetName];
-            const jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            const jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, dateNF: 'yyyy-mm-dd hh:mm:ss' });
             processParsedRawRows(jsonRows, file.name);
           } catch (err) {
             showToast('Gagal membaca Excel: ' + err.message, false);
@@ -1933,6 +1933,13 @@
 
     function extractYearMonth(dateStr) {
       if (!dateStr) return '';
+      if (typeof dateStr === 'number' && dateStr > 20000 && dateStr < 60000) {
+        const d = new Date(Math.round((dateStr - 25569) * 86400 * 1000));
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+      }
+      if (dateStr instanceof Date && !isNaN(dateStr.getTime())) {
+        return dateStr.getFullYear() + '-' + String(dateStr.getMonth() + 1).padStart(2, '0');
+      }
       const s = String(dateStr).trim();
       const m1 = s.match(/^(\d{4})[-/](\d{1,2})/);
       if (m1) return m1[1] + '-' + m1[2].padStart(2, '0');
@@ -2195,6 +2202,13 @@
 
     function extractISODate(dateStr) {
       if (!dateStr) return '';
+      if (typeof dateStr === 'number' && dateStr > 20000 && dateStr < 60000) {
+        const d = new Date(Math.round((dateStr - 25569) * 86400 * 1000));
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      }
+      if (dateStr instanceof Date && !isNaN(dateStr.getTime())) {
+        return dateStr.getFullYear() + '-' + String(dateStr.getMonth() + 1).padStart(2, '0') + '-' + String(dateStr.getDate()).padStart(2, '0');
+      }
       const s = String(dateStr).trim();
       const m1 = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
       if (m1) return m1[1] + '-' + m1[2].padStart(2, '0') + '-' + m1[3].padStart(2, '0');
