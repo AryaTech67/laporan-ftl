@@ -15,6 +15,11 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Chart.js for interactive analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- jsPDF & AutoTable for direct PDF download -->
+  <script src="jspdf.umd.min.js"></script>
+  <script src="jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
@@ -796,17 +801,17 @@
 
         <!-- Export Buttons (Touch-Friendly) -->
         <div class="grid grid-cols-3 sm:flex sm:items-center sm:justify-end gap-2 pt-2 border-t border-slate-100">
-          <button onclick="window.print()" class="col-span-1 px-3 py-2 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 rounded-xl transition-all flex items-center justify-center gap-1.5 border border-slate-300 active:scale-95 shadow-2xs" title="Cetak atau Simpan sebagai PDF">
-            <i data-lucide="printer" class="w-3.5 h-3.5 text-slate-600"></i>
-            <span>Cetak PDF</span>
+          <button onclick="downloadDirectPDF()" class="col-span-1 px-3 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl transition-all flex items-center justify-center gap-1.5 border border-rose-200 active:scale-95 shadow-2xs" title="Langsung download laporan format PDF resmi">
+            <i data-lucide="file-down" class="w-3.5 h-3.5 text-rose-600"></i>
+            <span>Download PDF</span>
           </button>
 
-          <button onclick="copyToClipboardSpreadsheet()" class="col-span-1 px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all flex items-center justify-center gap-1.5 border border-slate-200 active:scale-95">
-            <i data-lucide="clipboard" class="w-3.5 h-3.5 text-slate-500"></i>
-            <span>Copy ke Sheets</span>
+          <button onclick="openGoogleSheetsHelper()" class="col-span-1 px-3 py-2 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-all flex items-center justify-center gap-1.5 border border-emerald-200 active:scale-95 shadow-2xs" title="Buka data langsung di Google Sheets">
+            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span>Buka di Sheets</span>
           </button>
           
-          <button onclick="exportToExcel()" class="col-span-1 px-3.5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-1.5 active:scale-95">
+          <button onclick="exportToExcel()" class="col-span-1 px-3.5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-1.5 active:scale-95" title="Download spreadsheet Excel resmi FTL">
             <i data-lucide="sheet" class="w-3.5 h-3.5"></i>
             <span id="lblBtnExport">Export Excel (Shopee)</span>
           </button>
@@ -2777,10 +2782,10 @@
       showToast(`File Excel ${activePlatformTab} (${rangeInfo.label}) berhasil diunduh!`);
     }
 
-    function copyToClipboardSpreadsheet() {
+    function copyToClipboardSpreadsheet(silent = false) {
       const exportData = getExportDataset();
       if (exportData.length === 0) {
-        showToast('Tidak ada data untuk dicopy', false);
+        if (!silent) showToast('Tidak ada data untuk dicopy', false);
         return;
       }
 
@@ -2857,9 +2862,11 @@
       ].join('\n');
 
       navigator.clipboard.writeText(tsvContent).then(() => {
-        showToast(`Tabel rapi & Periode (${rangeInfo.label}) berhasil disalin! Buka Google Sheets / Excel lalu Ctrl+V`);
+        if (!silent) {
+          showToast(`Tabel rapi (${rangeInfo.label}) berhasil disalin! Tekan Ctrl+V di Google Sheets`);
+        }
       }).catch(err => {
-        showToast('Gagal menyalin: ' + err.message, false);
+        if (!silent) showToast('Gagal menyalin: ' + err.message, false);
       });
     }
 
@@ -3274,6 +3281,255 @@
       }
     }
 
+
+    // 📄 DIRECT PDF DOWNLOAD (Tanpa Dialog Print, Rapi & Tajam Vektor)
+    function downloadDirectPDF() {
+      const exportData = getExportDataset();
+      if (!exportData || exportData.length === 0) {
+        showToast('Tidak ada data pesanan untuk dibuat PDF!', false);
+        return;
+      }
+
+      if (!window.jspdf || !window.jspdf.jsPDF) {
+        showToast('Memuat komponen PDF, silakan klik sekali lagi...', false);
+        return;
+      }
+
+      showToast('Membuat file PDF resmi FTL...', true);
+
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        const pageWidth = 297;
+        const pageHeight = 210;
+
+        const totalOrders = exportData.length;
+        const totalQty = exportData.reduce((acc, o) => acc + (o.qty || 1), 0);
+        const totalKotor = exportData.reduce((acc, o) => acc + (o.hargaKotor || o.totalBayar || 0), 0);
+        const totalDiskon = exportData.reduce((acc, o) => acc + (o.potongan || 0), 0);
+        const totalBersih = exportData.reduce((acc, o) => acc + (o.totalBayar || 0), 0);
+        const suksesPcs = exportData.filter(o => o.status === 'Selesai').reduce((acc, o) => acc + (o.qty || 1), 0);
+        const totalHpp = suksesPcs * defaultHppPerPcs;
+        const totalLaba = totalBersih - totalHpp;
+        const rangeInfo = getDatasetDateRange(exportData);
+        const todayStr = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+
+        // 1. Header Banner FTL (Forest Green #264D3B)
+        doc.setFillColor(38, 77, 59);
+        doc.rect(0, 0, pageWidth, 20, 'F');
+
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.text('FOR THE LITTLE INDONESIA', 14, 9);
+
+        doc.setFontSize(8.5);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Laporan Rekapitulasi Transaksi - Platform: ${activePlatformTab} | Periode: ${rangeInfo.label}`, 14, 15);
+
+        doc.setFontSize(8);
+        doc.text(`Tanggal Unduh: ${todayStr}`, pageWidth - 14, 12, { align: 'right' });
+
+        // 2. Financial Metrics Summary Box (y = 23 to 37)
+        doc.setFillColor(248, 250, 252);
+        doc.setDrawColor(226, 232, 240);
+        doc.roundedRect(14, 23, pageWidth - 28, 14, 2, 2, 'FD');
+
+        const metrics = [
+          { label: 'TOTAL PESANAN', val: `${totalOrders} Order (${totalQty} Pcs)` },
+          { label: 'OMSET KOTOR', val: `Rp ${Math.round(totalKotor).toLocaleString('id-ID')}` },
+          { label: 'TOTAL DISKON', val: `- Rp ${Math.round(totalDiskon).toLocaleString('id-ID')}` },
+          { label: 'TOTAL HPP', val: `Rp ${Math.round(totalHpp).toLocaleString('id-ID')}` },
+          { label: 'OMSET BERSIH', val: `Rp ${Math.round(totalBersih).toLocaleString('id-ID')}` },
+          { label: 'ESTIMASI LABA', val: `Rp ${Math.round(totalLaba).toLocaleString('id-ID')}` }
+        ];
+
+        const colWidth = (pageWidth - 28) / metrics.length;
+        metrics.forEach((m, i) => {
+          const x = 16 + (i * colWidth);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(6.5);
+          doc.setTextColor(100, 116, 139);
+          doc.text(m.label, x, 27.5);
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(8.5);
+          if (m.label.includes('LABA') || m.label.includes('BERSIH')) doc.setTextColor(38, 77, 59);
+          else if (m.label.includes('DISKON')) doc.setTextColor(225, 29, 72);
+          else doc.setTextColor(15, 23, 42);
+          doc.text(m.val, x, 33);
+        });
+
+        // 3. Transactions Table (AutoTable)
+        const tableHeaders = [
+          'No', 'Platform', 'Kategori', 'Jalur Checkout', 'Status', 'No. Pesanan', 
+          'Waktu Pesanan', 'Nama Produk', 'Qty', 'Bersih (Rp)', 'HPP (Rp)', 'Laba (Rp)', 
+          'Resi & Kurir', 'Kota / Kab'
+        ];
+
+        const tableBody = exportData.map((o, idx) => {
+          const estHpp = (o.status === 'Selesai' ? (o.qty || 1) : 0) * defaultHppPerPcs;
+          const laba = (o.totalBayar || 0) - estHpp;
+          return [
+            String(idx + 1),
+            o.platform,
+            o.kategori,
+            o.jalurCheckout || o.kategori || '-',
+            o.status,
+            o.orderId,
+            o.waktuPesan,
+            (o.produk || '-') + (o.variasi && o.variasi !== '-' ? ` (${o.variasi})` : ''),
+            String(o.qty || 1),
+            Math.round(o.totalBayar || 0).toLocaleString('id-ID'),
+            Math.round(estHpp).toLocaleString('id-ID'),
+            Math.round(laba).toLocaleString('id-ID'),
+            (o.resi || '-') + ' (' + (o.kurir || '-') + ')',
+            o.kota || o.provinsi || '-'
+          ];
+        });
+
+        const tableFoot = [[
+          'TOTAL', '', '', '', '', '', 'TOTAL KESELURUHAN', '',
+          String(totalQty),
+          Math.round(totalBersih).toLocaleString('id-ID'),
+          Math.round(totalHpp).toLocaleString('id-ID'),
+          Math.round(totalLaba).toLocaleString('id-ID'),
+          '', ''
+        ]];
+
+        doc.autoTable({
+          startY: 40,
+          head: [tableHeaders],
+          body: tableBody,
+          foot: tableFoot,
+          theme: 'striped',
+          headStyles: {
+            fillColor: [38, 77, 59],
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+            fontSize: 7,
+            halign: 'center',
+            cellPadding: 1.8
+          },
+          bodyStyles: {
+            fontSize: 6.5,
+            textColor: [30, 41, 59],
+            cellPadding: 1.6
+          },
+          footStyles: {
+            fillColor: [241, 245, 249],
+            textColor: [15, 23, 42],
+            fontStyle: 'bold',
+            fontSize: 7,
+            cellPadding: 2
+          },
+          columnStyles: {
+            0: { cellWidth: 7, halign: 'center' },
+            1: { cellWidth: 13, halign: 'center' },
+            2: { cellWidth: 18, halign: 'center' },
+            3: { cellWidth: 20 },
+            4: { cellWidth: 13, halign: 'center' },
+            5: { cellWidth: 25 },
+            6: { cellWidth: 20 },
+            7: { cellWidth: 'auto' },
+            8: { cellWidth: 8, halign: 'center' },
+            9: { cellWidth: 18, halign: 'right' },
+            10: { cellWidth: 16, halign: 'right' },
+            11: { cellWidth: 16, halign: 'right' },
+            12: { cellWidth: 25 },
+            13: { cellWidth: 22 }
+          },
+          margin: { left: 14, right: 14, top: 22, bottom: 14 },
+          didDrawPage: function(dataHook) {
+            const pageCount = doc.internal.getNumberOfPages();
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7);
+            doc.setTextColor(148, 163, 184);
+            doc.text(`For The Little Indonesia • Halaman ${dataHook.pageNumber} dari ${pageCount}`, pageWidth / 2, pageHeight - 6, { align: 'center' });
+            doc.text(`Dokumen Resmi Rekap Laporan Penjualan FTL`, 14, pageHeight - 6);
+          }
+        });
+
+        const fileName = `Laporan_FTL_${activePlatformTab}_${new Date().toISOString().slice(0, 10)}.pdf`;
+        doc.save(fileName);
+        showToast(`File ${fileName} berhasil di-download!`);
+      } catch (err) {
+        console.error('PDF generation error:', err);
+        showToast('Gagal membuat PDF: ' + err.message, false);
+      }
+    }
+
+    // 🟢 GOOGLE SHEETS SUITE (Otomatis Buka & Paste Helper)
+    function openGoogleSheetsHelper() {
+      // 1. Copy formatted TSV data to clipboard silently
+      copyToClipboardSpreadsheet(true);
+
+      // 2. Check saved URL
+      const savedUrl = localStorage.getItem('ftl_custom_sheets_url') || '';
+      const inputUrl = document.getElementById('inputCustomSheetUrl');
+      if (inputUrl) inputUrl.value = savedUrl;
+
+      const btnCustom = document.getElementById('btnOpenCustomSheet');
+      const lblCustom = document.getElementById('lblCustomSheetBtn');
+      if (savedUrl) {
+        if (btnCustom) btnCustom.classList.remove('hidden');
+        if (lblCustom) lblCustom.innerText = 'Buka Link Sheets Tim FTL (Tersimpan)';
+      } else {
+        if (btnCustom) btnCustom.classList.add('hidden');
+      }
+
+      // 3. Open tab immediately
+      const targetUrl = savedUrl ? savedUrl : 'https://sheets.new';
+      window.open(targetUrl, '_blank');
+
+      // 4. Show guide modal
+      const modal = document.getElementById('sheetsModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+      }
+    }
+
+    function closeGoogleSheetsModal() {
+      const modal = document.getElementById('sheetsModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+      }
+    }
+
+    function launchSheetsNew() {
+      copyToClipboardSpreadsheet(true);
+      window.open('https://sheets.new', '_blank');
+      showToast('Tab Google Sheets baru dibuka! Cukup tekan Ctrl+V di cell A1.');
+    }
+
+    function launchCustomSheet() {
+      const savedUrl = localStorage.getItem('ftl_custom_sheets_url');
+      if (savedUrl) {
+        copyToClipboardSpreadsheet(true);
+        window.open(savedUrl, '_blank');
+        showToast('Link Google Sheets kantor FTL dibuka! Tekan Ctrl+V untuk menempelkan data.');
+      }
+    }
+
+    function saveCustomSheetUrl() {
+      const input = document.getElementById('inputCustomSheetUrl');
+      const val = input ? input.value.trim() : '';
+      if (!val) {
+        localStorage.removeItem('ftl_custom_sheets_url');
+        const btnCustom = document.getElementById('btnOpenCustomSheet');
+        if (btnCustom) btnCustom.classList.add('hidden');
+        showToast('Link Google Sheets dihapus.');
+        return;
+      }
+      localStorage.setItem('ftl_custom_sheets_url', val);
+      const btnCustom = document.getElementById('btnOpenCustomSheet');
+      const lblCustom = document.getElementById('lblCustomSheetBtn');
+      if (btnCustom) btnCustom.classList.remove('hidden');
+      if (lblCustom) lblCustom.innerText = 'Buka Link Sheets Tim FTL (Tersimpan)';
+      showToast('Link Google Sheets kantor FTL berhasil disimpan!');
+    }
+
     function loadSampleDemoData() {
       shopeeOrders = [
         { platform: 'Shopee', orderId: '261001FFPWDP7T', waktuPesan: '2026-10-01 12:37', waktuBatal: '', kategori: 'FO (Fake Order)', jalurCheckout: 'Fake Order (FO)', status: 'Selesai', alasanBatal: '', resi: 'SPXID06048105384A', kurir: 'Hemat Kargo-SPX Hemat', produk: 'For The Little - Baby Calming Rub Cream 50gr', variasi: '-', qty: 3, hargaKotor: 353997, potongan: 206859, totalBayar: 147138, pembeli: 'giawaridea', penerima: 'L***a', kota: 'KOTA JAKARTA UTARA', provinsi: 'DKI JAKARTA', metodeBayar: 'COD (Bayar di Tempat)', statusReturFisik: '-', tglReturFisik: '' },
@@ -3305,5 +3561,66 @@
     // Inisialisasi awal UI dengan data yang tersimpan di LocalStorage
     setActivePlatformTab(activePlatformTab);
   </script>
+
+  <!-- 📊 MODAL GOOGLE SHEETS HELPER -->
+  <div id="sheetsModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-5 sm:p-6 space-y-4 relative overflow-hidden transition-all">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shadow-2xs">
+            <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-slate-900 leading-tight">Buka di Google Sheets</h3>
+            <p class="text-[11px] text-slate-500 font-medium">Data rekap FTL otomatis siap masuk</p>
+          </div>
+        </div>
+        <button onclick="closeGoogleSheetsModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Status Clipboard Card -->
+      <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-start gap-2.5">
+        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+        <div class="text-xs">
+          <span class="font-bold text-emerald-800 block">Data Tabel Berhasil Disalin!</span>
+          <span class="text-emerald-700 text-[11px] leading-tight block mt-0.5">
+            Di Google Sheets yang terbuka, Kak Mia cukup tekan <b>Ctrl + V</b> (Paste). Semua 24 kolom, warna, dan total otomatis masuk rapi!
+          </span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="space-y-2 pt-1">
+        <!-- Button 1: Buka sheets.new -->
+        <button onclick="launchSheetsNew()" class="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl shadow-xs transition active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span>Buka Google Sheets Baru (sheets.new)</span>
+        </button>
+
+        <!-- Button 2: Buka Link Sheets Tim FTL (if configured) -->
+        <button id="btnOpenCustomSheet" onclick="launchCustomSheet()" class="hidden w-full py-2.5 px-3 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-xl border border-slate-300 shadow-2xs transition active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer">
+          <i data-lucide="link" class="w-3.5 h-3.5 text-[#264D3B]"></i>
+          <span id="lblCustomSheetBtn">Buka Link Sheets Tim FTL</span>
+        </button>
+      </div>
+
+      <!-- Custom Sheet Link Configuration -->
+      <div class="pt-3 border-t border-slate-100 space-y-2">
+        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Link Google Sheets Kantor FTL (Opsional):</span>
+        <div class="flex items-center gap-1.5">
+          <input type="url" id="inputCustomSheetUrl" placeholder="https://docs.google.com/spreadsheets/d/..." class="flex-1 text-xs px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500">
+          <button onclick="saveCustomSheetUrl()" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-lg transition active:scale-95 shrink-0 cursor-pointer">
+            Simpan
+          </button>
+        </div>
+        <p class="text-[10px] text-slate-400">
+          *Jika link disimpan, tombol "Buka di Sheets" akan langsung membuka spreadsheet kantor FTL.
+        </p>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
