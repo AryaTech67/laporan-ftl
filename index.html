@@ -29,7 +29,8 @@
           fontFamily: {
             brand: ['"Arial Rounded MT Bold"', '"Arial Rounded MT"', '"Nunito"', '"Comfortaa"', 'sans-serif'],
             comfortaa: ['"Comfortaa"', 'sans-serif'],
-            courier: ['"Courier New"', 'Courier', '"Courier Prime"', 'monospace']
+            courier: ['"Plus Jakarta Sans"', '"Inter"', 'sans-serif'],
+            mono: ['"Plus Jakarta Sans"', '"Inter"', '"JetBrains Mono"', 'monospace']
           }
         }
       }
@@ -50,7 +51,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
     :root {
       /* 🎨 FTL Official Brand Colors (GSM Page 5) */
@@ -88,15 +89,23 @@
       font-family: 'Comfortaa', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    /* 🔤 3. SECONDARY TYPEFACE: Courier New (GSM Page 3) - Long detailed text, IDs, numbers, data tables */
+        /* 🔤 3. CRISP & CLEAR SELLER CENTER FONT FOR TABLES, ORDER IDs & NUMBERS */
     .font-mono, [class*="font-mono"], .font-courier, .order-id-cell, .data-code {
-      font-family: 'Courier New', Courier, 'Courier Prime', monospace !important;
-      letter-spacing: -0.015em;
+      font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.035em;
+      font-weight: 600;
     }
 
     .tabular-nums, .num-tabular {
-      font-family: 'Courier New', Courier, monospace;
+      font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
       font-variant-numeric: tabular-nums;
+      letter-spacing: 0.015em;
+    }
+
+    /* Supreme table readability - No blurry/broken typewriter serifs */
+    table, th, td {
+      font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     }
 
     .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 6px; }
@@ -1460,7 +1469,15 @@
           saveStateToStorage();
           setActivePlatformTab('Shopee');
           if (updatedCount === 0 || addedCount === newShopee.length) {
-            showToast(`Berhasil upload ${newShopee.length} pesanan Shopee! Data tersimpan otomatis.`);
+            // Auto-set filter date range to match uploaded file
+          const newDates = newShopee.map(o => extractISODate(o.waktuPesan)).filter(Boolean).sort();
+          if (newDates.length > 0) {
+            const sInp = document.getElementById('filterStartDate');
+            const eInp = document.getElementById('filterEndDate');
+            if (sInp) sInp.value = newDates[0];
+            if (eInp) eInp.value = newDates[newDates.length - 1];
+          }
+          showToast(`Berhasil upload ${newShopee.length} pesanan Shopee (${newDates.length > 0 ? newDates[0] + ' s/d ' + newDates[newDates.length - 1] : ''})!`);
           } else {
             showToast(`Shopee diperbarui: +${addedCount} pesanan baru ditambahkan, ${updatedCount} data disinkronkan (perubahan manual tetap tersimpan)!`);
           }
@@ -1475,7 +1492,15 @@
           saveStateToStorage();
           setActivePlatformTab('TikTok');
           if (updatedCount === 0 || addedCount === newTikTok.length) {
-            showToast(`Berhasil upload ${newTikTok.length} pesanan TikTok! Data tersimpan otomatis.`);
+            // Auto-set filter date range to match uploaded file
+          const newDates = newTikTok.map(o => extractISODate(o.waktuPesan)).filter(Boolean).sort();
+          if (newDates.length > 0) {
+            const sInp = document.getElementById('filterStartDate');
+            const eInp = document.getElementById('filterEndDate');
+            if (sInp) sInp.value = newDates[0];
+            if (eInp) eInp.value = newDates[newDates.length - 1];
+          }
+          showToast(`Berhasil upload ${newTikTok.length} pesanan TikTok (${newDates.length > 0 ? newDates[0] + ' s/d ' + newDates[newDates.length - 1] : ''})!`);
           } else {
             showToast(`TikTok diperbarui: +${addedCount} pesanan baru ditambahkan, ${updatedCount} data disinkronkan (perubahan manual tetap tersimpan)!`);
           }
@@ -2342,20 +2367,54 @@
       e.target.value = '';
     }
 
-    function extractISODate(dateStr) {
-      if (!dateStr) return '';
-      if (typeof dateStr === 'number' && dateStr > 20000 && dateStr < 60000) {
-        const d = new Date(Math.round((dateStr - 25569) * 86400 * 1000));
+    function extractISODate(dateVal) {
+      if (!dateVal && dateVal !== 0) return '';
+      if (dateVal instanceof Date && !isNaN(dateVal.getTime())) {
+        return dateVal.getFullYear() + '-' + String(dateVal.getMonth() + 1).padStart(2, '0') + '-' + String(dateVal.getDate()).padStart(2, '0');
+      }
+      if (typeof dateVal === 'number' && dateVal > 20000 && dateVal < 70000) {
+        const d = new Date(Math.round((dateVal - 25569) * 86400 * 1000));
         return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
       }
-      if (dateStr instanceof Date && !isNaN(dateStr.getTime())) {
-        return dateStr.getFullYear() + '-' + String(dateStr.getMonth() + 1).padStart(2, '0') + '-' + String(dateStr.getDate()).padStart(2, '0');
+      const s = String(dateVal).trim();
+      if (!s) return '';
+
+      // 1. YYYY-MM-DD or YYYY/MM/DD or YYYY.MM.DD
+      const mYMD = s.match(/(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+      if (mYMD) {
+        return mYMD[1] + '-' + mYMD[2].padStart(2, '0') + '-' + mYMD[3].padStart(2, '0');
       }
-      const s = String(dateStr).trim();
-      const m1 = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
-      if (m1) return m1[1] + '-' + m1[2].padStart(2, '0') + '-' + m1[3].padStart(2, '0');
-      const m2 = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
-      if (m2) return m2[3] + '-' + m2[2].padStart(2, '0') + '-' + m2[1].padStart(2, '0');
+
+      // 2. DD/MM/YYYY or DD-MM-YYYY or DD.MM.YYYY
+      const mDMY = s.match(/(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/);
+      if (mDMY) {
+        const d = parseInt(mDMY[1], 10);
+        const m = parseInt(mDMY[2], 10);
+        const y = mDMY[3];
+        if (m > 12 && d <= 12) {
+          return y + '-' + String(d).padStart(2, '0') + '-' + String(m).padStart(2, '0');
+        }
+        return y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+      }
+
+      // 3. DD/MM/YY (2-digit year)
+      const m2Digit = s.match(/(\d{1,2})[-/.](\d{1,2})[-/.](\d{2})\b/);
+      if (m2Digit) {
+        const y = '20' + m2Digit[3];
+        const d = parseInt(m2Digit[1], 10);
+        const m = parseInt(m2Digit[2], 10);
+        if (m > 12 && d <= 12) {
+          return y + '-' + String(d).padStart(2, '0') + '-' + String(m).padStart(2, '0');
+        }
+        return y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+      }
+
+      // 4. Native Date parse fallback
+      const parsed = new Date(s);
+      if (!isNaN(parsed.getTime())) {
+        return parsed.getFullYear() + '-' + String(parsed.getMonth() + 1).padStart(2, '0') + '-' + String(parsed.getDate()).padStart(2, '0');
+      }
+
       return '';
     }
 
@@ -2426,10 +2485,9 @@
 
         if (startDate || endDate) {
           const isoDate = extractISODate(o.waktuPesan);
-          if (isoDate) {
-            if (startDate && isoDate < startDate) return false;
-            if (endDate && isoDate > endDate) return false;
-          }
+          if (!isoDate) return false;
+          if (startDate && isoDate < startDate) return false;
+          if (endDate && isoDate > endDate) return false;
         }
 
         if (search) {
@@ -2736,10 +2794,9 @@
 
         if (startDate || endDate) {
           const isoDate = extractISODate(o.waktuPesan);
-          if (isoDate) {
-            if (startDate && isoDate < startDate) return false;
-            if (endDate && isoDate > endDate) return false;
-          }
+          if (!isoDate) return false;
+          if (startDate && isoDate < startDate) return false;
+          if (endDate && isoDate > endDate) return false;
         }
 
         if (search) {
