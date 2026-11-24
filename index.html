@@ -1183,6 +1183,47 @@
       }
     }
 
+    // 🔄 SMART ACCUMULATIVE MERGE (Simpan data lama & pertahankan perubahan manual Kak Mia)
+    function mergeOrdersPreservingEdits(existingOrders, incomingOrders) {
+      if (!existingOrders || existingOrders.length === 0) {
+        return { merged: incomingOrders, addedCount: incomingOrders.length, updatedCount: 0 };
+      }
+
+      const existingMap = new Map();
+      existingOrders.forEach(o => {
+        const key = String(o.orderId || '').trim();
+        if (key) existingMap.set(key, o);
+      });
+
+      let addedCount = 0;
+      let updatedCount = 0;
+      const result = [...existingOrders];
+
+      incomingOrders.forEach(incoming => {
+        const key = String(incoming.orderId || '').trim();
+        if (key && existingMap.has(key)) {
+          const existing = existingMap.get(key);
+          const idx = result.findIndex(o => String(o.orderId || '').trim() === key);
+          if (idx !== -1) {
+            result[idx] = {
+              ...incoming,
+              kategori: existing.kategori || incoming.kategori,
+              jalurCheckout: existing.jalurCheckout || incoming.jalurCheckout,
+              status: existing.status || incoming.status,
+              statusReturFisik: existing.statusReturFisik || incoming.statusReturFisik,
+              tglReturFisik: existing.tglReturFisik || incoming.tglReturFisik
+            };
+            updatedCount++;
+          }
+        } else {
+          result.push(incoming);
+          addedCount++;
+        }
+      });
+
+      return { merged: result, addedCount, updatedCount };
+    }
+
     function processParsedRawRows(rows, fileName) {
       if (!rows || rows.length === 0) return;
 
@@ -1244,20 +1285,30 @@
       if (detectedPlatform === 'Shopee') {
         const newShopee = parseShopeeRows(headers, rawDataRows);
         if (newShopee.length > 0) {
-          shopeeOrders = newShopee;
+          const { merged, addedCount, updatedCount } = mergeOrdersPreservingEdits(shopeeOrders, newShopee);
+          shopeeOrders = merged;
           saveStateToStorage();
           setActivePlatformTab('Shopee');
-          showToast(`Berhasil upload ${newShopee.length} pesanan Shopee! Data tersimpan otomatis.`);
+          if (updatedCount === 0 || addedCount === newShopee.length) {
+            showToast(`Berhasil upload ${newShopee.length} pesanan Shopee! Data tersimpan otomatis.`);
+          } else {
+            showToast(`Shopee diperbarui: +${addedCount} pesanan baru ditambahkan, ${updatedCount} data disinkronkan (perubahan manual tetap tersimpan)!`);
+          }
         } else {
           showToast(`Tidak ditemukan data pesanan Shopee di ${fileName}`, false);
         }
       } else {
         const newTikTok = parseTikTokRows(headers, rawDataRows);
         if (newTikTok.length > 0) {
-          tiktokOrders = newTikTok;
+          const { merged, addedCount, updatedCount } = mergeOrdersPreservingEdits(tiktokOrders, newTikTok);
+          tiktokOrders = merged;
           saveStateToStorage();
           setActivePlatformTab('TikTok');
-          showToast(`Berhasil upload ${newTikTok.length} pesanan TikTok! Data tersimpan otomatis.`);
+          if (updatedCount === 0 || addedCount === newTikTok.length) {
+            showToast(`Berhasil upload ${newTikTok.length} pesanan TikTok! Data tersimpan otomatis.`);
+          } else {
+            showToast(`TikTok diperbarui: +${addedCount} pesanan baru ditambahkan, ${updatedCount} data disinkronkan (perubahan manual tetap tersimpan)!`);
+          }
         } else {
           showToast(`Tidak ditemukan data pesanan TikTok di ${fileName}`, false);
         }
