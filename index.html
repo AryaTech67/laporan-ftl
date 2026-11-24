@@ -7,6 +7,34 @@
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 🎨 OFFICIAL GRAPHIC STANDARD MANUAL (GSM) TAILWIND CONFIG -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ftl: {
+              primary: '#738a7a',     /* Primary Sage Green (GSM Hal 5) */
+              secondary: '#abcbb2',   /* Secondary Soft Mint (GSM Hal 5) */
+              text: '#666a6c',        /* Charcoal Teks Utama (GSM Hal 5) */
+              accent: '#fce9a1',      /* Warm Butter Yellow (GSM Hal 5) */
+              white: '#ffffff',       /* Putih Bersih (GSM Hal 5) */
+              dark: '#35433a',        /* Forest Deep Text */
+              bg: '#f4f7f5',          /* Soft Sage Ambient Background */
+              border: '#d2ded6',      /* Subtle Sage Card Border */
+              soft: '#e9f1ec',        /* Gentle Pill & Input Background */
+              hover: '#5e7264'        /* Primary Button Hover */
+            }
+          },
+          fontFamily: {
+            brand: ['"Arial Rounded MT Bold"', '"Arial Rounded MT"', '"Nunito"', '"Comfortaa"', 'sans-serif'],
+            comfortaa: ['"Comfortaa"', 'sans-serif'],
+            courier: ['"Courier New"', 'Courier', '"Courier Prime"', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
   <!-- PapaParse for robust CSV parsing -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <!-- SheetJS (xlsx) for instant Excel generation -->
@@ -22,26 +50,58 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+    :root {
+      /* 🎨 FTL Official Brand Colors (GSM Page 5) */
+      --ftl-primary: #738a7a;        /* Sage Green Utama */
+      --ftl-secondary: #abcbb2;      /* Soft Mint / Light Sage */
+      --ftl-text: #666a6c;           /* Charcoal Teks Utama */
+      --ftl-accent: #fce9a1;         /* Warm Butter Yellow Accent */
+      --ftl-white: #ffffff;          /* Putih Bersih */
+      --ftl-dark: #35433a;           /* Deep Forest Green (Heading & High Contrast) */
+      --ftl-bg: #f4f7f5;             /* Soft Sage Background */
+      --ftl-border: #d2ded6;         /* Gentle Sage Border */
+      --ftl-soft: #e9f1ec;           /* Soft Pill / Card Background */
+      --ftl-hover: #5e7264;
+    }
+
     * { -webkit-tap-highlight-color: transparent; }
+
+    /* 🔤 1. PRIMARY TYPEFACE: Arial Rounded MT Bold (GSM Page 2) */
+    .font-brand, .font-heading, h1, h2, h3, .brand-title, .brand-logo-text {
+      font-family: 'Arial Rounded MT Bold', 'Arial Rounded MT', 'Nunito', 'Comfortaa', sans-serif !important;
+      letter-spacing: -0.015em;
+    }
+
+    /* 🔤 2. SECONDARY TYPEFACE OPTION: Comfortaa (GSM Page 4) - Body & UI Components */
     body { 
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      background-color: var(--ftl-bg);
+      color: var(--ftl-text);
+      font-family: 'Comfortaa', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      letter-spacing: -0.012em;
+      letter-spacing: -0.01em;
     }
-    .font-mono, [class*="font-mono"] {
-      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-      letter-spacing: -0.03em;
+
+    input, select, textarea, button {
+      font-family: 'Comfortaa', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
+
+    /* 🔤 3. SECONDARY TYPEFACE: Courier New (GSM Page 3) - Long detailed text, IDs, numbers, data tables */
+    .font-mono, [class*="font-mono"], .font-courier, .order-id-cell, .data-code {
+      font-family: 'Courier New', Courier, 'Courier Prime', monospace !important;
+      letter-spacing: -0.015em;
+    }
+
     .tabular-nums, .num-tabular {
+      font-family: 'Courier New', Courier, monospace;
       font-variant-numeric: tabular-nums;
-      font-feature-settings: "tnum" 1;
     }
+
     .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #e9f1ec; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #abcbb2; border-radius: 999px; }
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
       20%, 60% { transform: translateX(-8px); }
@@ -57,18 +117,18 @@
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen antialiased flex flex-col relative selection:bg-orange-500 selection:text-white">
+<body class="bg-[#f4f7f5] text-[#666a6c] min-h-screen antialiased flex flex-col relative selection:bg-[#738a7a] selection:text-white">
 
   <!-- 🔒 SECURITY LOGIN OVERLAY (Clean & Private) -->
-  <div id="loginOverlay" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-    <div id="loginCard" class="bg-white rounded-xl shadow-xl border border-slate-200/90 max-w-sm w-full p-6 sm:p-7 text-center relative overflow-hidden transition-all">
-      <div class="w-10 h-10 rounded-lg bg-slate-900 text-white flex items-center justify-center mx-auto mb-3 shadow-xs">
-        <i data-lucide="lock" class="w-5 h-5"></i>
+  <div id="loginOverlay" class="fixed inset-0 z-50 bg-[#35433a]/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div id="loginCard" class="bg-white rounded-2xl shadow-xl border border-[#abcbb2]/60 max-w-sm w-full p-6 sm:p-7 text-center relative overflow-hidden transition-all">
+      <div class="w-12 h-12 rounded-2xl bg-[#e9f1ec] text-[#738a7a] flex items-center justify-center mx-auto mb-3 shadow-2xs border border-[#abcbb2]/40">
+        <i data-lucide="lock" class="w-6 h-6"></i>
       </div>
       
-      <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-500 block">SISTEM REKAP LAPORAN</span>
-      <h2 class="text-lg font-bold text-slate-900 tracking-tight mt-0.5">Akses Rekap Pesanan</h2>
-      <p class="text-xs text-slate-500 mt-1 mb-5">
+      <span class="text-[10px] font-bold uppercase tracking-wider text-[#738a7a] bg-[#abcbb2]/20 px-2.5 py-0.5 rounded-full border border-[#abcbb2]/40 inline-block">SISTEM REKAP LAPORAN</span>
+      <h2 class="text-xl font-bold text-[#35433a] font-brand tracking-normal mt-2">FOR THE LITTLE</h2>
+      <p class="text-xs text-[#666a6c] mt-1 mb-5">
         Silakan masukkan password untuk membuka portal laporan.
       </p>
 
@@ -76,8 +136,8 @@
         <div class="relative">
           <input type="password" id="accessPinInput" autofocus placeholder="Masukkan password..." 
                  onkeydown="if(event.key==='Enter'){event.preventDefault();handleLoginSubmit(event);}"
-                 class="w-full text-center text-xs font-semibold tracking-wider px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800 transition">
-          <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1">
+                 class="w-full text-center text-xs font-semibold tracking-wider px-3.5 py-2.5 bg-[#f4f7f5] border border-[#d2ded6] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#738a7a]/20 focus:border-[#738a7a] transition">
+          <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-[#666a6c] hover:text-[#35433a] p-1">
             <i data-lucide="eye" id="eyeIcon" class="w-3.5 h-3.5"></i>
           </button>
         </div>
@@ -86,7 +146,7 @@
           Password salah, silakan coba lagi!
         </p>
 
-        <button type="button" onclick="handleLoginSubmit(event)" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-lg shadow-xs transition active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer">
+        <button type="button" onclick="handleLoginSubmit(event)" class="w-full py-2.5 bg-[#738a7a] hover:bg-[#5e7264] text-white font-brand font-bold text-xs rounded-xl shadow-xs transition active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer">
           <i data-lucide="unlock" class="w-3.5 h-3.5"></i>
           <span>Buka Sistem</span>
         </button>
@@ -95,36 +155,36 @@
   </div>
 
   <!-- Header / Navbar Brand FTL -->
-  <header class="bg-white border-b border-slate-200/90 sticky top-0 z-40 shadow-xs">
+  <header class="bg-white border-b border-[#d2ded6] sticky top-0 z-40 shadow-xs">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
       <div class="flex items-center gap-2.5 sm:gap-3">
         <img src="logo-ftl.png" alt="For The Little" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0">
         <div class="overflow-hidden">
           <div class="flex items-center gap-2">
-            <h1 class="text-sm sm:text-base font-extrabold text-[#264D3B] tracking-tight leading-tight truncate">For The Little</h1>
-            <span class="text-[10px] font-bold bg-emerald-50 text-[#264D3B] px-2 py-0.5 rounded-full border border-emerald-200 hidden sm:inline">Rekap Transaksi v3.9</span>
+            <h1 class="text-base sm:text-lg font-bold text-[#738a7a] font-brand tracking-normal uppercase leading-tight truncate">FOR THE LITTLE</h1>
+            <span class="text-[10px] font-bold bg-[#abcbb2]/30 text-[#35433a] px-2 py-0.5 rounded-full border border-[#abcbb2]/60 hidden sm:inline">Rekap Transaksi v3.9</span>
           </div>
-          <p class="text-[11px] text-[#8D6E54] font-semibold truncate hidden sm:block">Indonesia • Rekapitulasi Penjualan Shopee & TikTok</p>
+          <p class="text-[11px] text-[#666a6c] font-medium truncate hidden sm:block">Natural Baby Calming & Care • Rekapitulasi Penjualan Shopee & TikTok</p>
         </div>
       </div>
 
       <div class="flex items-center gap-1.5 sm:gap-2">
-        <button onclick="exportBackupJSON()" class="px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 rounded-lg transition border border-slate-300 shadow-2xs flex items-center gap-1.5 active:scale-95" title="Download backup data ke file JSON agar bisa dipindah antar-laptop/HP">
-          <i data-lucide="download" class="w-3.5 h-3.5 text-slate-600"></i>
+        <button onclick="exportBackupJSON()" class="px-2.5 py-1.5 text-xs font-medium text-[#666a6c] hover:text-[#35433a] bg-white hover:bg-[#e9f1ec] rounded-xl transition border border-[#d2ded6] shadow-2xs flex items-center gap-1.5 active:scale-95" title="Download backup data ke file JSON agar bisa dipindah antar-laptop/HP">
+          <i data-lucide="download" class="w-3.5 h-3.5 text-[#738a7a]"></i>
           <span class="hidden md:inline">Backup</span>
         </button>
 
-        <label class="cursor-pointer px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 rounded-lg transition border border-slate-300 shadow-2xs flex items-center gap-1.5 active:scale-95" title="Pulihkan data dari file JSON backup">
-          <i data-lucide="upload" class="w-3.5 h-3.5 text-slate-600"></i>
+        <label class="cursor-pointer px-2.5 py-1.5 text-xs font-medium text-[#666a6c] hover:text-[#35433a] bg-white hover:bg-[#e9f1ec] rounded-xl transition border border-[#d2ded6] shadow-2xs flex items-center gap-1.5 active:scale-95" title="Pulihkan data dari file JSON backup">
+          <i data-lucide="upload" class="w-3.5 h-3.5 text-[#738a7a]"></i>
           <span class="hidden md:inline">Restore</span>
           <input type="file" accept=".json" onchange="importBackupJSON(event)" class="hidden">
         </label>
 
-        <button id="btnResetData" onclick="resetActiveTabData()" class="hidden px-2.5 py-1.5 text-xs font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg transition border border-rose-200 shadow-xs flex items-center gap-1.5 active:scale-95" title="Hapus data pada tab yang aktif">
+        <button id="btnResetData" onclick="resetActiveTabData()" class="hidden px-2.5 py-1.5 text-xs font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl transition border border-rose-200 shadow-xs flex items-center gap-1.5 active:scale-95" title="Hapus data pada tab yang aktif">
           <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">Hapus Tab</span>
         </button>
-        <button onclick="lockScreen()" class="px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 rounded-lg transition border border-slate-300 shadow-xs flex items-center gap-1.5 active:scale-95" title="Kunci Layar">
+        <button onclick="lockScreen()" class="px-2.5 py-1.5 text-xs font-medium text-[#666a6c] hover:text-[#35433a] bg-white hover:bg-[#e9f1ec] rounded-xl transition border border-[#d2ded6] shadow-xs flex items-center gap-1.5 active:scale-95" title="Kunci Layar">
           <i data-lucide="lock" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">Kunci</span>
         </button>
@@ -135,61 +195,61 @@
   <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-5 space-y-4 sm:space-y-5 flex-1 w-full">
 
     <!-- 📑 PLATFORM WORKSPACE TABS -->
-    <section id="platformTabsContainer" class="bg-white p-2.5 rounded-xl border border-slate-200/90 shadow-xs flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg w-full sm:w-auto">
+    <section id="platformTabsContainer" class="bg-white p-2.5 rounded-2xl border border-[#d2ded6] shadow-xs flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-1.5 bg-[#f4f7f5] p-1 rounded-xl w-full sm:w-auto border border-[#d2ded6]/50">
         <button id="tabShopee" onclick="setActivePlatformTab('Shopee')" 
-                class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-md font-semibold text-xs transition flex items-center justify-center gap-1.5 bg-[#EE4D2D] text-white shadow-xs">
+                class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg font-bold text-xs transition flex items-center justify-center gap-1.5 bg-[#EE4D2D] text-white shadow-xs font-brand">
           <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
           <span>Shopee (<span id="tabCountShopee">0</span>)</span>
         </button>
         <button id="tabTikTok" onclick="setActivePlatformTab('TikTok')" 
-                class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-md font-medium text-xs transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900">
+                class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg font-medium text-xs transition flex items-center justify-center gap-1.5 text-[#666a6c] hover:text-[#35433a] hover:bg-[#e9f1ec] font-brand">
           <i data-lucide="music-2" class="w-3.5 h-3.5"></i>
           <span>TikTok (<span id="tabCountTikTok">0</span>)</span>
         </button>
         <button id="tabGabungan" onclick="setActivePlatformTab('Gabungan')" 
-                class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-md font-medium text-xs transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900">
+                class="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg font-medium text-xs transition flex items-center justify-center gap-1.5 text-[#666a6c] hover:text-[#35433a] hover:bg-[#e9f1ec] font-brand">
           <i data-lucide="layers" class="w-3.5 h-3.5"></i>
           <span>Gabungan (<span id="tabCountGabungan">0</span>)</span>
         </button>
       </div>
 
-      <div class="text-[11px] text-slate-500 font-medium px-1 flex items-center gap-2.5">
-        <span class="flex items-center gap-1.5 font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 shadow-2xs">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+      <div class="text-[11px] text-[#666a6c] font-medium px-1 flex items-center gap-2.5">
+        <span class="flex items-center gap-1.5 font-bold text-[#35433a] bg-[#abcbb2]/25 px-2.5 py-1 rounded-xl border border-[#abcbb2]/60 shadow-2xs">
+          <span class="w-2 h-2 rounded-full bg-[#738a7a] animate-pulse"></span>
           Tersimpan Otomatis di Browser
         </span>
-        <button onclick="loadSampleDemoData()" class="text-slate-700 hover:text-slate-900 font-semibold underline">
+        <button onclick="loadSampleDemoData()" class="text-[#738a7a] hover:text-[#35433a] font-bold underline cursor-pointer">
           Muat Data Demo
         </button>
       </div>
     </section>
 
     <!-- Upload Zone -->
-    <section class="bg-white rounded-xl border border-dashed border-slate-300 hover:border-slate-800 p-5 sm:p-6 text-center transition shadow-xs" id="dropArea">
+    <section class="bg-white rounded-2xl border-2 border-dashed border-[#abcbb2] hover:border-[#738a7a] p-5 sm:p-6 text-center transition shadow-xs" id="dropArea">
       <div class="max-w-xl mx-auto flex flex-col items-center">
-        <div class="w-10 h-10 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center mb-2.5 shadow-2xs">
-          <i data-lucide="file-up" class="w-5 h-5"></i>
+        <div class="w-12 h-12 rounded-2xl bg-[#e9f1ec] text-[#738a7a] flex items-center justify-center mb-2.5 shadow-2xs border border-[#abcbb2]/40">
+          <i data-lucide="file-up" class="w-6 h-6"></i>
         </div>
         
-        <h2 class="text-sm sm:text-base font-bold text-slate-900 mb-0.5" id="uploadTitle">
+        <h2 class="text-base sm:text-lg font-bold text-[#35433a] font-brand mb-0.5 uppercase tracking-normal" id="uploadTitle">
           Upload Laporan Shopee
         </h2>
-        <p class="text-xs text-slate-500 mb-3.5 leading-relaxed" id="uploadSubtitle">
+        <p class="text-xs text-[#666a6c] mb-3.5 leading-relaxed" id="uploadSubtitle">
           Pilih file <b>.csv</b> atau <b>.xlsx</b> untuk dimasukkan ke tab yang sedang aktif.
         </p>
 
         <div class="flex flex-col sm:flex-row items-center justify-center gap-2 w-full sm:w-auto">
-          <div class="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200 text-xs font-medium text-slate-600">
+          <div class="flex items-center gap-1.5 bg-[#f4f7f5] px-2.5 py-1.5 rounded-xl border border-[#d2ded6] text-xs font-medium text-[#666a6c]">
             <span>Target:</span>
-            <select id="targetUploadSelect" onchange="syncTargetUploadWithTab(this.value)" class="bg-white border border-slate-300 rounded-md px-2 py-1 font-semibold text-slate-800 focus:outline-none">
+            <select id="targetUploadSelect" onchange="syncTargetUploadWithTab(this.value)" class="bg-white border border-[#d2ded6] rounded-lg px-2 py-1 font-semibold text-[#35433a] focus:outline-none">
               <option value="AUTO">🔍 Otomatis Kenali File</option>
               <option value="Shopee">Shopee Tab</option>
               <option value="TikTok">TikTok Tab</option>
             </select>
           </div>
 
-          <label class="cursor-pointer px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs rounded-lg shadow-xs transition flex items-center justify-center gap-1.5 active:scale-95">
+          <label class="cursor-pointer px-4 py-2 bg-[#738a7a] hover:bg-[#5e7264] text-white font-brand font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 active:scale-95">
             <i data-lucide="folder-open" class="w-3.5 h-3.5"></i>
             <span>Pilih File Laporan</span>
             <input type="file" id="fileInput" class="hidden" multiple accept=".csv, .xlsx, .xls">
@@ -214,7 +274,7 @@
         <!-- 4 KARTU OPERASIONAL: TOTAL, KOL, SALES, FO -->
         <section class="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <!-- Total Pesanan -->
-          <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/90 shadow-xs hover:border-slate-400 transition">
+          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-[#d2ded6] shadow-xs hover:border-[#abcbb2] transition">
             <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Total Pesanan</span>
             <div class="text-xl sm:text-2xl font-bold text-slate-900 mt-1" id="statTotalOrder">0</div>
             <p class="text-[11px] text-slate-500 font-medium truncate mt-1" id="statTotalBreakdown">Video: 0 • Toko: 0 • FO: 0</p>
@@ -229,22 +289,22 @@
             <p class="text-[11px] text-purple-600 font-medium truncate mt-1" id="statKOLSubtext">0 pcs • Video TikTok & Kreator</p>
           </div>
 
-          <!-- 2. CHECKOUT RESMI DARI TOKO -->
+          <!-- 2. CHECKOUT RESMI DARI TOKO - GSM Sage Green & Soft Mint -->
           <div onclick="filterByQuickCat('SALES (Real)')" 
-               class="bg-white p-3.5 sm:p-4 rounded-xl border border-emerald-200 hover:border-emerald-400 shadow-xs transition cursor-pointer group" 
+               class="bg-white p-3.5 sm:p-4 rounded-2xl border border-[#abcbb2] hover:border-[#738a7a] shadow-xs transition cursor-pointer group" 
                title="Klik untuk melihat pesanan resmi langsung dari etalase toko FTL">
-            <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">🏪 Toko Resmi FTL (Etalase)</span>
-            <div class="text-xl sm:text-2xl font-bold text-emerald-600 mt-1" id="statSalesReal">0</div>
-            <p class="text-[11px] text-emerald-600 font-medium truncate mt-1" id="statSalesSubtext">0 pcs • Checkout Langsung Toko</p>
+            <span class="text-[10px] font-bold text-[#738a7a] uppercase tracking-wider block font-brand">🏪 Toko Resmi FTL (Etalase)</span>
+            <div class="text-xl sm:text-2xl font-bold text-[#738a7a] mt-1 font-brand" id="statSalesReal">0</div>
+            <p class="text-[11px] text-[#35433a] font-semibold truncate mt-1" id="statSalesSubtext">0 pcs • Checkout Langsung Toko</p>
           </div>
 
-          <!-- 3. FO (FAKE ORDER) -->
+          <!-- 3. FO (FAKE ORDER) - GSM Warm Butter Yellow #fce9a1 -->
           <div onclick="filterByQuickCat('FO (Fake Order)')" 
-               class="bg-white p-3.5 sm:p-4 rounded-xl border border-amber-200 hover:border-amber-400 shadow-xs transition cursor-pointer group" 
+               class="bg-[#fce9a1]/25 p-3.5 sm:p-4 rounded-2xl border border-[#ebd273] hover:border-[#d4be63] shadow-xs transition cursor-pointer group" 
                title="Klik untuk melihat hanya pesanan Fake Order (FO)">
-            <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider block">📦 Fake Order (FO)</span>
-            <div class="text-xl sm:text-2xl font-bold text-amber-600 mt-1" id="statFOCount">0</div>
-            <p class="text-[11px] text-amber-600 font-medium truncate mt-1" id="statFOSubtext">0 pcs • Tembakan Internal</p>
+            <span class="text-[10px] font-bold text-[#544406] uppercase tracking-wider block font-brand">📦 Fake Order (FO)</span>
+            <div class="text-xl sm:text-2xl font-bold text-[#544406] mt-1 font-brand" id="statFOCount">0</div>
+            <p class="text-[11px] text-[#6d5b12] font-semibold truncate mt-1" id="statFOSubtext">0 pcs • Tembakan Internal</p>
           </div>
         </section>
 
@@ -255,16 +315,16 @@
             <span>Filter Cepat (<span id="pillActivePlatformBadge" class="text-slate-900 font-bold">Gabungan</span>):</span>
           </div>
           <div class="flex flex-wrap items-center gap-1.5" id="quickPillsContainer">
-            <button id="pillBtnAll" onclick="filterByQuickCat('ALL')" class="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-bold text-xs transition border border-slate-900 active:scale-95 shadow-2xs flex items-center gap-1">
+            <button id="pillBtnAll" onclick="filterByQuickCat('ALL')" class="px-2.5 py-1 rounded-xl bg-[#738a7a] hover:bg-[#5e7264] text-white font-bold text-xs transition border border-[#738a7a] active:scale-95 shadow-2xs flex items-center gap-1 font-brand">
               <span id="pillAllPrefix">Semua / Gabungan</span> (<span id="pillTotalCount">0</span>)
             </button>
             <button id="pillBtnKOL" onclick="filterByQuickCat('AFFILIATE / KOL')" class="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 font-medium text-xs transition border border-purple-200 active:scale-95 flex items-center gap-1">
               🎬 <span id="pillKOL">Video Affiliate: 0</span>
             </button>
-            <button id="pillBtnSales" onclick="filterByQuickCat('SALES (Real)')" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-medium text-xs transition border border-emerald-200 active:scale-95 flex items-center gap-1">
+            <button id="pillBtnSales" onclick="filterByQuickCat('SALES (Real)')" class="px-2.5 py-1 rounded-xl bg-[#abcbb2]/30 hover:bg-[#abcbb2]/50 text-[#35433a] font-bold text-xs transition border border-[#abcbb2] active:scale-95 flex items-center gap-1 font-brand">
               🏪 <span id="pillSales">Toko Resmi: 0</span>
             </button>
-            <button id="pillBtnFO" onclick="filterByQuickCat('FO (Fake Order)')" class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 font-medium text-xs transition border border-amber-200 active:scale-95 flex items-center gap-1">
+            <button id="pillBtnFO" onclick="filterByQuickCat('FO (Fake Order)')" class="px-2.5 py-1 rounded-xl bg-[#fce9a1] hover:bg-[#f6df8b] text-[#544406] font-bold text-xs transition border border-[#ebd273] active:scale-95 flex items-center gap-1 font-brand shadow-2xs">
               📦 <span id="pillFO">FO: 0</span>
             </button>
           </div>
@@ -530,7 +590,7 @@
       <section class="bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs space-y-3">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
           <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-[#264D3B] flex items-center justify-center shadow-2xs">
+            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-[#738a7a] flex items-center justify-center shadow-2xs">
               <i data-lucide="calendar" class="w-4 h-4"></i>
             </div>
             <div>
@@ -583,7 +643,7 @@
         <div class="flex flex-wrap items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100 text-xs">
           <div class="flex flex-wrap items-center gap-2">
             <span class="font-bold text-slate-800 flex items-center gap-1.5">
-              <i data-lucide="calendar-range" class="w-4 h-4 text-[#264D3B]"></i>
+              <i data-lucide="calendar-range" class="w-4 h-4 text-[#738a7a]"></i>
               <span>Periode Laporan:</span>
             </span>
             <span id="badgeDateRange" class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-[11px] tabular-nums flex items-center gap-1 shadow-2xs">
@@ -613,26 +673,26 @@
         <!-- Baris Tombol Export Kecil / Compact TEPAT DI ATAS STATUS & FILTER SESUAI REQUEST KAK MIA -->
         <div class="flex flex-wrap items-center justify-between gap-2 pt-1 pb-1">
           <div class="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
-            <i data-lucide="filter" class="w-3.5 h-3.5 text-[#264D3B]"></i>
+            <i data-lucide="filter" class="w-3.5 h-3.5 text-[#738a7a]"></i>
             <span>Filter Pesanan & Status:</span>
           </div>
 
           <!-- 3 Tombol Kecil Rapi Sesuai Mau Kak Mia -->
           <div class="flex items-center gap-1.5 flex-wrap">
             <!-- 1. Download PDF -->
-            <button onclick="downloadDirectPDF()" class="px-2.5 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg transition border border-rose-200 active:scale-95 shadow-2xs cursor-pointer flex items-center gap-1.5" title="Download laporan PDF resmi (format lanskap A4)">
+            <button onclick="downloadDirectPDF()" class="px-2.5 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl transition border border-rose-200 active:scale-95 shadow-2xs cursor-pointer flex items-center gap-1.5 font-brand" title="Download laporan PDF resmi (format lanskap A4)">
               <i data-lucide="file-down" class="w-3.5 h-3.5 text-rose-600"></i>
               <span>Download PDF</span>
             </button>
 
             <!-- 2. Download ke Excel (Renamed per request) -->
-            <button onclick="exportToExcel()" class="px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-2xs transition active:scale-95 cursor-pointer flex items-center gap-1.5" title="Download file Excel resmi FTL lengkap 24 kolom terisi 100%">
+            <button onclick="exportToExcel()" class="px-3 py-1.5 text-xs font-bold text-white bg-[#738a7a] hover:bg-[#5e7264] rounded-xl shadow-2xs transition active:scale-95 cursor-pointer flex items-center gap-1.5 font-brand" title="Download file Excel resmi FTL lengkap 24 kolom terisi 100%">
               <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
               <span id="lblBtnExport">Download ke Excel</span>
             </button>
 
             <!-- 3. Copy ke Sheets (Google Sheets) -->
-            <button onclick="openGoogleSheetsHelper()" class="px-2.5 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition border border-emerald-300 active:scale-95 shadow-2xs cursor-pointer flex items-center gap-1.5" title="Buka di Google Sheets (Data 24 kolom otomatis disalin)">
+            <button onclick="openGoogleSheetsHelper()" class="px-2.5 py-1.5 text-xs font-bold text-[#35433a] bg-[#abcbb2]/30 hover:bg-[#abcbb2]/50 rounded-xl transition border border-[#abcbb2] active:scale-95 shadow-2xs cursor-pointer flex items-center gap-1.5 font-brand" title="Buka di Google Sheets (Data 24 kolom otomatis disalin)">
               <i data-lucide="clipboard-copy" class="w-3.5 h-3.5 text-emerald-600"></i>
               <span>Copy ke Sheets</span>
             </button>
@@ -646,7 +706,7 @@
             <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
             <input type="text" id="searchInput" placeholder="Cari No. Pesanan, Resi, Nama..." 
                    oninput="applyFilters()"
-                   class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#264D3B]/20 focus:border-[#264D3B] transition-all">
+                   class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#738a7a]/20 focus:border-[#738a7a] transition-all">
           </div>
 
           <!-- Kategori Filter -->
@@ -699,7 +759,7 @@
       <section class="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
         <div class="overflow-x-auto custom-scrollbar max-h-[600px]">
           <table class="w-full text-left text-xs text-slate-600 border-collapse">
-            <thead class="bg-slate-50/95 text-slate-700 uppercase font-bold sticky top-0 z-10 border-b border-slate-200 text-[10px] sm:text-[11px] tracking-wider backdrop-blur-xs">
+            <thead class="bg-[#e9f1ec] text-[#35433a] uppercase font-bold sticky top-0 z-10 border-b border-[#d2ded6] text-[10px] sm:text-[11px] tracking-wider backdrop-blur-xs font-brand">
               <tr>
                 <th class="px-2.5 py-3 w-8 text-center no-print">
                   <input type="checkbox" id="checkAll" onchange="toggleSelectAll(this.checked)" class="rounded text-orange-600 cursor-pointer">
@@ -1055,19 +1115,19 @@
       const uploadTitle = document.getElementById('uploadTitle');
 
       [btnShopee, btnTikTok, btnGabungan].forEach(b => {
-        if (b) b.className = "flex-1 sm:flex-initial px-3.5 py-1.5 rounded-md font-medium text-xs transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900";
+        if (b) b.className = "flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg font-medium text-xs transition flex items-center justify-center gap-1.5 text-[#666a6c] hover:text-[#35433a] hover:bg-[#e9f1ec] font-brand";
       });
 
       if (tabName === 'Shopee') {
-        if (btnShopee) btnShopee.className = "flex-1 sm:flex-initial px-3.5 py-1.5 rounded-md font-semibold text-xs transition flex items-center justify-center gap-1.5 bg-[#EE4D2D] text-white shadow-xs";
+        if (btnShopee) btnShopee.className = "flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg font-bold text-xs transition flex items-center justify-center gap-1.5 bg-[#EE4D2D] text-white shadow-xs font-brand";
         if (uploadTitle) uploadTitle.innerText = "Upload Laporan Shopee";
         setTxt('lblBtnExport', "Download ke Excel (Shopee)");
       } else if (tabName === 'TikTok') {
-        if (btnTikTok) btnTikTok.className = "flex-1 sm:flex-initial px-3.5 py-1.5 rounded-md font-semibold text-xs transition flex items-center justify-center gap-1.5 bg-slate-900 text-white shadow-xs";
+        if (btnTikTok) btnTikTok.className = "flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg font-bold text-xs transition flex items-center justify-center gap-1.5 bg-[#1e2321] text-white shadow-xs font-brand";
         if (uploadTitle) uploadTitle.innerText = "Upload Laporan TikTok";
         setTxt('lblBtnExport', "Download ke Excel (TikTok)");
       } else {
-        if (btnGabungan) btnGabungan.className = "flex-1 sm:flex-initial px-3.5 py-1.5 rounded-md font-semibold text-xs transition flex items-center justify-center gap-1.5 bg-[#264D3B] text-white shadow-xs";
+        if (btnGabungan) btnGabungan.className = "flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg font-bold text-xs transition flex items-center justify-center gap-1.5 bg-[#738a7a] text-white shadow-xs font-brand";
         if (uploadTitle) uploadTitle.innerText = "Upload Laporan Shopee / TikTok";
         setTxt('lblBtnExport', "Download ke Excel (Gabungan)");
       }
@@ -1936,7 +1996,7 @@
                }">
             <div>
               <div class="flex items-center justify-between gap-1 mb-1.5">
-                <span class="text-xs font-bold text-slate-900 group-hover:text-[#264D3B] flex items-center gap-1.5">
+                <span class="text-xs font-bold text-slate-900 group-hover:text-[#738a7a] flex items-center gap-1.5">
                   <span class="w-2 h-2 rounded-full ${isCurrentMonthFiltered ? 'bg-emerald-600 animate-pulse' : 'bg-slate-400'}"></span>
                   <span>${m.label}</span>
                 </span>
@@ -1945,7 +2005,7 @@
                 </span>
               </div>
               <div class="flex items-baseline gap-1.5 mt-1">
-                <span class="text-2xl font-extrabold text-[#264D3B] tabular-nums">${m.suksesPcs.toLocaleString('id-ID')}</span>
+                <span class="text-2xl font-extrabold text-[#738a7a] tabular-nums">${m.suksesPcs.toLocaleString('id-ID')}</span>
                 <span class="text-xs font-bold text-slate-700">pcs keluar</span>
                 ${m.batalPcs > 0 ? `<span class="text-[10px] font-medium text-rose-500 tabular-nums">(${m.batalPcs} batal)</span>` : ''}
               </div>
@@ -2040,7 +2100,7 @@
           </div>
           <div class="pt-2 mt-2 border-t border-slate-100 flex items-center justify-between text-xs">
             <span class="text-slate-500 font-medium">Terjual (Selesai):</span>
-            <span class="font-extrabold text-[#264D3B] text-sm tabular-nums">${p.selesaiQty.toLocaleString('id-ID')} <span class="text-xs font-semibold text-slate-700">pcs</span> <span class="text-[10px] text-slate-400 font-normal">(${p.selesaiOrders} order)</span></span>
+            <span class="font-extrabold text-[#738a7a] text-sm tabular-nums">${p.selesaiQty.toLocaleString('id-ID')} <span class="text-xs font-semibold text-slate-700">pcs</span> <span class="text-[10px] text-slate-400 font-normal">(${p.selesaiOrders} order)</span></span>
           </div>
         </div>
       `).join('');
@@ -2383,8 +2443,8 @@
           <select onchange="updateRowCategory('${o.platform}', ${o.idxInPlatform}, this.value)" 
                   class="text-[10px] sm:text-[11px] font-bold py-1 px-1 rounded-lg border focus:outline-none ${
                     o.kategori.includes('KOL') || o.kategori.includes('AFFILIATE') ? 'bg-purple-50 text-purple-700 border-purple-200' :
-                    o.kategori.includes('FO') ? 'bg-amber-50 text-amber-800 border-amber-200' :
-                    'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    o.kategori.includes('FO') ? 'bg-[#fce9a1] text-[#544406] border-[#ebd273] font-brand' :
+                    'bg-[#abcbb2]/30 text-[#35433a] border-[#abcbb2] font-brand'
                   }">
             <option value="AFFILIATE / KOL" ${o.kategori.includes('KOL') || o.kategori.includes('AFFILIATE') ? 'selected' : ''}>🎬 Video Affiliate</option>
             <option value="SALES (Real)" ${o.kategori.includes('Real') || o.kategori.includes('SALES') ? 'selected' : ''}>🏪 Toko Resmi FTL</option>
@@ -2402,9 +2462,9 @@
         } else if (jc.includes('live')) {
           checkoutBadge = `<span class="inline-flex items-center gap-1 font-bold text-pink-700 bg-pink-50 px-2 py-0.5 rounded-md border border-pink-200 text-[10px] whitespace-nowrap">🔴 LIVE Affiliate</span>`;
         } else if (jc.includes('fo') || jc.includes('fake')) {
-          checkoutBadge = `<span class="inline-flex items-center gap-1 font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 text-[10px] whitespace-nowrap">📦 Fake Order (FO)</span>`;
+          checkoutBadge = `<span class="inline-flex items-center gap-1 font-bold text-[#544406] bg-[#fce9a1] px-2 py-0.5 rounded-lg border border-[#ebd273] text-[10px] whitespace-nowrap font-brand">📦 Fake Order (FO)</span>`;
         } else {
-          checkoutBadge = `<span class="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 text-[10px] whitespace-nowrap">🏪 Toko Resmi FTL</span>`;
+          checkoutBadge = `<span class="inline-flex items-center gap-1 font-bold text-[#35433a] bg-[#abcbb2]/30 px-2 py-0.5 rounded-lg border border-[#abcbb2] text-[10px] whitespace-nowrap font-brand">🏪 Toko Resmi FTL</span>`;
         }
 
         const statusSelect = `
@@ -2835,8 +2895,8 @@
         const rangeInfo = getDatasetDateRange(exportData);
         const todayStr = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
 
-        // 1. Header Banner FTL (Forest Green #264D3B)
-        doc.setFillColor(38, 77, 59);
+        // 1. Header Banner FTL (Forest Green #738a7a)
+        doc.setFillColor(115, 138, 122); /* #738a7a */
         doc.rect(0, 0, pageWidth, 20, 'F');
 
         doc.setTextColor(255, 255, 255);
@@ -2853,7 +2913,7 @@
 
         // 2. Financial Metrics Summary Box (y = 23 to 37)
         doc.setFillColor(248, 250, 252);
-        doc.setDrawColor(226, 232, 240);
+        doc.setDrawColor(171, 203, 178); /* #abcbb2 */
         doc.roundedRect(14, 23, pageWidth - 28, 14, 2, 2, 'FD');
 
         const metrics = [
@@ -2874,7 +2934,7 @@
           doc.text(m.label, x, 27.5);
           doc.setFont('helvetica', 'bold');
           doc.setFontSize(8.5);
-          if (m.label.includes('LABA') || m.label.includes('BERSIH')) doc.setTextColor(38, 77, 59);
+          if (m.label.includes('LABA') || m.label.includes('BERSIH')) doc.setTextColor(115, 138, 122);
           else if (m.label.includes('DISKON')) doc.setTextColor(225, 29, 72);
           else doc.setTextColor(15, 23, 42);
           doc.text(m.val, x, 33);
@@ -2924,7 +2984,7 @@
           foot: tableFoot,
           theme: 'striped',
           headStyles: {
-            fillColor: [38, 77, 59],
+            fillColor: [115, 138, 122], /* #738a7a */
             textColor: [255, 255, 255],
             fontStyle: 'bold',
             fontSize: 7,
@@ -2933,7 +2993,7 @@
           },
           bodyStyles: {
             fontSize: 6.5,
-            textColor: [30, 41, 59],
+            textColor: [102, 106, 108], /* #666a6c */
             cellPadding: 1.6
           },
           footStyles: {
