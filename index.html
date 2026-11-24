@@ -1783,6 +1783,7 @@
     }
 
     function refreshUI() {
+      const currentData = getActiveDataset();
       const isShopee = activePlatformTab === 'Shopee';
       const isTikTok = activePlatformTab === 'TikTok';
 
@@ -1790,8 +1791,6 @@
       setTxt('tabCountTikTok', tiktokOrders.length);
       setTxt('tabCountGabungan', shopeeOrders.length + tiktokOrders.length);
       setTxt('navBadgeOrdersCount', currentData.length);
-
-      const currentData = getActiveDataset();
 
       const btnReset = document.getElementById('btnResetData');
       if (currentData.length > 0) {
@@ -3083,10 +3082,7 @@
       showToast(`Fee marketplace diperbarui (Shopee ${shopeeFeePct}%, TikTok ${tiktokFeePct}%)`);
     }
 
-    // 📊 CHART.JS VISUAL ANALYTICS (Ditiadakan per permintaan Kak Mia agar tampilan bersih dan fokus ke rekap tabel operasional)
-    function renderCharts(currentData) {
-      return;
-    }
+
 
 
     // 📄 DIRECT PDF DOWNLOAD (Tanpa Dialog Print, Rapi & Tajam Vektor)
