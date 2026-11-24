@@ -340,7 +340,7 @@
         <!-- 4 KARTU OPERASIONAL: TOTAL, KOL, SALES, FO -->
         <section class="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <!-- Total Pesanan -->
-          <div class="bg-white p-3.5 sm:p-4 rounded-2xl border border-[#d2ded6] shadow-xs hover:border-[#abcbb2] transition">
+          <div onclick="filterByQuickCat('ALL')" class="bg-white p-3.5 sm:p-4 rounded-2xl border border-[#d2ded6] shadow-xs hover:border-[#abcbb2] transition cursor-pointer group active:scale-98" title="Klik untuk melihat semua transaksi pesanan di tabel">
             <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Total Pesanan</span>
             <div class="text-xl sm:text-2xl font-bold text-slate-900 mt-1" id="statTotalOrder">0</div>
             <p class="text-[11px] text-slate-500 font-medium truncate mt-1" id="statTotalBreakdown">Video: 0 • Toko: 0 • FO: 0</p>
@@ -604,10 +604,6 @@
           </table>
         </div>
       </section>
-
-    </div>
-
-  </main>
       </section>
 
         
@@ -1142,6 +1138,7 @@
     let shopeeOrders = [];
     let tiktokOrders = [];
     let activePlatformTab = 'Shopee'; // 'Shopee' | 'TikTok' | 'Gabungan'
+    let currentActiveView = localStorage.getItem('ftl_active_view') || 'upload'; // 'upload' | 'orders' | 'analytics' | 'products' | 'finance'
     let defaultHppPerPcs = 25000;
     let selectedOrderIndices = new Set();
 
@@ -2065,10 +2062,11 @@
       const catSelect = document.getElementById('filterCategory');
       if (catSelect) {
         catSelect.value = cat;
-        applyFilters();
-        showToast(cat === 'ALL' ? 'Menampilkan semua kategori' : `Menampilkan kategori: ${cat}`);
-        scrollToTableSection();
       }
+      switchView('orders');
+      applyFilters();
+      showToast(cat === 'ALL' ? 'Menampilkan semua kategori' : `Menampilkan kategori: ${cat}`);
+      scrollToTableSection();
     }
 
     function updatePlatformTabCounts() {
@@ -2266,6 +2264,7 @@
       if (startEl) startEl.value = start;
       if (endEl) endEl.value = end;
 
+      switchView('orders');
       applyFilters();
       const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
       showToast(`Menampilkan khusus pesanan bulan ${monthNames[m - 1]} ${y}`);
@@ -3718,8 +3717,6 @@
 
 
     // 🗂️ SIDEBAR NAVIGATION & MULTI-VIEW CONTROLLER (Ala Seller Center)
-    let currentActiveView = localStorage.getItem('ftl_active_view') || 'upload';
-
     function switchView(viewName) {
       currentActiveView = viewName;
       try {
@@ -3737,7 +3734,10 @@
       Object.keys(views).forEach(key => {
         const v = document.getElementById(views[key].id);
         const nav = document.getElementById(views[key].navId);
-        if (v) v.classList.add('hidden');
+        if (v) {
+          v.classList.add('hidden');
+          v.style.display = 'none';
+        }
         if (nav) {
           nav.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-brand font-medium text-xs transition text-[#666a6c] hover:text-[#35433a] hover:bg-[#e9f1ec] cursor-pointer";
         }
@@ -3746,7 +3746,10 @@
       const activeCfg = views[viewName] || views.upload;
       const targetView = document.getElementById(activeCfg.id);
       const targetNav = document.getElementById(activeCfg.navId);
-      if (targetView) targetView.classList.remove('hidden');
+      if (targetView) {
+        targetView.classList.remove('hidden');
+        targetView.style.display = 'block';
+      }
       if (targetNav) {
         targetNav.className = "w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-brand font-bold text-xs transition bg-[#738a7a] text-white shadow-xs cursor-pointer";
       }
@@ -3756,15 +3759,25 @@
         titleEl.innerHTML = `<i data-lucide="${activeCfg.icon}" class="w-4 h-4 text-[#738a7a]"></i> <span>${activeCfg.title}</span>`;
       }
 
-      toggleSidebar(false);
-
-      if (viewName === 'analytics') {
-        setTimeout(() => {
-          renderCharts(getActiveDataset());
-        }, 50);
+      if (window.innerWidth < 768) {
+        toggleSidebar(false);
       }
 
-      lucide.createIcons();
+      const currentData = getActiveDataset();
+      if (viewName === 'orders') {
+        applyFilters();
+      } else if (viewName === 'analytics') {
+        setTimeout(() => {
+          renderCharts(currentData);
+        }, 50);
+      } else if (viewName === 'products') {
+        renderMonthlyBreakdown(currentData);
+        renderProductBreakdown(currentData);
+      }
+
+      try {
+        lucide.createIcons();
+      } catch (e) {}
     }
 
     function toggleSidebar(open) {
@@ -3777,10 +3790,16 @@
 
       if (shouldOpen) {
         sidebar.classList.remove('-translate-x-full');
-        if (backdrop) backdrop.classList.remove('hidden');
+        if (backdrop) {
+          backdrop.classList.remove('hidden');
+          backdrop.style.display = 'block';
+        }
       } else {
         sidebar.classList.add('-translate-x-full');
-        if (backdrop) backdrop.classList.add('hidden');
+        if (backdrop) {
+          backdrop.classList.add('hidden');
+          backdrop.style.display = 'none';
+        }
       }
     }
 
