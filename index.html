@@ -543,30 +543,48 @@
           </span>
         </div>
 
+        <!-- Toolbar Kontrol Grafik Interaktif (Fitur persis Analitik TikTok Shop di Foto Kak Mia) -->
+        <div class="flex flex-wrap items-center justify-between gap-2.5 bg-slate-50/90 p-2 sm:p-2.5 rounded-xl border border-slate-200 text-xs">
+          <!-- Toggle Dimensi: Menurut Sumber Pesanan vs Menurut Jenis Konten -->
+          <div class="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-2xs">
+            <button id="btnDimSumber" onclick="setChartDimension('SUMBER')" class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#264D3B] text-white transition shadow-2xs cursor-pointer">
+              Berdasarkan Sumber Pesanan
+            </button>
+            <button id="btnDimKonten" onclick="setChartDimension('KONTEN')" class="px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer">
+              Menurut Jenis Konten
+            </button>
+          </div>
+
+          <!-- Toggle Metrik: Omset (GMV Rp) vs Produk Terjual (Pcs) vs Pesanan (Order) -->
+          <div class="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-2xs">
+            <button id="btnMetricNominal" onclick="setChartMetric('NOMINAL')" class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-900 text-white transition shadow-2xs cursor-pointer">
+              💰 Omset (GMV)
+            </button>
+            <button id="btnMetricPcs" onclick="setChartMetric('PCS')" class="px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer">
+              📦 Produk (Pcs)
+            </button>
+            <button id="btnMetricOrder" onclick="setChartMetric('ORDER')" class="px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer">
+              📑 Pesanan (Order)
+            </button>
+          </div>
+        </div>
+
         <!-- 2 Chart Containers -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-1">
           <!-- Donut Chart: Proporsi Jalur Penjualan (5 cols on lg) -->
           <div class="lg:col-span-5 bg-slate-50/60 rounded-xl p-3 border border-slate-200/80 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-slate-800">Proporsi Kategori Pesanan</span>
-              <span class="text-[10px] font-medium text-slate-500">Sales vs KOL vs FO</span>
+              <span class="text-xs font-bold text-slate-800" id="donutTitleLabel">Proporsi Sumber Pesanan</span>
+              <span class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                👆 Klik Grafik untuk Filter
+              </span>
             </div>
-            <div class="relative w-full h-52 sm:h-56 flex items-center justify-center">
+            <div class="relative w-full h-52 sm:h-56 flex items-center justify-center cursor-pointer" title="Klik bagian grafik untuk menyaring tabel">
               <canvas id="categoryDonutChart"></canvas>
             </div>
-            <div class="grid grid-cols-3 gap-1 pt-2 border-t border-slate-200/60 text-center text-[10px] font-medium">
-              <div class="bg-emerald-50 text-emerald-800 rounded p-1">
-                <span class="block font-bold text-xs" id="donutPctSales">0%</span>
-                <span class="text-[9px]">🛒 Sales Real</span>
-              </div>
-              <div class="bg-purple-50 text-purple-800 rounded p-1">
-                <span class="block font-bold text-xs" id="donutPctKOL">0%</span>
-                <span class="text-[9px]">⭐ KOL / Sample</span>
-              </div>
-              <div class="bg-amber-50 text-amber-800 rounded p-1">
-                <span class="block font-bold text-xs" id="donutPctFO">0%</span>
-                <span class="text-[9px]">📦 Fake Order</span>
-              </div>
+            <!-- Interactive Cards Container (Rendered dynamically with click-to-filter) -->
+            <div class="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-200/60 text-center text-[10px] font-medium" id="donutCardsContainer">
+              <!-- Rendered dynamically -->
             </div>
           </div>
 
@@ -2865,7 +2883,47 @@
       showToast(`Fee marketplace diperbarui (Shopee ${shopeeFeePct}%, TikTok ${tiktokFeePct}%)`);
     }
 
-    // 📊 CHART.JS VISUAL ANALYTICS FUNCTIONS
+    // 📊 CHART.JS VISUAL ANALYTICS (Interaktif persis TikTok Shop Seller Center)
+    let chartDimension = 'SUMBER'; // 'SUMBER' (Toko Resmi vs Video Affiliate vs FO) | 'KONTEN' (Video vs LIVE vs Etalase)
+    let chartMetric = 'NOMINAL'; // 'NOMINAL' (Rp) | 'PCS' (Qty) | 'ORDER' (Count)
+
+    function setChartDimension(dim) {
+      chartDimension = dim;
+      const btnS = document.getElementById('btnDimSumber');
+      const btnK = document.getElementById('btnDimKonten');
+      if (btnS && btnK) {
+        if (dim === 'SUMBER') {
+          btnS.className = "px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#264D3B] text-white transition shadow-2xs cursor-pointer";
+          btnK.className = "px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer";
+        } else {
+          btnK.className = "px-2.5 py-1 rounded-md text-[11px] font-bold bg-[#264D3B] text-white transition shadow-2xs cursor-pointer";
+          btnS.className = "px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer";
+        }
+      }
+      const titleEl = document.getElementById('donutTitleLabel');
+      if (titleEl) {
+        titleEl.innerText = dim === 'SUMBER' ? 'Proporsi Sumber Pesanan' : 'Proporsi Menurut Jenis Konten';
+      }
+      renderCharts(getActiveDataset());
+      showToast(dim === 'SUMBER' ? 'Grafik diubah: Berdasarkan Sumber Pesanan' : 'Grafik diubah: Menurut Jenis Konten (Video, LIVE, Etalase)');
+    }
+
+    function setChartMetric(met) {
+      chartMetric = met;
+      const btnNom = document.getElementById('btnMetricNominal');
+      const btnPcs = document.getElementById('btnMetricPcs');
+      const btnOrd = document.getElementById('btnMetricOrder');
+      [btnNom, btnPcs, btnOrd].forEach(b => {
+        if (b) b.className = "px-2.5 py-1 rounded-md text-[11px] font-medium text-slate-600 hover:text-slate-900 transition cursor-pointer";
+      });
+      if (met === 'NOMINAL' && btnNom) btnNom.className = "px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-900 text-white transition shadow-2xs cursor-pointer";
+      if (met === 'PCS' && btnPcs) btnPcs.className = "px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-900 text-white transition shadow-2xs cursor-pointer";
+      if (met === 'ORDER' && btnOrd) btnOrd.className = "px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-900 text-white transition shadow-2xs cursor-pointer";
+
+      renderCharts(getActiveDataset());
+      showToast(met === 'NOMINAL' ? 'Metrik grafik: Omset Bersih (Rp)' : (met === 'PCS' ? 'Metrik grafik: Produk Terjual (Pcs)' : 'Metrik grafik: Jumlah Pesanan (Order)'));
+    }
+
     function renderCharts(currentData) {
       if (typeof Chart === 'undefined') return;
 
@@ -2874,26 +2932,124 @@
         lblChartPlat.innerText = `Data: ${activePlatformTab}`;
       }
 
-      // 1. Donut Chart - Proporsi Jalur Penjualan
-      const kolOrders = currentData.filter(o => o.kategori.includes('KOL') || o.kategori.includes('AFFILIATE'));
-      const salesOrders = currentData.filter(o => o.kategori.includes('Real') || o.kategori.includes('SALES'));
-      const foOrders = currentData.filter(o => o.kategori.includes('FO'));
+      // 1. Interactive Donut Chart (Mode: Sumber Pesanan vs Jenis Konten, Metrik: Rp / Pcs / Order)
+      let chartGroups = [];
+      if (chartDimension === 'SUMBER') {
+        const salesOrders = currentData.filter(o => o.kategori.includes('Real') || o.kategori.includes('SALES'));
+        const kolOrders = currentData.filter(o => o.kategori.includes('KOL') || o.kategori.includes('AFFILIATE'));
+        const foOrders = currentData.filter(o => o.kategori.includes('FO'));
 
-      const kCount = kolOrders.length;
-      const sCount = salesOrders.length;
-      const fCount = foOrders.length;
-      const totalCount = kCount + sCount + fCount || 1;
+        chartGroups = [
+          {
+            label: '🏪 Toko Resmi FTL',
+            shortLabel: 'Toko Resmi',
+            filterKey: 'SALES (Real)',
+            color: '#10B981',
+            bgLight: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+            textColor: 'text-emerald-700',
+            orders: salesOrders
+          },
+          {
+            label: '🎬 Video Affiliate & KOL',
+            shortLabel: 'Video Affiliate',
+            filterKey: 'AFFILIATE / KOL',
+            color: '#8B5CF6',
+            bgLight: 'bg-purple-50 text-purple-800 border-purple-200',
+            textColor: 'text-purple-700',
+            orders: kolOrders
+          },
+          {
+            label: '📦 Fake Order (FO)',
+            shortLabel: 'Fake Order',
+            filterKey: 'FO (Fake Order)',
+            color: '#F59E0B',
+            bgLight: 'bg-amber-50 text-amber-800 border-amber-200',
+            textColor: 'text-amber-700',
+            orders: foOrders
+          }
+        ];
+      } else {
+        // Menurut Jenis Konten: Video FYP vs TikTok LIVE vs Etalase Produk
+        const videoOrders = currentData.filter(o => {
+          const jc = (o.jalurCheckout || o.kategori || '').toLowerCase();
+          return jc.includes('video') || jc.includes('creator') || jc.includes('@') || jc.includes('kol') || jc.includes('affiliate');
+        });
+        const liveOrders = currentData.filter(o => {
+          const jc = (o.jalurCheckout || o.kategori || '').toLowerCase();
+          return jc.includes('live');
+        });
+        const etalaseOrders = currentData.filter(o => {
+          const jc = (o.jalurCheckout || o.kategori || '').toLowerCase();
+          return !jc.includes('video') && !jc.includes('creator') && !jc.includes('@') && !jc.includes('kol') && !jc.includes('affiliate') && !jc.includes('live');
+        });
 
-      const sPct = Math.round((sCount / totalCount) * 100);
-      const kPct = Math.round((kCount / totalCount) * 100);
-      const fPct = Math.max(0, 100 - sPct - kPct);
+        chartGroups = [
+          {
+            label: '🎥 Video FYP / Kreator',
+            shortLabel: 'Video FYP',
+            filterKey: 'AFFILIATE / KOL',
+            color: '#6366F1',
+            bgLight: 'bg-indigo-50 text-indigo-800 border-indigo-200',
+            textColor: 'text-indigo-700',
+            orders: videoOrders
+          },
+          {
+            label: '🔴 TikTok LIVE Stream',
+            shortLabel: 'LIVE Stream',
+            filterKey: 'AFFILIATE / KOL',
+            color: '#EC4899',
+            bgLight: 'bg-pink-50 text-pink-800 border-pink-200',
+            textColor: 'text-pink-700',
+            orders: liveOrders
+          },
+          {
+            label: '🛍️ Etalase / Kartu Produk',
+            shortLabel: 'Etalase Toko',
+            filterKey: 'SALES (Real)',
+            color: '#10B981',
+            bgLight: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+            textColor: 'text-emerald-700',
+            orders: etalaseOrders
+          }
+        ];
+      }
 
-      const elSPct = document.getElementById('donutPctSales');
-      const elKPct = document.getElementById('donutPctKOL');
-      const elFPct = document.getElementById('donutPctFO');
-      if (elSPct) elSPct.innerText = `${sPct}%`;
-      if (elKPct) elKPct.innerText = `${kPct}%`;
-      if (elFPct) elFPct.innerText = `${fPct}%`;
+      chartGroups.forEach(g => {
+        const suksesOnly = g.orders.filter(o => o.status === 'Selesai');
+        g.omset = suksesOnly.reduce((acc, o) => acc + (o.totalBayar || 0), 0);
+        g.pcs = g.orders.reduce((acc, o) => acc + (o.qty || 1), 0);
+        g.orderCount = g.orders.length;
+
+        if (chartMetric === 'NOMINAL') {
+          g.val = g.omset;
+          g.displayVal = 'Rp ' + Math.round(g.omset).toLocaleString('id-ID');
+        } else if (chartMetric === 'PCS') {
+          g.val = g.pcs;
+          g.displayVal = g.pcs.toLocaleString('id-ID') + ' pcs';
+        } else {
+          g.val = g.orderCount;
+          g.displayVal = g.orderCount.toLocaleString('id-ID') + ' order';
+        }
+      });
+
+      const totalVal = chartGroups.reduce((acc, g) => acc + g.val, 0) || 1;
+      chartGroups.forEach(g => {
+        g.pct = Math.round((g.val / totalVal) * 100);
+      });
+
+      // Render 3 Interactive Clickable Cards Below Donut
+      const cardsContainer = document.getElementById('donutCardsContainer');
+      if (cardsContainer) {
+        cardsContainer.innerHTML = chartGroups.map(g => `
+          <div onclick="filterByQuickCat('${g.filterKey}')" 
+               class="${g.bgLight} rounded-lg p-1.5 border shadow-2xs hover:scale-102 transition cursor-pointer text-center group"
+               title="Klik untuk menyaring tabel ke ${g.label}">
+            <div class="font-extrabold text-xs sm:text-sm tabular-nums">${g.pct}%</div>
+            <div class="text-[9px] font-bold truncate mt-0.5">${g.shortLabel}</div>
+            <div class="text-[8px] opacity-75 font-semibold truncate">${g.displayVal}</div>
+          </div>
+        `).join('');
+      }
 
       const donutCanvas = document.getElementById('categoryDonutChart');
       if (donutCanvas) {
@@ -2904,18 +3060,27 @@
         categoryDonutChart = new Chart(donutCanvas, {
           type: 'doughnut',
           data: {
-            labels: ['Sales Real', 'KOL / Affiliate', 'Fake Order (FO)'],
+            labels: chartGroups.map(g => g.label),
             datasets: [{
-              data: [sCount, kCount, fCount],
-              backgroundColor: ['#10B981', '#8B5CF6', '#F59E0B'],
+              data: chartGroups.map(g => g.val),
+              backgroundColor: chartGroups.map(g => g.color),
               borderWidth: 2,
               borderColor: '#ffffff',
-              hoverOffset: 6
+              hoverOffset: 8
             }]
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            onClick: (evt, activeEls) => {
+              if (activeEls && activeEls.length > 0) {
+                const idx = activeEls[0].index;
+                const clickedGroup = chartGroups[idx];
+                if (clickedGroup && clickedGroup.filterKey) {
+                  filterByQuickCat(clickedGroup.filterKey);
+                }
+              }
+            },
             plugins: {
               legend: {
                 position: 'bottom',
@@ -2928,9 +3093,9 @@
               tooltip: {
                 callbacks: {
                   label: function(ctx) {
-                    const val = ctx.raw || 0;
-                    const pct = Math.round((val / totalCount) * 100);
-                    return ` ${ctx.label}: ${val} order (${pct}%)`;
+                    const g = chartGroups[ctx.dataIndex];
+                    if (!g) return '';
+                    return ` ${g.shortLabel}: ${g.displayVal} (${g.pct}%) • Klik untuk Filter`;
                   }
                 }
               }
@@ -2940,7 +3105,7 @@
         });
       }
 
-      // 2. Bar & Line Chart - Monthly Trend
+      // 2. Bar & Line Chart - Monthly Trend with Interactive Click-to-Filter Month
       const monthlyData = getMonthlyBreakdown(currentData);
       const trendCanvas = document.getElementById('monthlyTrendChart');
       if (trendCanvas) {
@@ -2982,6 +3147,15 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            onClick: (evt, activeEls) => {
+              if (activeEls && activeEls.length > 0) {
+                const idx = activeEls[0].index;
+                const clickedMonth = monthlyData[idx];
+                if (clickedMonth && clickedMonth.key) {
+                  filterByMonth(clickedMonth.key);
+                }
+              }
+            },
             interaction: {
               mode: 'index',
               intersect: false
