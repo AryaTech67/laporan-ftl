@@ -27,10 +27,10 @@
             }
           },
           fontFamily: {
-            brand: ['"Arial Rounded MT Bold"', '"Arial Rounded MT"', '"Nunito"', '"Comfortaa"', 'sans-serif'],
-            comfortaa: ['"Comfortaa"', 'sans-serif'],
-            courier: ['"Plus Jakarta Sans"', '"Inter"', 'sans-serif'],
-            mono: ['"Plus Jakarta Sans"', '"Inter"', '"JetBrains Mono"', 'monospace']
+            sans: ['"Plus Jakarta Sans"', '"Inter"', 'system-ui', '-apple-system', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+            brand: ['"Plus Jakarta Sans"', '"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
+            display: ['"Arial Rounded MT Bold"', '"Nunito"', '"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"Plus Jakarta Sans"', '"Inter"', 'system-ui', 'monospace']
           }
         }
       }
@@ -51,61 +51,86 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Nunito:wght@600;700;800&display=swap');
 
     :root {
       /* 🎨 FTL Official Brand Colors (GSM Page 5) */
       --ftl-primary: #738a7a;        /* Sage Green Utama */
       --ftl-secondary: #abcbb2;      /* Soft Mint / Light Sage */
-      --ftl-text: #666a6c;           /* Charcoal Teks Utama */
+      --ftl-text: #1e293b;           /* Slate 800 (Ultra High-Contrast Legibility) */
+      --ftl-text-muted: #64748b;     /* Slate 500 (Subtext / Meta) */
       --ftl-accent: #fce9a1;         /* Warm Butter Yellow Accent */
       --ftl-white: #ffffff;          /* Putih Bersih */
-      --ftl-dark: #35433a;           /* Deep Forest Green (Heading & High Contrast) */
+      --ftl-dark: #0f172a;           /* Deep Slate 900 (Bold Numbers & High Contrast) */
       --ftl-bg: #f4f7f5;             /* Soft Sage Background */
       --ftl-border: #d2ded6;         /* Gentle Sage Border */
       --ftl-soft: #e9f1ec;           /* Soft Pill / Card Background */
       --ftl-hover: #5e7264;
     }
 
-    * { -webkit-tap-highlight-color: transparent; }
+    * { 
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
 
-    /* 🔤 1. PRIMARY TYPEFACE: Arial Rounded MT Bold (GSM Page 2) */
-    .font-brand, .font-heading, h1, h2, h3, .brand-title, .brand-logo-text {
-      font-family: 'Arial Rounded MT Bold', 'Arial Rounded MT', 'Nunito', 'Comfortaa', sans-serif !important;
+    /* 🔤 1. BRAND LOGO ONLY (Friendly display font) */
+    .brand-title, .brand-logo-text {
+      font-family: 'Arial Rounded MT Bold', 'Nunito', 'Plus Jakarta Sans', sans-serif !important;
       letter-spacing: -0.015em;
     }
 
-    /* 🔤 2. SECONDARY TYPEFACE OPTION: Comfortaa (GSM Page 4) - Body & UI Components */
+    /* 🔤 2. PRIMARY UI & BODY TYPEFACE: Plus Jakarta Sans & Inter (Clean, Crisp, Maximum Screen Legibility) */
     body { 
       background-color: var(--ftl-bg);
       color: var(--ftl-text);
-      font-family: 'Comfortaa', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      letter-spacing: -0.01em;
+      text-rendering: optimizeLegibility;
+      letter-spacing: -0.005em;
     }
 
-    input, select, textarea, button {
-      font-family: 'Comfortaa', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    /* All Interactive & Form Elements */
+    input, select, textarea, button, optgroup, option {
+      font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     }
 
-        /* 🔤 3. CRISP & CLEAR SELLER CENTER FONT FOR TABLES, ORDER IDs & NUMBERS */
+    .font-brand, .font-heading, h1, h2, h3, h4, h5, h6 {
+      font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    }
+
+    /* 🔤 3. CRISP & CLEAR SELLER CENTER FONT FOR TABLES, ORDER IDs & NUMBERS */
     .font-mono, [class*="font-mono"], .font-courier, .order-id-cell, .data-code {
       font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
       font-variant-numeric: tabular-nums;
-      letter-spacing: 0.035em;
-      font-weight: 600;
+      letter-spacing: 0.02em !important;
+      font-feature-settings: "tnum" 1, "cv05" 1;
     }
 
     .tabular-nums, .num-tabular {
       font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
       font-variant-numeric: tabular-nums;
-      letter-spacing: 0.015em;
+      font-feature-settings: "tnum" 1;
     }
 
-    /* Supreme table readability - No blurry/broken typewriter serifs */
+    /* Supreme table readability - 100% crisp, dark text, no squished typewriter serifs */
     table, th, td {
       font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+      text-rendering: optimizeLegibility;
+    }
+
+    table {
+      font-size: 12px;
+    }
+
+    th {
+      font-weight: 700 !important;
+      color: #1e293b !important;
+      letter-spacing: 0.025em !important;
+    }
+
+    td {
+      color: #1e293b !important;
     }
 
     .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 6px; }
@@ -534,7 +559,7 @@
       <section class="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
         <div class="overflow-x-auto custom-scrollbar max-h-[600px]">
           <table class="w-full text-left text-xs text-slate-600 border-collapse">
-            <thead class="bg-[#e9f1ec] text-[#35433a] uppercase font-bold sticky top-0 z-10 border-b border-[#d2ded6] text-[10px] sm:text-[11px] tracking-wider backdrop-blur-xs font-brand">
+            <thead class="bg-[#e9f1ec] text-[#1e293b] uppercase font-bold sticky top-0 z-10 border-b border-[#d2ded6] text-[11px] sm:text-xs tracking-wider backdrop-blur-xs">
               <tr>
                 <th class="px-2.5 py-3 w-8 text-center no-print">
                   <input type="checkbox" id="checkAll" onchange="toggleSelectAll(this.checked)" class="rounded text-orange-600 cursor-pointer">
@@ -2746,8 +2771,8 @@
             <td class="px-2.5 py-2 whitespace-nowrap">${catSelect}</td>
             <td class="px-2.5 py-2 whitespace-nowrap">${checkoutBadge}</td>
             <td class="px-2.5 py-2 whitespace-nowrap">${statusSelect}</td>
-            <td class="px-2.5 py-2 font-mono font-semibold text-slate-900 whitespace-nowrap text-[11px] tracking-tight">${o.orderId}</td>
-            <td class="px-2.5 py-2 whitespace-nowrap text-slate-600 tabular-nums">${o.waktuPesan}</td>
+            <td class="px-3 py-2.5 font-bold text-slate-900 whitespace-nowrap text-xs tracking-normal tabular-nums">${o.orderId}</td>
+            <td class="px-3 py-2.5 whitespace-nowrap text-slate-700 text-xs tabular-nums">${o.waktuPesan}</td>
             <td class="px-2.5 py-2 whitespace-nowrap">
               ${o.status === 'Batal' 
                 ? `<input type="text" value="${o.waktuBatal || o.waktuPesan}" 
@@ -2764,7 +2789,7 @@
             <td class="px-2.5 py-2 text-right font-bold text-emerald-700 whitespace-nowrap bg-emerald-50/30 tabular-nums">Rp ${Math.round(o.totalBayar).toLocaleString('id-ID')}</td>
             <td class="px-2.5 py-2 text-right font-medium text-indigo-600 whitespace-nowrap bg-indigo-50/30 tabular-nums">Rp ${Math.round(estHpp).toLocaleString('id-ID')}</td>
             <td class="px-2.5 py-2 text-right font-bold ${rowMargin >= 0 ? 'text-blue-700' : 'text-rose-600'} whitespace-nowrap bg-blue-50/30 tabular-nums">Rp ${Math.round(rowMargin).toLocaleString('id-ID')}</td>
-            <td class="px-2.5 py-2 font-mono font-medium text-slate-600 whitespace-nowrap text-[11px] tracking-tight">${o.resi || '-'}</td>
+            <td class="px-3 py-2.5 font-semibold text-slate-700 whitespace-nowrap text-xs tracking-normal tabular-nums">${o.resi || '-'}</td>
             <td class="px-2.5 py-2 text-slate-500 whitespace-nowrap">${o.kurir || '-'}</td>
             <td class="px-2.5 py-2 text-slate-600 whitespace-nowrap">${o.pembeli || '-'}</td>
             <td class="px-2.5 py-2 text-slate-600 whitespace-nowrap">${o.penerima || '-'}</td>
