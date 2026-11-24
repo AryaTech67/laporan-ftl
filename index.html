@@ -217,34 +217,34 @@
           <div class="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/90 shadow-xs hover:border-slate-400 transition">
             <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Total Pesanan</span>
             <div class="text-xl sm:text-2xl font-bold text-slate-900 mt-1" id="statTotalOrder">0</div>
-            <p class="text-[11px] text-slate-500 font-medium truncate mt-1" id="statTotalBreakdown">KOL: 0 • SALES: 0 • FO: 0</p>
+            <p class="text-[11px] text-slate-500 font-medium truncate mt-1" id="statTotalBreakdown">Video: 0 • Toko: 0 • FO: 0</p>
           </div>
 
-          <!-- 1. KOL / AFFILIATE -->
+          <!-- 1. VIDEO AFFILIATE & KOL -->
           <div onclick="filterByQuickCat('AFFILIATE / KOL')" 
                class="bg-white p-3.5 sm:p-4 rounded-xl border border-purple-200 hover:border-purple-400 shadow-xs transition cursor-pointer group" 
-               title="Klik untuk melihat hanya pesanan KOL / Affiliate">
-            <span class="text-[10px] font-semibold text-purple-700 uppercase tracking-wider block">KOL / Affiliate</span>
+               title="Klik untuk melihat hanya pesanan dari Video Affiliate & Kreator">
+            <span class="text-[10px] font-bold text-purple-700 uppercase tracking-wider block">🎬 Video Affiliate & KOL</span>
             <div class="text-xl sm:text-2xl font-bold text-purple-700 mt-1" id="statAffiliateKOL">0</div>
-            <p class="text-[11px] text-purple-600 font-medium truncate mt-1" id="statKOLSubtext">0 pcs produk</p>
+            <p class="text-[11px] text-purple-600 font-medium truncate mt-1" id="statKOLSubtext">0 pcs • Video TikTok & Kreator</p>
           </div>
 
-          <!-- 2. SALES REAL (PENJUALAN ASLI) -->
+          <!-- 2. CHECKOUT RESMI DARI TOKO -->
           <div onclick="filterByQuickCat('SALES (Real)')" 
                class="bg-white p-3.5 sm:p-4 rounded-xl border border-emerald-200 hover:border-emerald-400 shadow-xs transition cursor-pointer group" 
-               title="Klik untuk melihat hanya penjualan real toko">
-            <span class="text-[10px] font-semibold text-emerald-700 uppercase tracking-wider block">Sales (Penjualan Real)</span>
+               title="Klik untuk melihat pesanan resmi langsung dari etalase toko FTL">
+            <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">🏪 Toko Resmi FTL (Etalase)</span>
             <div class="text-xl sm:text-2xl font-bold text-emerald-600 mt-1" id="statSalesReal">0</div>
-            <p class="text-[11px] text-emerald-600 font-medium truncate mt-1" id="statSalesSubtext">0 pcs produk</p>
+            <p class="text-[11px] text-emerald-600 font-medium truncate mt-1" id="statSalesSubtext">0 pcs • Checkout Langsung Toko</p>
           </div>
 
           <!-- 3. FO (FAKE ORDER) -->
           <div onclick="filterByQuickCat('FO (Fake Order)')" 
                class="bg-white p-3.5 sm:p-4 rounded-xl border border-amber-200 hover:border-amber-400 shadow-xs transition cursor-pointer group" 
                title="Klik untuk melihat hanya pesanan Fake Order (FO)">
-            <span class="text-[10px] font-semibold text-amber-700 uppercase tracking-wider block">Fake Order (FO)</span>
+            <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider block">📦 Fake Order (FO)</span>
             <div class="text-xl sm:text-2xl font-bold text-amber-600 mt-1" id="statFOCount">0</div>
-            <p class="text-[11px] text-amber-600 font-medium truncate mt-1" id="statFOSubtext">0 pcs produk</p>
+            <p class="text-[11px] text-amber-600 font-medium truncate mt-1" id="statFOSubtext">0 pcs • Tembakan Internal</p>
           </div>
         </section>
 
@@ -259,10 +259,10 @@
               <span id="pillAllPrefix">Semua / Gabungan</span> (<span id="pillTotalCount">0</span>)
             </button>
             <button id="pillBtnKOL" onclick="filterByQuickCat('AFFILIATE / KOL')" class="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 font-medium text-xs transition border border-purple-200 active:scale-95 flex items-center gap-1">
-              ⭐ <span id="pillKOL">KOL: 0</span>
+              🎬 <span id="pillKOL">Video Affiliate: 0</span>
             </button>
             <button id="pillBtnSales" onclick="filterByQuickCat('SALES (Real)')" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-medium text-xs transition border border-emerald-200 active:scale-95 flex items-center gap-1">
-              🛒 <span id="pillSales">Sales: 0</span>
+              🏪 <span id="pillSales">Toko Resmi: 0</span>
             </button>
             <button id="pillBtnFO" onclick="filterByQuickCat('FO (Fake Order)')" class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 font-medium text-xs transition border border-amber-200 active:scale-95 flex items-center gap-1">
               📦 <span id="pillFO">FO: 0</span>
@@ -472,114 +472,58 @@
         </div>
       </div>
 
-      <!-- 🎯 TARGET PENJUALAN BULANAN & KALKULATOR POTONGAN MARKETPLACE -->
-      <section class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        
-        <!-- KIRI: 🎯 GOAL TRACKER (TARGET PENJUALAN) -->
-        <div class="bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs space-y-3 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-emerald-100 text-[#264D3B] flex items-center justify-center shadow-2xs">
-                  <i data-lucide="target" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Target Penjualan (Goal Tracker)</h3>
-                  <p class="text-[10px] text-slate-500 font-medium">Monitoring capaian omset & kuantitas produk FTL</p>
-                </div>
-              </div>
-              
-              <!-- Target Type Toggle -->
-              <div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg text-[10px] font-bold">
-                <button type="button" id="btnTargetModeRp" onclick="setTargetMode('RP')" class="px-2 py-0.5 rounded-md bg-white text-slate-900 shadow-2xs transition">Rupiah (Rp)</button>
-                <button type="button" id="btnTargetModePcs" onclick="setTargetMode('PCS')" class="px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-900 transition">Pcs Produk</button>
-              </div>
-            </div>
-
-            <div class="mt-3 flex items-center justify-between gap-2">
-              <div class="flex items-baseline gap-1.5">
-                <span class="text-xl sm:text-2xl font-extrabold text-[#264D3B] tabular-nums" id="statTargetAchieved">Rp 0</span>
-                <span class="text-xs font-semibold text-slate-400">/ <span id="statTargetGoalLabel">Rp 250.000.000</span></span>
-              </div>
-              <span id="badgeTargetStatus" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-                0% Tercapai
-              </span>
-            </div>
-
-            <!-- Progress Bar -->
-            <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden mt-2.5 relative border border-slate-200/60 p-0.5">
-              <div id="targetProgressBar" class="h-full rounded-full bg-gradient-to-r from-emerald-600 to-[#264D3B] transition-all duration-700" style="width: 0%;"></div>
-            </div>
-
-            <div class="flex items-center justify-between text-[11px] text-slate-500 mt-2 font-medium">
-              <span id="targetRemainingText">Kurang: Rp 0 lagi</span>
-              <span id="targetPacingText" class="font-semibold text-slate-700">⚡ Status: Menghitung...</span>
-            </div>
-          </div>
-
-          <!-- Target Setting Input -->
-          <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
-            <span class="font-medium text-[11px]">Ubah Nilai Target:</span>
-            <div class="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200">
-              <span class="font-bold text-slate-400 text-[11px]" id="lblTargetInputPrefix">Rp</span>
-              <input type="number" id="inputTargetGoal" value="250000000" onchange="updateTargetGoal(this.value)" class="w-28 text-xs font-bold text-slate-900 bg-transparent focus:outline-none">
-            </div>
-          </div>
-        </div>
-
-        <!-- KANAN: 🏷️ ESTIMASI POTONGAN MARKETPLACE & NET CASH-IN -->
-        <div class="bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs space-y-3 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center shadow-2xs">
-                  <i data-lucide="percent" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Estimasi Fee Marketplace & Uang Bersih</h3>
-                  <p class="text-[10px] text-slate-500 font-medium">Kalkulasi potongan admin fee Shopee & TikTok</p>
-                </div>
-              </div>
-              <div class="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200" id="lblFeeActiveTabBadge">Tab Shopee</div>
-            </div>
-
-            <!-- Grid Metrik Fee & Net Payout -->
-            <div class="grid grid-cols-2 gap-2 mt-3">
-              <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Potongan Platform</span>
-                <div class="text-base sm:text-lg font-bold text-rose-600 mt-0.5 tabular-nums" id="statEstMarketplaceFee">Rp 0</div>
-                <p class="text-[10px] text-slate-400 truncate" id="statFeeRateSummary">Shopee 6.5% • TikTok 8.0%</p>
-              </div>
-
-              <div class="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200">
-                <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Uang Masuk Kas (Net)</span>
-                <div class="text-base sm:text-lg font-extrabold text-emerald-700 mt-0.5 tabular-nums" id="statNetCashIn">Rp 0</div>
-                <p class="text-[10px] text-emerald-600 truncate">Omset Bersih - Fee Admin</p>
-              </div>
-            </div>
-
-            <div class="mt-2.5 p-2 rounded-lg bg-blue-50/60 border border-blue-100 flex items-center justify-between text-xs">
-              <span class="text-blue-900 font-medium text-[11px]">Laba Bersih Riil (Setelah HPP & Fee Platform):</span>
-              <span class="text-xs font-bold text-blue-700 tabular-nums" id="statRealNetProfit">Rp 0</span>
-            </div>
-          </div>
-
-          <!-- Fee Rate Inputs -->
-          <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
-            <span class="text-[11px] font-medium text-slate-600">Setting Fee Admin:</span>
+      <!-- 🏷️ ESTIMASI POTONGAN MARKETPLACE & NET CASH-IN -->
+      <section class="bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs space-y-3">
+        <div>
+          <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
             <div class="flex items-center gap-2">
-              <div class="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-200 text-[11px]">
-                <span class="font-bold text-orange-600">Shopee:</span>
-                <input type="number" step="0.1" id="inputShopeeFee" value="6.5" onchange="updateMarketplaceFees(this.value, null)" class="w-12 text-center font-bold text-slate-800 bg-transparent focus:outline-none">%
+              <div class="w-7 h-7 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center shadow-2xs">
+                <i data-lucide="percent" class="w-4 h-4"></i>
               </div>
-              <div class="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-200 text-[11px]">
-                <span class="font-bold text-slate-900">TikTok:</span>
-                <input type="number" step="0.1" id="inputTikTokFee" value="8.0" onchange="updateMarketplaceFees(null, this.value)" class="w-12 text-center font-bold text-slate-800 bg-transparent focus:outline-none">%
+              <div>
+                <h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Estimasi Fee Marketplace & Uang Bersih</h3>
+                <p class="text-[10px] text-slate-500 font-medium">Kalkulasi potongan admin fee Shopee & TikTok</p>
               </div>
+            </div>
+            <div class="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200" id="lblFeeActiveTabBadge">Tab Shopee</div>
+          </div>
+
+          <!-- Grid Metrik Fee & Net Payout -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
+            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+              <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Potongan Platform</span>
+              <div class="text-base sm:text-lg font-bold text-rose-600 mt-0.5 tabular-nums" id="statEstMarketplaceFee">Rp 0</div>
+              <p class="text-[10px] text-slate-400 truncate" id="statFeeRateSummary">Shopee 6.5% • TikTok 8.0%</p>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200">
+              <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Uang Masuk Kas (Net)</span>
+              <div class="text-base sm:text-lg font-extrabold text-emerald-700 mt-0.5 tabular-nums" id="statNetCashIn">Rp 0</div>
+              <p class="text-[10px] text-emerald-600 truncate">Omset Bersih - Fee Admin</p>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-blue-50/60 border border-blue-100">
+              <span class="text-[10px] font-bold text-blue-900 uppercase tracking-wider block">Laba Riil Kas</span>
+              <div class="text-base sm:text-lg font-bold text-blue-700 mt-0.5 tabular-nums" id="statRealNetProfit">Rp 0</div>
+              <p class="text-[10px] text-blue-600 truncate">Setelah HPP & Fee Platform</p>
             </div>
           </div>
         </div>
 
+        <!-- Fee Rate Inputs -->
+        <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span class="text-[11px] font-medium text-slate-600">Setting Fee Admin:</span>
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-200 text-[11px]">
+              <span class="font-bold text-orange-600">Shopee:</span>
+              <input type="number" step="0.1" id="inputShopeeFee" value="6.5" onchange="updateMarketplaceFees(this.value, null)" class="w-12 text-center font-bold text-slate-800 bg-transparent focus:outline-none">%
+            </div>
+            <div class="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-lg border border-slate-200 text-[11px]">
+              <span class="font-bold text-slate-900">TikTok:</span>
+              <input type="number" step="0.1" id="inputTikTokFee" value="8.0" onchange="updateMarketplaceFees(null, this.value)" class="w-12 text-center font-bold text-slate-800 bg-transparent focus:outline-none">%
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- 📊 ANALISIS VISUAL & GRAFIK BISNIS -->
@@ -673,63 +617,31 @@
         </div>
       </section>
 
-      <!-- 📍 DEMOGRAFI KOTA & 📦 REKAPITULASI PRODUK & SKU -->
-      <section class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        
-        <!-- KIRI: 📍 TOP 5 KOTA PEMBELI (TARGET IKLAN ADS) -->
-        <div class="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-xs space-y-3 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shadow-2xs">
-                  <i data-lucide="map-pin" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Top Kota Pembeli (Rekomendasi Ads)</h3>
-                  <p class="text-[10px] text-slate-500 font-medium">Kota dengan pesanan terbanyak untuk acuan targeting iklan</p>
-                </div>
+      <!-- 📦 REKAPITULASI PRODUK & SKU TERLARIS -->
+      <section class="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-xs space-y-3">
+        <div>
+          <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center shadow-2xs">
+                <i data-lucide="package-search" class="w-4 h-4"></i>
               </div>
-              <span class="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">5 Kota Teratas</span>
+              <div>
+                <h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Rekapitulasi Produk & Varian (SKU)</h3>
+                <p class="text-[10px] text-slate-500 font-medium">Rincian kuantitas produk keluar untuk stok fisik gudang FTL</p>
+              </div>
             </div>
-
-            <div id="topCitiesContainer" class="space-y-2 mt-3">
-              <!-- Populated by JavaScript in refreshUI -->
-            </div>
+            <span id="badgeTotalSkuCount" class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">0 Varian</span>
           </div>
 
-          <div class="pt-2 border-t border-slate-100 text-[10px] text-slate-500 flex items-center gap-1.5">
-            <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i>
-            <span>Gunakan daftar kota ini saat set lokasi campaign di TikTok Ads & Meta Ads.</span>
+          <div id="productBreakdownContainer" class="space-y-2 mt-3 max-h-80 overflow-y-auto custom-scrollbar pr-1">
+            <!-- Populated by JavaScript in refreshUI -->
           </div>
         </div>
 
-        <!-- KANAN: 📦 REKAPITULASI PRODUK & SKU TERLARIS -->
-        <div class="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-xs space-y-3 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center shadow-2xs">
-                  <i data-lucide="package-search" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Rekapitulasi Produk & Varian (SKU)</h3>
-                  <p class="text-[10px] text-slate-500 font-medium">Rincian kuantitas produk keluar untuk stok fisik gudang</p>
-                </div>
-              </div>
-              <span id="badgeTotalSkuCount" class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">0 Varian</span>
-            </div>
-
-            <div id="productBreakdownContainer" class="space-y-2 mt-3 max-h-80 overflow-y-auto custom-scrollbar pr-1">
-              <!-- Populated by JavaScript in refreshUI -->
-            </div>
-          </div>
-
-          <div class="pt-2 border-t border-slate-100 text-[10px] text-slate-500 flex items-center justify-between">
-            <span>*Berdasarkan pesanan berstatus Selesai</span>
-            <span class="font-semibold text-slate-700">Gudang FTL</span>
-          </div>
+        <div class="pt-2 border-t border-slate-100 text-[10px] text-slate-500 flex items-center justify-between">
+          <span>*Berdasarkan pesanan berstatus Selesai</span>
+          <span class="font-semibold text-slate-700">Gudang FTL</span>
         </div>
-
       </section>
 
       <!-- Action & Toolbar Section -->
@@ -766,7 +678,36 @@
           </div>
         </div>
 
-        <!-- Search & Filter Controls -->
+        <!-- Baris Tombol Export Kecil / Compact TEPAT DI ATAS STATUS & FILTER SESUAI REQUEST KAK MIA -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1 pb-1">
+          <div class="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+            <i data-lucide="filter" class="w-3.5 h-3.5 text-[#264D3B]"></i>
+            <span>Filter Pesanan & Status:</span>
+          </div>
+
+          <!-- 3 Tombol Kecil Rapi Sesuai Mau Kak Mia -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <!-- 1. Download PDF -->
+            <button onclick="downloadDirectPDF()" class="px-2.5 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg transition border border-rose-200 active:scale-95 shadow-2xs cursor-pointer flex items-center gap-1.5" title="Download laporan PDF resmi (format lanskap A4)">
+              <i data-lucide="file-down" class="w-3.5 h-3.5 text-rose-600"></i>
+              <span>Download PDF</span>
+            </button>
+
+            <!-- 2. Download ke Excel (Renamed per request) -->
+            <button onclick="exportToExcel()" class="px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-2xs transition active:scale-95 cursor-pointer flex items-center gap-1.5" title="Download file Excel resmi FTL lengkap 24 kolom terisi 100%">
+              <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+              <span id="lblBtnExport">Download ke Excel</span>
+            </button>
+
+            <!-- 3. Copy ke Sheets (Google Sheets) -->
+            <button onclick="openGoogleSheetsHelper()" class="px-2.5 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition border border-emerald-300 active:scale-95 shadow-2xs cursor-pointer flex items-center gap-1.5" title="Buka di Google Sheets (Data 24 kolom otomatis disalin)">
+              <i data-lucide="clipboard-copy" class="w-3.5 h-3.5 text-emerald-600"></i>
+              <span>Copy ke Sheets</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Search & Filter Controls (Tempat Status) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
           <!-- Search Input -->
           <div class="relative sm:col-span-2 lg:col-span-1">
@@ -778,10 +719,10 @@
 
           <!-- Kategori Filter -->
           <select id="filterCategory" onchange="applyFilters()" class="text-xs py-2 px-2.5 bg-purple-50 border border-purple-200 text-purple-900 rounded-xl focus:outline-none font-bold">
-            <option value="ALL">Semua Kategori (KOL/Sales/FO)</option>
-            <option value="AFFILIATE / KOL">⭐ Affiliate / KOL</option>
-            <option value="SALES (Real)">🛒 Sales (Penjualan Real)</option>
-            <option value="FO (Fake Order)">📦 FO (Fake Order)</option>
+            <option value="ALL">Semua Jalur (Video Affiliate & Toko Resmi)</option>
+            <option value="AFFILIATE / KOL">🎬 Video & Creator Affiliate</option>
+            <option value="SALES (Real)">🏪 Checkout Resmi dari Toko (Etalase)</option>
+            <option value="FO (Fake Order)">📦 Fake Order (FO)</option>
           </select>
 
           <!-- Status Filter -->
@@ -797,27 +738,6 @@
             <option value="ORDER_DATE">Urutkan Tanggal Pesanan</option>
             <option value="BATAL_ONLY">Tampilkan Khusus Batal</option>
           </select>
-        </div>
-
-        <!-- Export Buttons (Touch-Friendly) -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-slate-100">
-          <!-- 1. Download PDF Resmi -->
-          <button onclick="downloadDirectPDF()" class="px-3.5 py-2.5 sm:py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-xl transition-all flex items-center justify-center gap-1.5 border border-rose-200 active:scale-95 shadow-2xs cursor-pointer" title="Download laporan PDF resmi (format lanskap A4, tanpa dialog print)">
-            <i data-lucide="file-down" class="w-4 h-4 text-rose-600"></i>
-            <span>Download PDF</span>
-          </button>
-
-          <!-- 2. Download Spreadsheet (.xlsx) - File Lengkap 100% Terisi -->
-          <button onclick="exportToExcel()" class="px-3.5 py-2.5 sm:py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer" title="Download file spreadsheet lengkap, langsung terisi 100% data & rumus">
-            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-            <span id="lblBtnExport">Download Spreadsheet (.xlsx)</span>
-          </button>
-
-          <!-- 3. Salin ke Google Sheets -->
-          <button onclick="openGoogleSheetsHelper()" class="px-3.5 py-2.5 sm:py-2 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-all flex items-center justify-center gap-1.5 border border-emerald-300 active:scale-95 shadow-2xs cursor-pointer" title="Salin data 24 kolom & buka panduan Google Sheets">
-            <i data-lucide="share-2" class="w-4 h-4 text-emerald-600"></i>
-            <span>Salin ke Google Sheets</span>
-          </button>
         </div>
 
         <!-- Bulk Tools & Retur Manager -->
@@ -1209,15 +1129,15 @@
       if (tabName === 'Shopee') {
         if (btnShopee) btnShopee.className = "flex-1 sm:flex-initial px-3.5 py-1.5 rounded-md font-semibold text-xs transition flex items-center justify-center gap-1.5 bg-[#EE4D2D] text-white shadow-xs";
         if (uploadTitle) uploadTitle.innerText = "Upload Laporan Shopee";
-        setTxt('lblBtnExport', "Download Spreadsheet (Shopee)");
+        setTxt('lblBtnExport', "Download ke Excel (Shopee)");
       } else if (tabName === 'TikTok') {
         if (btnTikTok) btnTikTok.className = "flex-1 sm:flex-initial px-3.5 py-1.5 rounded-md font-semibold text-xs transition flex items-center justify-center gap-1.5 bg-slate-900 text-white shadow-xs";
         if (uploadTitle) uploadTitle.innerText = "Upload Laporan TikTok";
-        setTxt('lblBtnExport', "Download Spreadsheet (TikTok)");
+        setTxt('lblBtnExport', "Download ke Excel (TikTok)");
       } else {
         if (btnGabungan) btnGabungan.className = "flex-1 sm:flex-initial px-3.5 py-1.5 rounded-md font-semibold text-xs transition flex items-center justify-center gap-1.5 bg-[#264D3B] text-white shadow-xs";
         if (uploadTitle) uploadTitle.innerText = "Upload Laporan Shopee / TikTok";
-        setTxt('lblBtnExport', "Download Spreadsheet (Gabungan)");
+        setTxt('lblBtnExport', "Download ke Excel (Gabungan)");
       }
 
       refreshUI();
@@ -1645,13 +1565,13 @@
 
       // Update Kategori & Operasional Cards
       setTxt('statTotalOrder', totalOrders.toLocaleString('id-ID'));
-      setTxt('statTotalBreakdown', `KOL: ${kolCount} • SALES: ${salesCount} • FO: ${foCount} (${totalPcs} pcs)`);
+      setTxt('statTotalBreakdown', `🎬 Video: ${kolCount} • 🏪 Toko: ${salesCount} • 📦 FO: ${foCount} (${totalPcs} pcs)`);
 
       setTxt('statAffiliateKOL', kolCount.toLocaleString('id-ID'));
-      setTxt('statKOLSubtext', `${kolPcs} Pcs • Endorse / Sample`);
+      setTxt('statKOLSubtext', `${kolPcs} Pcs • Video & Creator Affiliate`);
 
       setTxt('statSalesReal', salesCount.toLocaleString('id-ID'));
-      setTxt('statSalesSubtext', `${salesPcs} Pcs • Penjualan Asli Toko`);
+      setTxt('statSalesSubtext', `${salesPcs} Pcs • Checkout Langsung Toko`);
 
       setTxt('statFOCount', foCount.toLocaleString('id-ID'));
       setTxt('statFOSubtext', `${foPcs} Pcs • Fake Order (Tembak)`);
@@ -1670,8 +1590,8 @@
       }
 
       setTxt('pillTotalCount', totalOrders);
-      setTxt('pillKOL', `KOL: ${kolCount} (${kolPcs} pcs)`);
-      setTxt('pillSales', `Sales: ${salesCount} (${salesPcs} pcs)`);
+      setTxt('pillKOL', `Video Affiliate: ${kolCount} (${kolPcs} pcs)`);
+      setTxt('pillSales', `Toko Resmi: ${salesCount} (${salesPcs} pcs)`);
       setTxt('pillFO', `FO: ${foCount} (${foPcs} pcs)`);
 
       const currentCatVal = document.getElementById('filterCategory') ? document.getElementById('filterCategory').value : 'ALL';
@@ -1701,13 +1621,6 @@
       setTxt('statBatalNominal', `${batalCount} order × ${batalPcs} pcs = ${strBatalNom}`);
 
       setTxt('lblTotalCount', totalOrders);
-
-      // Card 7: Rincian Hitungan Nominal
-      setTxt('calcNomKotor', strKotor);
-      setTxt('calcNomDiskon', strDiskon);
-      setTxt('calcNomBersih', strBersih);
-      setTxt('calcNomHpp', strHpp);
-      setTxt('calcNomLaba', strLaba);
 
       // Papan Kalkulasi 3 Persamaan
       setTxt('fKotor', strKotor);
@@ -1867,8 +1780,6 @@
       const inpTikTok = document.getElementById('inputTikTokFee');
       if (inpTikTok && document.activeElement !== inpTikTok) inpTikTok.value = tiktokFeePct;
 
-      updateTargetTrackerUI(currentData);
-      renderTopCities(currentData);
       renderMonthlyBreakdown(currentData);
       renderProductBreakdown(currentData);
       renderCharts(currentData);
@@ -2319,7 +2230,7 @@
 
       const lblBtnExport = document.getElementById('lblBtnExport');
       if (lblBtnExport) {
-        lblBtnExport.innerText = `Download Spreadsheet (${activePlatformTab})`;
+        lblBtnExport.innerText = `Download ke Excel (${activePlatformTab})`;
       }
     }
 
@@ -2492,25 +2403,25 @@
                     o.kategori.includes('FO') ? 'bg-amber-50 text-amber-800 border-amber-200' :
                     'bg-emerald-50 text-emerald-700 border-emerald-200'
                   }">
-            <option value="AFFILIATE / KOL" ${o.kategori.includes('KOL') || o.kategori.includes('AFFILIATE') ? 'selected' : ''}>KOL / Affiliate</option>
-            <option value="SALES (Real)" ${o.kategori.includes('Real') || o.kategori.includes('SALES') ? 'selected' : ''}>Sales Real</option>
-            <option value="FO (Fake Order)" ${o.kategori.includes('FO') ? 'selected' : ''}>FO</option>
+            <option value="AFFILIATE / KOL" ${o.kategori.includes('KOL') || o.kategori.includes('AFFILIATE') ? 'selected' : ''}>🎬 Video Affiliate</option>
+            <option value="SALES (Real)" ${o.kategori.includes('Real') || o.kategori.includes('SALES') ? 'selected' : ''}>🏪 Toko Resmi FTL</option>
+            <option value="FO (Fake Order)" ${o.kategori.includes('FO') ? 'selected' : ''}>📦 Fake Order (FO)</option>
           </select>
         `;
 
-        // Badge Jalur Checkout (Purple for Creator / Endorsement as requested)
+        // Badge Jalur Checkout (Distinction between Video Affiliate and Toko Resmi per Kak Mia)
         const jc = (o.jalurCheckout || o.kategori || '').toLowerCase();
         let checkoutBadge = '';
         if (jc.includes('creator') || jc.includes('endorse') || jc.includes('kol') || jc.includes('affiliate') || jc.includes('@') || jc.includes('sample')) {
-          checkoutBadge = `<span class="inline-flex items-center gap-1 font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200 text-[10px] whitespace-nowrap">Creator / Endorsement</span>`;
+          checkoutBadge = `<span class="inline-flex items-center gap-1 font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200 text-[10px] whitespace-nowrap">🎬 Video Affiliate</span>`;
         } else if (jc.includes('video')) {
-          checkoutBadge = `<span class="inline-flex items-center gap-1 font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 text-[10px] whitespace-nowrap">🎥 Video FYP</span>`;
+          checkoutBadge = `<span class="inline-flex items-center gap-1 font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200 text-[10px] whitespace-nowrap">🎬 Video Affiliate</span>`;
         } else if (jc.includes('live')) {
-          checkoutBadge = `<span class="inline-flex items-center gap-1 font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200 text-[10px] whitespace-nowrap">🔴 TikTok LIVE</span>`;
+          checkoutBadge = `<span class="inline-flex items-center gap-1 font-bold text-pink-700 bg-pink-50 px-2 py-0.5 rounded-md border border-pink-200 text-[10px] whitespace-nowrap">🔴 LIVE Affiliate</span>`;
         } else if (jc.includes('fo') || jc.includes('fake')) {
-          checkoutBadge = `<span class="inline-flex items-center gap-1 font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 text-[10px] whitespace-nowrap">📦 Fake Order (FO)</span>`;
+          checkoutBadge = `<span class="inline-flex items-center gap-1 font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 text-[10px] whitespace-nowrap">📦 Fake Order (FO)</span>`;
         } else {
-          checkoutBadge = `<span class="inline-flex items-center gap-1 font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 text-[10px] whitespace-nowrap">🛍️ ${o.jalurCheckout || 'Etalase Toko'}</span>`;
+          checkoutBadge = `<span class="inline-flex items-center gap-1 font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 text-[10px] whitespace-nowrap">🏪 Toko Resmi FTL</span>`;
         }
 
         const statusSelect = `
@@ -2890,128 +2801,6 @@
     }
 
 
-    // 🎯 GOAL TRACKER (TARGET PENJUALAN) FUNCTIONS
-    function setTargetMode(mode) {
-      targetMode = mode;
-      saveStateToStorage();
-      const btnRp = document.getElementById('btnTargetModeRp');
-      const btnPcs = document.getElementById('btnTargetModePcs');
-      const lblPrefix = document.getElementById('lblTargetInputPrefix');
-      const inputGoal = document.getElementById('inputTargetGoal');
-
-      if (btnRp && btnPcs && lblPrefix && inputGoal) {
-        if (mode === 'RP') {
-          btnRp.className = "px-2 py-0.5 rounded-md bg-white text-slate-900 shadow-2xs font-bold transition";
-          btnPcs.className = "px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-900 font-medium transition";
-          lblPrefix.innerText = 'Rp';
-          inputGoal.value = monthlyTargetRp;
-        } else {
-          btnPcs.className = "px-2 py-0.5 rounded-md bg-white text-slate-900 shadow-2xs font-bold transition";
-          btnRp.className = "px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-900 font-medium transition";
-          lblPrefix.innerText = 'Pcs';
-          inputGoal.value = monthlyTargetPcs;
-        }
-      }
-      refreshUI();
-      showToast(mode === 'RP' ? 'Target diubah ke format Rupiah (Omset)' : 'Target diubah ke format Pcs (Volume)');
-    }
-
-    function updateTargetGoal(val) {
-      const num = parseFloat(val) || 0;
-      if (targetMode === 'RP') {
-        monthlyTargetRp = num;
-      } else {
-        monthlyTargetPcs = num;
-      }
-      saveStateToStorage();
-      refreshUI();
-      showToast('Nilai target berhasil diperbarui!');
-    }
-
-    function updateTargetTrackerUI(currentData) {
-      const suksesOrders = currentData.filter(o => o.status === 'Selesai');
-      const omsetBersih = suksesOrders.reduce((acc, o) => acc + (o.totalBayar || 0), 0);
-      const totalPcs = suksesOrders.reduce((acc, o) => acc + (o.qty || 1), 0);
-
-      const isRp = targetMode === 'RP';
-      const goal = isRp ? monthlyTargetRp : monthlyTargetPcs;
-      const achieved = isRp ? omsetBersih : totalPcs;
-
-      const pct = goal > 0 ? Math.round((achieved / goal) * 1000) / 10 : 0;
-      const remaining = Math.max(0, goal - achieved);
-
-      const elAchieved = document.getElementById('statTargetAchieved');
-      const elGoalLabel = document.getElementById('statTargetGoalLabel');
-      const elBadge = document.getElementById('badgeTargetStatus');
-      const elBar = document.getElementById('targetProgressBar');
-      const elRem = document.getElementById('targetRemainingText');
-      const elPacing = document.getElementById('targetPacingText');
-      const inpGoal = document.getElementById('inputTargetGoal');
-      const btnRp = document.getElementById('btnTargetModeRp');
-      const btnPcs = document.getElementById('btnTargetModePcs');
-      const lblPrefix = document.getElementById('lblTargetInputPrefix');
-
-      if (btnRp && btnPcs && lblPrefix) {
-        if (isRp) {
-          btnRp.className = "px-2 py-0.5 rounded-md bg-white text-slate-900 shadow-2xs font-bold transition";
-          btnPcs.className = "px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-900 font-medium transition";
-          lblPrefix.innerText = 'Rp';
-        } else {
-          btnPcs.className = "px-2 py-0.5 rounded-md bg-white text-slate-900 shadow-2xs font-bold transition";
-          btnRp.className = "px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-900 font-medium transition";
-          lblPrefix.innerText = 'Pcs';
-        }
-      }
-
-      if (inpGoal && document.activeElement !== inpGoal) {
-        inpGoal.value = goal;
-      }
-
-      if (elAchieved) {
-        elAchieved.innerText = isRp ? ('Rp ' + Math.round(achieved).toLocaleString('id-ID')) : (achieved.toLocaleString('id-ID') + ' pcs');
-      }
-      if (elGoalLabel) {
-        elGoalLabel.innerText = isRp ? ('Rp ' + Math.round(goal).toLocaleString('id-ID')) : (goal.toLocaleString('id-ID') + ' pcs');
-      }
-      if (elBadge) {
-        elBadge.innerText = `${pct}% Tercapai`;
-        if (pct >= 100) {
-          elBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300";
-        } else if (pct >= 60) {
-          elBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-300";
-        } else {
-          elBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300";
-        }
-      }
-      if (elBar) {
-        elBar.style.width = Math.min(100, pct) + '%';
-        if (pct >= 100) {
-          elBar.className = "h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 transition-all duration-700";
-        } else {
-          elBar.className = "h-full rounded-full bg-gradient-to-r from-emerald-600 to-[#264D3B] transition-all duration-700";
-        }
-      }
-      if (elRem) {
-        if (remaining <= 0) {
-          elRem.innerHTML = `<b class="text-emerald-700 font-bold">🎉 Target Terpenuhi! (+${isRp ? 'Rp ' + Math.round(achieved - goal).toLocaleString('id-ID') : (achieved - goal) + ' pcs'} melampaui target)</b>`;
-        } else {
-          elRem.innerText = isRp ? `Kurang: Rp ${Math.round(remaining).toLocaleString('id-ID')} lagi` : `Kurang: ${remaining.toLocaleString('id-ID')} pcs lagi`;
-        }
-      }
-      if (elPacing) {
-        if (pct >= 100) {
-          elPacing.innerText = '🏆 Luar Biasa! Target Tercapai';
-          elPacing.className = 'font-bold text-emerald-700';
-        } else if (pct >= 50) {
-          elPacing.innerText = '🚀 On Track! Pertahankan pacing';
-          elPacing.className = 'font-semibold text-blue-700';
-        } else {
-          elPacing.innerText = '⚡ Kejar Target! Dorong penjualan';
-          elPacing.className = 'font-semibold text-amber-700';
-        }
-      }
-    }
-
     // 🏷️ MARKETPLACE FEE FUNCTIONS
     function updateMarketplaceFees(sVal, tVal) {
       if (sVal !== null && sVal !== undefined) {
@@ -3023,84 +2812,6 @@
       saveStateToStorage();
       refreshUI();
       showToast(`Fee marketplace diperbarui (Shopee ${shopeeFeePct}%, TikTok ${tiktokFeePct}%)`);
-    }
-
-    // 📍 TOP 5 KOTA PEMBELI (TARGET IKLAN ADS) FUNCTIONS
-    function getTopCities(data) {
-      const cityMap = {};
-      data.forEach(o => {
-        let raw = (o.kota || o.provinsi || '').trim();
-        if (!raw) raw = 'Lainnya';
-        let clean = raw.replace(/^(KOTA|KABUPATEN|KAB\.?)\s+/i, '').trim();
-        if (!clean) clean = 'Lainnya';
-        clean = clean.toUpperCase();
-
-        if (!cityMap[clean]) {
-          cityMap[clean] = {
-            city: clean,
-            orders: 0,
-            pcs: 0,
-            omsetBersih: 0
-          };
-        }
-        cityMap[clean].orders += 1;
-        cityMap[clean].pcs += (o.qty || 1);
-        if (o.status === 'Selesai') {
-          cityMap[clean].omsetBersih += (o.totalBayar || 0);
-        }
-      });
-      const list = Object.values(cityMap).sort((a, b) => b.orders - a.orders || b.pcs - a.pcs);
-      return list.slice(0, 5);
-    }
-
-    function renderTopCities(data) {
-      const container = document.getElementById('topCitiesContainer');
-      if (!container) return;
-      const topCities = getTopCities(data);
-      if (topCities.length === 0) {
-        container.innerHTML = `
-          <div class="py-6 text-center text-slate-400 text-xs">
-            <i data-lucide="map-pin-off" class="w-5 h-5 mx-auto mb-1 opacity-40"></i>
-            Belum ada data kota/kabupaten pembeli.
-          </div>
-        `;
-        lucide.createIcons();
-        return;
-      }
-      const totalOrdersInScope = data.length || 1;
-      const rankBadges = [
-        '<span class="w-5 h-5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold flex items-center justify-center shrink-0 border border-amber-300">1</span>',
-        '<span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-extrabold flex items-center justify-center shrink-0 border border-slate-300">2</span>',
-        '<span class="w-5 h-5 rounded-full bg-orange-100 text-orange-800 text-[10px] font-extrabold flex items-center justify-center shrink-0 border border-orange-300">3</span>',
-        '<span class="w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-extrabold flex items-center justify-center shrink-0 border border-slate-200">4</span>',
-        '<span class="w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-extrabold flex items-center justify-center shrink-0 border border-slate-200">5</span>'
-      ];
-
-      container.innerHTML = topCities.map((c, idx) => {
-        const pct = Math.round((c.orders / totalOrdersInScope) * 100);
-        return `
-          <div class="p-2.5 rounded-xl border border-slate-200/90 bg-white hover:border-rose-300 transition shadow-2xs space-y-1.5">
-            <div class="flex items-center justify-between gap-1.5">
-              <div class="flex items-center gap-2 min-w-0">
-                ${rankBadges[idx] || `<span class="text-[10px] font-bold text-slate-500">${idx+1}</span>`}
-                <span class="text-xs font-bold text-slate-800 truncate" title="${c.city}">${c.city}</span>
-              </div>
-              <div class="text-right shrink-0">
-                <span class="text-xs font-extrabold text-[#264D3B] tabular-nums">${c.orders} <span class="text-[10px] font-semibold text-slate-500">order</span></span>
-                <span class="text-[10px] font-medium text-slate-400">(${c.pcs} pcs)</span>
-              </div>
-            </div>
-            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-              <div class="h-full rounded-full bg-gradient-to-r from-rose-500 to-rose-600" style="width: ${pct}%;"></div>
-            </div>
-            <div class="flex items-center justify-between text-[9px] text-slate-500 pt-0.5">
-              <span>Porsi Transaksi: <b>${pct}%</b></span>
-              <span>Omset: <b class="text-emerald-700">Rp ${Math.round(c.omsetBersih).toLocaleString('id-ID')}</b></span>
-            </div>
-          </div>
-        `;
-      }).join('');
-      lucide.createIcons();
     }
 
     // 📊 CHART.JS VISUAL ANALYTICS FUNCTIONS
@@ -3456,8 +3167,9 @@
       }
     }
 
-    // 🟢 GOOGLE SHEETS SUITE (Otomatis Buka & Paste Helper)
-    // 🟢 GOOGLE SHEETS SUITE (Modal Panduan & Paste Helper - Anti-Bingung)
+    // 🟢 GOOGLE SHEETS SUITE (Otomatis Salin & Langsung Buka Tab Google Sheets)
+    const DEFAULT_FTL_SHEETS_URL = 'https://docs.google.com/spreadsheets/d/1FUAcjVywbB8DOwOPjKt9iTvhS66Qe3GsCAIJyAuY1W0/edit?gid=0#gid=0';
+
     function openGoogleSheetsHelper() {
       // 1. Copy formatted TSV data to clipboard silently
       copyToClipboardSpreadsheet(true);
@@ -3465,7 +3177,14 @@
       // 2. Synchronize saved URL state
       refreshCustomSheetUI();
 
-      // 3. Show guide modal (TIDAK langsung buka tab baru agar user tidak kaget melihat sheets kosong!)
+      // 3. Langsung buka tab Google Sheets (link kantor tersimpan atau sheets.new) per permintaan Kak Mia
+      const targetUrl = localStorage.getItem('ftl_custom_sheets_url') || DEFAULT_FTL_SHEETS_URL;
+      window.open(targetUrl, '_blank');
+
+      // 4. Notifikasi panduan instan
+      showToast('Data 24 kolom siap! Di Google Sheets, klik kotak A1 lalu tekan Ctrl+V (Paste).', true);
+
+      // 5. Tampilkan juga modal panduan jika kembali ke tab ini
       const modal = document.getElementById('sheetsModal');
       if (modal) {
         modal.classList.remove('hidden');
@@ -3518,7 +3237,7 @@
     }
 
     function refreshCustomSheetUI() {
-      const savedUrl = localStorage.getItem('ftl_custom_sheets_url') || '';
+      const savedUrl = localStorage.getItem('ftl_custom_sheets_url') || DEFAULT_FTL_SHEETS_URL;
       const input = document.getElementById('inputCustomSheetUrl');
       if (input && !input.value) input.value = savedUrl;
 
@@ -3645,15 +3364,15 @@
         </div>
       </div>
 
-      <!-- Alternative Option: 1-Click XLSX Download (Pre-filled) -->
+      <!-- Alternative Option: 1-Click Excel Download (Pre-filled) -->
       <div class="bg-amber-50/80 border border-amber-200 rounded-xl p-3 flex items-center justify-between gap-2.5">
         <div class="text-xs">
-          <span class="font-bold text-amber-900 block text-[11px]">Mau file spreadsheet yang LANGSUNG TERISI 100%?</span>
-          <span class="text-amber-800 text-[10px] block">Tanpa perlu paste, bisa langsung dibuka di Excel/Drive.</span>
+          <span class="font-bold text-amber-900 block text-[11px]">Mau file Excel yang LANGSUNG TERISI 100%?</span>
+          <span class="text-amber-800 text-[10px] block">Tanpa perlu paste, semua 24 kolom & total langsung terisi.</span>
         </div>
         <button onclick="exportToExcel(); closeGoogleSheetsModal();" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-lg shadow-2xs shrink-0 active:scale-95 transition cursor-pointer flex items-center gap-1">
           <i data-lucide="download" class="w-3 h-3"></i>
-          <span>Download .xlsx</span>
+          <span>Download ke Excel</span>
         </button>
       </div>
 
