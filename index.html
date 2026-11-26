@@ -408,6 +408,58 @@
           </div>
         </section>
 
+<!-- 🏷️ RINGKASAN RINCIAN POTONGAN BIAYA DI BERANDA -->
+        <div class="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 shadow-xs space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+              <i data-lucide="receipt" class="w-4 h-4 text-rose-500"></i>
+              <span>Rincian Potongan & Biaya Penjualan (<span id="lblHomePotonganPlatform" class="text-rose-600 font-bold">Tab Shopee</span>):</span>
+            </span>
+            <button onclick="switchView('finance')" class="text-xs font-bold text-[#738a7a] hover:text-[#5e7264] flex items-center gap-1 transition cursor-pointer">
+              <span>Buka Menu Keuangan Lengkap</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div class="p-2.5 rounded-xl bg-orange-50/70 border border-orange-200/80">
+              <div class="flex items-center justify-between text-[10px] font-semibold text-orange-800 uppercase tracking-wider">
+                <span>1. Diskon Toko</span>
+                <span class="text-[9px] text-orange-600">Beban FTL</span>
+              </div>
+              <div class="text-sm sm:text-base font-bold text-orange-700 mt-0.5 tabular-nums" id="statHomeDiskonToko">Rp 0</div>
+              <p class="text-[10px] text-orange-600/80 truncate">Voucher diskon penjual</p>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-purple-50/70 border border-purple-200/80">
+              <div class="flex items-center justify-between text-[10px] font-semibold text-purple-800 uppercase tracking-wider">
+                <span>2. Subsidi Platform</span>
+                <span class="text-[9px] text-purple-600">Diganti</span>
+              </div>
+              <div class="text-sm sm:text-base font-bold text-purple-700 mt-0.5 tabular-nums" id="statHomeDiskonPlatform">Rp 0</div>
+              <p class="text-[10px] text-purple-600/80 truncate">Diskon promo TikTok/Shopee</p>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-rose-50/70 border border-rose-200/80">
+              <div class="flex items-center justify-between text-[10px] font-semibold text-rose-800 uppercase tracking-wider">
+                <span>3. Fee Admin</span>
+                <span class="text-[9px] text-rose-600" id="statHomeFeeRate">Shopee / TikTok</span>
+              </div>
+              <div class="text-sm sm:text-base font-bold text-rose-600 mt-0.5 tabular-nums" id="statHomeFeeAdmin">Rp 0</div>
+              <p class="text-[10px] text-rose-600/80 truncate">Potongan fee transaksi</p>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-200">
+              <div class="flex items-center justify-between text-[10px] font-bold text-emerald-800 uppercase tracking-wider">
+                <span>4. Kas Riil (Net)</span>
+                <span class="text-[9px] text-emerald-700">Masuk Kas</span>
+              </div>
+              <div class="text-sm sm:text-base font-extrabold text-emerald-700 mt-0.5 tabular-nums" id="statHomeNetCashIn">Rp 0</div>
+              <p class="text-[10px] text-emerald-600 truncate">Uang bersih setelah fee</p>
+            </div>
+          </div>
+        </div>
+
         <!-- BANNER RINCIAN CEPAT / PILL BAR KATEGORI (KLIKABLE & SINKRON TOTAL) -->
         <div class="bg-white border border-slate-200/90 p-2 sm:p-2.5 rounded-xl flex flex-wrap items-center justify-between gap-2 text-xs shadow-xs">
           <div class="flex items-center gap-1.5 font-semibold text-slate-700">
@@ -580,6 +632,8 @@
                 <th class="px-2.5 py-3 text-right bg-purple-50/80 text-purple-800 min-w-[105px]" title="Diskon subsidi dari TikTok / Shopee">Diskon Platform</th>
                 <th class="px-2.5 py-3 text-right bg-rose-50/80 text-rose-700 border-r border-rose-200/60 min-w-[105px]" title="Total semua potongan (Diskon Toko + Diskon Platform)">Total Potongan</th>
                 <th class="px-2.5 py-3 text-right bg-emerald-50/50 text-emerald-800 min-w-[100px]">Omset Bersih</th>
+                <th class="px-2.5 py-3 text-right bg-rose-50/70 text-rose-800 min-w-[95px]" title="Estimasi potongan fee komisi admin platform">Fee Admin</th>
+                <th class="px-2.5 py-3 text-right bg-teal-50/70 text-teal-800 min-w-[105px]" title="Uang riil masuk kas toko setelah dipotong fee admin">Kas Masuk (Net)</th>
                 <th class="px-2.5 py-3 text-right bg-indigo-50/50 text-indigo-800">Total HPP</th>
                 <th class="px-2.5 py-3 text-right bg-blue-50/50 text-blue-800">Laba (Est)</th>
                 <th class="px-2.5 py-3">No. Resi</th>
@@ -956,40 +1010,150 @@
         </div>
       </div>
 
-      <!-- 🏷️ ESTIMASI POTONGAN MARKETPLACE & NET CASH-IN -->
-      <section class="bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs space-y-3">
-        <div>
-          <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
-            <div class="flex items-center gap-2">
-              <div class="w-7 h-7 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center shadow-2xs">
-                <i data-lucide="percent" class="w-4 h-4"></i>
+      <!-- 🏷️ DETAIL RINCIAN POTONGAN BIAYA (DIPISAH BERDASARKAN ASAL BIAYA) -->
+      <section class="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-200 shadow-2xs">
+              <i data-lucide="receipt" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-slate-900 leading-tight">Detail Rincian Potongan Biaya (Dipisah Berdasarkan Asal Biaya)</h3>
+              <p class="text-xs text-slate-500 font-medium">Transparansi penuh: membedakan biaya toko sendiri vs potongan fee marketplace vs subsidi promo</p>
+            </div>
+          </div>
+          <div class="text-xs font-semibold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200" id="lblDetailPotonganTabBadge">
+            Aktif: Tab Shopee
+          </div>
+        </div>
+
+        <!-- 4 KARTU SUMBER BIAYA TERPISAH -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          
+          <!-- POS 1: DISKON VOUCHER TOKO (BEBAN TOKO SENDIRI) -->
+          <div class="bg-orange-50/40 border border-orange-200/80 rounded-2xl p-3.5 space-y-2 relative overflow-hidden flex flex-col justify-between">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-orange-800 bg-orange-100 px-2 py-0.5 rounded-md border border-orange-200">
+                  1. Beban Toko FTL
+                </span>
+                <span class="text-[10px] font-semibold text-orange-700">Voucher Penjual</span>
               </div>
               <div>
-                <h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Estimasi Fee Marketplace & Uang Bersih</h3>
-                <p class="text-[10px] text-slate-500 font-medium">Kalkulasi potongan admin fee Shopee & TikTok</p>
+                <div class="text-lg sm:text-xl font-extrabold text-orange-900 tabular-nums" id="statDetailDiskonToko">Rp 0</div>
+                <p class="text-[11px] font-semibold text-orange-800 mt-0.5">Potongan Diskon Toko</p>
+              </div>
+              <div class="text-[10px] text-slate-600 space-y-1 pt-1.5 border-t border-orange-200/60 leading-relaxed">
+                <div>• <b>Shopee:</b> Voucher Toko / Diskon Penjual</div>
+                <div>• <b>TikTok:</b> Kolom <i>SKU Seller Discount</i> (Col 16)</div>
               </div>
             </div>
-            <div class="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200" id="lblFeeActiveTabBadge">Tab Shopee</div>
+            <div class="text-[9px] text-orange-700 font-medium bg-white/80 p-1.5 rounded-lg border border-orange-200/60 mt-2">
+              ⚠️ <b>Beban Toko:</b> Mengurangi harga jual kotor sebagai promosi menarik pembeli.
+            </div>
           </div>
 
-          <!-- Grid Metrik Fee & Net Payout -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
-            <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-              <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">Potongan Platform</span>
-              <div class="text-base sm:text-lg font-bold text-rose-600 mt-0.5 tabular-nums" id="statEstMarketplaceFee">Rp 0</div>
-              <p class="text-[10px] text-slate-400 truncate" id="statFeeRateSummary">Shopee 6.5% • TikTok 8.0%</p>
+          <!-- POS 2: DISKON SUBSIDI PLATFORM (BUKAN BEBAN TOKO) -->
+          <div class="bg-purple-50/40 border border-purple-200/80 rounded-2xl p-3.5 space-y-2 relative overflow-hidden flex flex-col justify-between">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-purple-800 bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200">
+                  2. Subsidi Platform
+                </span>
+                <span class="text-[10px] font-semibold text-purple-700">Promo Marketplace</span>
+              </div>
+              <div>
+                <div class="text-lg sm:text-xl font-extrabold text-purple-900 tabular-nums" id="statDetailDiskonPlatform">Rp 0</div>
+                <p class="text-[11px] font-semibold text-purple-800 mt-0.5">Diskon Subsidi Platform</p>
+              </div>
+              <div class="text-[10px] text-slate-600 space-y-1 pt-1.5 border-t border-purple-200/60 leading-relaxed">
+                <div>• <b>TikTok:</b> Kolom <i>SKU Platform Discount</i> (Col 15)</div>
+                <div>• <b>Shopee:</b> Voucher Event / Gratis Ongkir Shopee</div>
+              </div>
             </div>
-
-            <div class="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200">
-              <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Uang Masuk Kas (Net)</span>
-              <div class="text-base sm:text-lg font-extrabold text-emerald-700 mt-0.5 tabular-nums" id="statNetCashIn">Rp 0</div>
-              <p class="text-[10px] text-emerald-600 truncate">Omset Bersih - Fee Admin</p>
+            <div class="text-[9px] text-purple-700 font-medium bg-white/80 p-1.5 rounded-lg border border-purple-200/60 mt-2">
+              ✅ <b>Bukan Beban Toko:</b> Disubsidi penuh oleh marketplace, uang tetap masuk kas.
             </div>
+          </div>
 
-            <div class="p-2.5 rounded-xl bg-blue-50/60 border border-blue-100">
-              <span class="text-[10px] font-bold text-blue-900 uppercase tracking-wider block">Laba Riil Kas</span>
-              <div class="text-base sm:text-lg font-bold text-blue-700 mt-0.5 tabular-nums" id="statRealNetProfit">Rp 0</div>
-              <p class="text-[10px] text-blue-600 truncate">Setelah HPP & Fee Platform</p>
+          <!-- POS 3: BIAYA ADMIN & LAYANAN MARKETPLACE (FEE PLATFORM) -->
+          <div class="bg-rose-50/40 border border-rose-200/80 rounded-2xl p-3.5 space-y-2 relative overflow-hidden flex flex-col justify-between">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-rose-800 bg-rose-100 px-2 py-0.5 rounded-md border border-rose-200">
+                  3. Biaya Layanan
+                </span>
+                <span class="text-[10px] font-semibold text-rose-700" id="statDetailFeeRateBadge">Shopee 6.5% • TikTok 8%</span>
+              </div>
+              <div>
+                <div class="text-lg sm:text-xl font-extrabold text-rose-700 tabular-nums" id="statDetailFeeAdmin">- Rp 0</div>
+                <p class="text-[11px] font-semibold text-rose-800 mt-0.5">Fee Admin Marketplace</p>
+              </div>
+              <div class="text-[10px] text-slate-600 space-y-1 pt-1.5 border-t border-rose-200/60 leading-relaxed">
+                <div>• <b>Shopee:</b> Komisi & biaya administrasi transaksi</div>
+                <div>• <b>TikTok:</b> Komisi platform & fee transaksi</div>
+              </div>
+            </div>
+            <div class="text-[9px] text-rose-700 font-medium bg-white/80 p-1.5 rounded-lg border border-rose-200/60 mt-2">
+              ⚠️ <b>Potongan Kas:</b> Ditarik otomatis dari saldo sebelum ditarik ke rekening.
+            </div>
+          </div>
+
+          <!-- POS 4: MODAL POKOK BARANG FISIK (HPP GUDANG) -->
+          <div class="bg-indigo-50/40 border border-indigo-200/80 rounded-2xl p-3.5 space-y-2 relative overflow-hidden flex flex-col justify-between">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-800 bg-indigo-100 px-2 py-0.5 rounded-md border border-indigo-200">
+                  4. Modal Produk
+                </span>
+                <span class="text-[10px] font-semibold text-indigo-700" id="statDetailHppRateBadge">@Rp 25.000 / pcs</span>
+              </div>
+              <div>
+                <div class="text-lg sm:text-xl font-extrabold text-indigo-900 tabular-nums" id="statDetailHppModal">- Rp 0</div>
+                <p class="text-[11px] font-semibold text-indigo-800 mt-0.5">Total HPP Modal Barang</p>
+              </div>
+              <div class="text-[10px] text-slate-600 space-y-1 pt-1.5 border-t border-indigo-200/60 leading-relaxed">
+                <div>• <b>Status:</b> Dihitung khusus pesanan <i>Selesai</i></div>
+                <div>• <b>Rumus:</b> Qty Terjual Sukses × HPP Satuan</div>
+              </div>
+            </div>
+            <div class="text-[9px] text-indigo-700 font-medium bg-white/80 p-1.5 rounded-lg border border-indigo-200/60 mt-2">
+              📦 <b>Beban Gudang:</b> Modal produksi barang yang keluar dari gudang FTL.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- REKAPITULASI AKHIR: DARI OMSET KOTOR HINGGA UANG BERSIH MASUK KAS -->
+        <div class="bg-slate-900 text-white rounded-xl p-3.5 sm:p-4 text-xs space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-700/80 pb-2">
+            <span class="font-bold text-slate-200 flex items-center gap-1.5">
+              <i data-lucide="calculator" class="w-4 h-4 text-emerald-400"></i>
+              <span>Alur Arus Kas Lengkap: Dari Omset Kotor Menjadi Uang Bersih di Kas Toko</span>
+            </span>
+            <span class="text-[10px] text-slate-400">Perhitungan Transparan Arus Kas Masuk</span>
+          </div>
+          
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center">
+            <div class="p-2 rounded-lg bg-slate-800/80 border border-slate-700">
+              <span class="text-[10px] text-slate-400 block">1. Omset Kotor</span>
+              <span class="text-sm font-bold text-white tabular-nums" id="statFlowKotor">Rp 0</span>
+            </div>
+            <div class="p-2 rounded-lg bg-slate-800/80 border border-slate-700">
+              <span class="text-[10px] text-orange-400 block">2. - Diskon Toko</span>
+              <span class="text-sm font-bold text-orange-400 tabular-nums" id="statFlowDiskonToko">- Rp 0</span>
+            </div>
+            <div class="p-2 rounded-lg bg-slate-800/80 border border-slate-700">
+              <span class="text-[10px] text-emerald-400 block">3. = Omset Bersih</span>
+              <span class="text-sm font-bold text-emerald-400 tabular-nums" id="statFlowBersih">Rp 0</span>
+            </div>
+            <div class="p-2 rounded-lg bg-slate-800/80 border border-slate-700">
+              <span class="text-[10px] text-rose-400 block">4. - Fee Admin</span>
+              <span class="text-sm font-bold text-rose-400 tabular-nums" id="statFlowFeeAdmin">- Rp 0</span>
+            </div>
+            <div class="p-2 rounded-lg bg-emerald-950/80 border border-emerald-600/60 col-span-2 sm:col-span-1">
+              <span class="text-[10px] text-emerald-300 font-semibold block">5. = Kas Masuk Riil (Net)</span>
+              <span class="text-sm font-extrabold text-emerald-400 tabular-nums" id="statFlowNetCash">Rp 0</span>
             </div>
           </div>
         </div>
@@ -2672,7 +2836,7 @@
         if (rawLen > 0) {
           tbody.innerHTML = `
             <tr>
-              <td colspan="23" class="py-12 text-center text-slate-500">
+              <td colspan="25" class="py-12 text-center text-slate-500">
                 <i data-lucide="filter-x" class="w-8 h-8 mx-auto mb-2 text-slate-400"></i>
                 <div class="font-semibold text-slate-700">Tidak ada pesanan yang sesuai filter aktif di tab <b>${activePlatformTab}</b></div>
                 <p class="text-xs text-slate-400 mt-1">Coba reset filter kategori, status, atau rentang tanggal.</p>
@@ -2686,7 +2850,7 @@
         } else {
           tbody.innerHTML = `
             <tr>
-              <td colspan="23" class="py-12 text-center text-slate-400">
+              <td colspan="25" class="py-12 text-center text-slate-400">
                 <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
                 <div>Tidak ada data di tab <b>${activePlatformTab}</b>. Silakan upload file atau muat data demo.</div>
               </td>
@@ -2760,8 +2924,10 @@
           `;
         }
 
-        const estHpp = (o.qty || 1) * defaultHppPerPcs;
-        const rowMargin = (o.totalBayar || 0) - estHpp;
+        const rowFee = (o.status === 'Selesai' ? (o.totalBayar || 0) : 0) * (o.platform === 'TikTok' ? (tiktokFeePct / 100) : (shopeeFeePct / 100));
+        const rowNetCash = Math.max(0, (o.totalBayar || 0) - rowFee);
+        const estHpp = (o.status === 'Selesai' ? (o.qty || 1) : 0) * defaultHppPerPcs;
+        const rowMargin = o.status === 'Selesai' ? (rowNetCash - estHpp) : 0;
 
         return `
           <tr class="hover:bg-slate-50/80 transition-colors ${o.status === 'Batal' ? 'bg-rose-50/30' : ''}">
@@ -2791,6 +2957,8 @@
             <td class="px-2.5 py-2 text-right font-medium text-purple-700 whitespace-nowrap bg-purple-50/30 tabular-nums" title="Diskon Subsidi Platform">Rp ${Math.round(o.diskonPlatform || 0).toLocaleString('id-ID')}</td>
             <td class="px-2.5 py-2 text-right font-bold text-rose-600 whitespace-nowrap bg-rose-50/40 tabular-nums" title="Total Potongan (Toko + Platform)">Rp ${Math.round(o.potongan || 0).toLocaleString('id-ID')}</td>
             <td class="px-2.5 py-2 text-right font-bold text-emerald-700 whitespace-nowrap bg-emerald-50/30 tabular-nums">Rp ${Math.round(o.totalBayar).toLocaleString('id-ID')}</td>
+            <td class="px-2.5 py-2 text-right font-medium text-rose-600 whitespace-nowrap bg-rose-50/20 tabular-nums" title="Est. Fee Admin: Rp ${Math.round(rowFee).toLocaleString('id-ID')}">- Rp ${Math.round(rowFee).toLocaleString('id-ID')}</td>
+            <td class="px-2.5 py-2 text-right font-bold text-teal-700 whitespace-nowrap bg-teal-50/30 tabular-nums" title="Kas Riil Masuk: Rp ${Math.round(rowNetCash).toLocaleString('id-ID')}">Rp ${Math.round(rowNetCash).toLocaleString('id-ID')}</td>
             <td class="px-2.5 py-2 text-right font-medium text-indigo-600 whitespace-nowrap bg-indigo-50/30 tabular-nums">Rp ${Math.round(estHpp).toLocaleString('id-ID')}</td>
             <td class="px-2.5 py-2 text-right font-bold ${rowMargin >= 0 ? 'text-blue-700' : 'text-rose-600'} whitespace-nowrap bg-blue-50/30 tabular-nums">Rp ${Math.round(rowMargin).toLocaleString('id-ID')}</td>
             <td class="px-3 py-2.5 font-semibold text-slate-700 whitespace-nowrap text-xs tracking-normal tabular-nums">${o.resi || '-'}</td>
@@ -2855,17 +3023,26 @@
       const totalOrders = exportData.length;
       const totalQty = exportData.reduce((acc, o) => acc + (o.qty || 1), 0);
       const totalKotor = exportData.reduce((acc, o) => acc + (o.hargaKotor || o.totalBayar || 0), 0);
-      const totalDiskon = exportData.reduce((acc, o) => acc + (o.potongan || 0), 0);
+      const totalDiskonToko = exportData.reduce((acc, o) => acc + (o.diskonPenjual !== undefined ? o.diskonPenjual : (o.potongan || 0)), 0);
+      const totalDiskonPlatform = exportData.reduce((acc, o) => acc + (o.diskonPlatform || 0), 0);
+      const totalPotongan = exportData.reduce((acc, o) => acc + (o.potongan || 0), 0);
       const totalBersih = exportData.reduce((acc, o) => acc + (o.totalBayar || 0), 0);
+      const totalFeeAdmin = exportData.reduce((acc, o) => {
+        const rate = o.platform === 'TikTok' ? (tiktokFeePct / 100) : (shopeeFeePct / 100);
+        return acc + ((o.status === 'Selesai' ? (o.totalBayar || 0) : 0) * rate);
+      }, 0);
+      const totalKasMasuk = Math.max(0, totalBersih - totalFeeAdmin);
       const totalHpp = exportData.reduce((acc, o) => acc + ((o.status === 'Selesai' ? (o.qty || 1) : 0) * defaultHppPerPcs), 0);
-      const totalLaba = totalBersih - totalHpp;
+      const totalLaba = totalKasMasuk - totalHpp;
       const rangeInfo = getDatasetDateRange(exportData);
 
       const aoa = [
         ['FOR THE LITTLE INDONESIA'],
-        ['REKAP LAPORAN TRANSAKSI PENJUALAN & PROFITABILITAS'],
+        ['REKAP LAPORAN TRANSAKSI PENJUALAN & RINCIAN POTONGAN BIAYA'],
         ['Platform:', activePlatformTab, '', 'Periode Transaksi:', rangeInfo.label, '', 'Tanggal Unduh:', new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })],
-        ['Total Pesanan:', `${totalOrders} Pesanan (${totalQty} Pcs)`, '', 'Omset Bersih:', totalBersih, '', 'Estimasi Laba:', totalLaba],
+        ['Total Pesanan:', `${totalOrders} Pesanan (${totalQty} Pcs)`, '', 'Kas Masuk Riil (Net):', Math.round(totalKasMasuk), '', 'Estimasi Laba Kas:', Math.round(totalLaba)],
+        ['Omset Kotor:', Math.round(totalKotor), '', 'Diskon Toko (FTL):', Math.round(totalDiskonToko), '', 'Subsidi Platform:', Math.round(totalDiskonPlatform)],
+        ['Omset Bersih:', Math.round(totalBersih), '', 'Est. Fee Admin:', Math.round(totalFeeAdmin), '', 'Total HPP Modal:', Math.round(totalHpp)],
         []
       ];
 
@@ -2873,15 +3050,20 @@
       const monthlyData = getMonthlyBreakdown(exportData);
       if (monthlyData.length > 0) {
         aoa.push(['RINGKASAN VOLUME PRODUK KELUAR PER BULAN:']);
-        aoa.push(['Bulan', 'Total Pesanan', 'Pcs Produk Keluar (Selesai)', 'Pcs Batal', 'Omset Bersih (Rp)', 'Estimasi Laba (Rp)']);
+        aoa.push(['Bulan', 'Total Pesanan', 'Pcs Selesai', 'Pcs Batal', 'Omset Bersih (Rp)', 'Fee Admin (Rp)', 'Kas Masuk Net (Rp)', 'Laba Riil (Rp)']);
         monthlyData.forEach(m => {
+          const mFee = (m.omsetBersih || 0) * ((activePlatformTab === 'TikTok' ? tiktokFeePct : shopeeFeePct) / 100);
+          const mNetCash = Math.max(0, m.omsetBersih - mFee);
+          const mLaba = mNetCash - (m.suksesPcs * defaultHppPerPcs);
           aoa.push([
             m.label,
             m.totalOrders,
             m.suksesPcs,
             m.batalPcs,
             Math.round(m.omsetBersih),
-            Math.round(m.laba)
+            Math.round(mFee),
+            Math.round(mNetCash),
+            Math.round(mLaba)
           ]);
         });
         aoa.push([]); // Baris kosong pemisah
@@ -2900,10 +3082,14 @@
         'Variasi',
         'Qty',
         'Omset Kotor (Rp)',
-        'Total Diskon (Rp)',
+        'Diskon Toko / Penjual (Rp)',
+        'Diskon Subsidi Platform (Rp)',
+        'Total Potongan Diskon (Rp)',
         'Omset Bersih (Rp)',
+        'Est. Fee Admin Platform (Rp)',
+        'Kas Masuk Riil / Net Payout (Rp)',
         'Total HPP (Rp)',
-        'Estimasi Laba (Rp)',
+        'Estimasi Laba Riil (Rp)',
         'No. Resi',
         'Kurir / Ekspedisi',
         'Username Pembeli',
@@ -2915,8 +3101,14 @@
       ]);
 
       exportData.forEach((o, idx) => {
+        const rowDiskonToko = o.diskonPenjual !== undefined ? o.diskonPenjual : (o.potongan || 0);
+        const rowDiskonPlatform = o.diskonPlatform || 0;
+        const rowPotongan = o.potongan || 0;
+        const rowFee = (o.status === 'Selesai' ? (o.totalBayar || 0) : 0) * (o.platform === 'TikTok' ? (tiktokFeePct / 100) : (shopeeFeePct / 100));
+        const rowNetCash = Math.max(0, (o.totalBayar || 0) - rowFee);
         const estHpp = (o.status === 'Selesai' ? (o.qty || 1) : 0) * defaultHppPerPcs;
-        const laba = (o.totalBayar || 0) - estHpp;
+        const laba = o.status === 'Selesai' ? (rowNetCash - estHpp) : 0;
+
         aoa.push([
           idx + 1,
           o.platform,
@@ -2930,8 +3122,12 @@
           o.variasi || '-',
           o.qty,
           Math.round(o.hargaKotor || o.totalBayar),
-          Math.round(o.potongan || 0),
+          Math.round(rowDiskonToko),
+          Math.round(rowDiskonPlatform),
+          Math.round(rowPotongan),
           Math.round(o.totalBayar),
+          Math.round(rowFee),
+          Math.round(rowNetCash),
           Math.round(estHpp),
           Math.round(laba),
           o.resi || '-',
@@ -2950,8 +3146,12 @@
         'TOTAL', '', '', '', '', '', '', '', 'TOTAL KESELURUHAN', '',
         totalQty,
         Math.round(totalKotor),
-        Math.round(totalDiskon),
+        Math.round(totalDiskonToko),
+        Math.round(totalDiskonPlatform),
+        Math.round(totalPotongan),
         Math.round(totalBersih),
+        Math.round(totalFeeAdmin),
+        Math.round(totalKasMasuk),
         Math.round(totalHpp),
         Math.round(totalLaba),
         '', '', '', '', '', '', '', ''
@@ -2961,8 +3161,8 @@
 
       // Merge Title Header Rows & Total row labels
       ws['!merges'] = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } },
-        { s: { r: 1, c: 0 }, e: { r: 1, c: 8 } },
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 9 } },
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 9 } },
         { s: { r: aoa.length - 1, c: 0 }, e: { r: aoa.length - 1, c: 9 } }
       ];
 
@@ -2980,8 +3180,12 @@
         { wch: 12 }, // Variasi
         { wch: 8 },  // Qty
         { wch: 18 }, // Kotor
-        { wch: 18 }, // Diskon
+        { wch: 18 }, // Diskon Toko
+        { wch: 18 }, // Diskon Platform
+        { wch: 18 }, // Total Potongan
         { wch: 18 }, // Bersih
+        { wch: 18 }, // Fee Admin
+        { wch: 19 }, // Kas Masuk Net
         { wch: 16 }, // HPP
         { wch: 18 }, // Laba
         { wch: 22 }, // Resi
