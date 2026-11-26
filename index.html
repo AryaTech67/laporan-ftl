@@ -1751,6 +1751,10 @@
         if (subtotalKotor > 0 && totalBayar > 0 && subtotalKotor >= totalBayar) {
           totalDiskon = subtotalKotor - totalBayar;
         }
+        const diskonPenjualShopeeRaw = parseFloat(getVal(row, ['Diskon Dari Penjual', 'Voucher Ditanggung Penjual', 'Diskon Penjual'], -1).replace(/[^0-9.]/g, '')) || 0;
+        const diskonPlatformShopeeRaw = parseFloat(getVal(row, ['Diskon Dari Shopee', 'Voucher Ditanggung Shopee', 'Diskon Shopee'], -1).replace(/[^0-9.]/g, '')) || 0;
+        const diskonPenjualVal = diskonPenjualShopeeRaw > 0 ? diskonPenjualShopeeRaw : totalDiskon;
+        const diskonPlatformVal = diskonPlatformShopeeRaw;
         const username = getVal(row, ['Username (Pembeli)', 'Username Pembeli', 'Buyer Username'], 46);
         const penerima = getVal(row, ['Nama Penerima', 'Recipient Name'], 47);
         const kota = getVal(row, ['Kota/Kabupaten', 'Kota / Kabupaten', 'City'], 50);
@@ -1803,6 +1807,8 @@
           variasi: variasi || '-',
           qty: qty,
           hargaKotor: subtotalKotor > 0 ? subtotalKotor : totalBayar,
+          diskonPenjual: diskonPenjualVal,
+          diskonPlatform: diskonPlatformVal,
           potongan: totalDiskon,
           totalBayar: totalBayar,
           pembeli: username,
@@ -1926,6 +1932,8 @@
           variasi: variasi || '-',
           qty: qty,
           hargaKotor: subtotalBeforeDisc > 0 ? subtotalBeforeDisc : (unitPrice * qty),
+          diskonPenjual: sellerDisc,
+          diskonPlatform: platformDisc,
           potongan: platformDisc + sellerDisc,
           totalBayar: totalBayar,
           pembeli: username,
@@ -1994,6 +2002,8 @@
       const suksesOrders = currentData.filter(o => o.status === 'Selesai');
       const omsetKotor = suksesOrders.reduce((acc, o) => acc + (o.hargaKotor || o.totalBayar || 0), 0);
       const totalPotongan = suksesOrders.reduce((acc, o) => acc + (o.potongan || 0), 0);
+      const totalDiskonPenjual = suksesOrders.reduce((acc, o) => acc + (o.diskonPenjual !== undefined ? o.diskonPenjual : (o.potongan || 0)), 0);
+      const totalDiskonPlatform = suksesOrders.reduce((acc, o) => acc + (o.diskonPlatform || 0), 0);
       const omsetBersih = suksesOrders.reduce((acc, o) => acc + (o.totalBayar || 0), 0);
       
       const suksesPcs = suksesOrders.reduce((acc, o) => acc + (o.qty || 1), 0);
@@ -2040,6 +2050,8 @@
       const fmtRp = (num) => 'Rp ' + Math.round(num || 0).toLocaleString('id-ID');
       const strKotor = fmtRp(omsetKotor);
       const strDiskon = fmtRp(totalPotongan);
+      const strDiskonPenjual = fmtRp(totalDiskonPenjual);
+      const strDiskonPlatform = fmtRp(totalDiskonPlatform);
       const strBersih = fmtRp(omsetBersih);
       const strHpp = fmtRp(totalHpp);
       const strLaba = fmtRp(estimasiLaba);
@@ -2210,6 +2222,35 @@
       setTxt('statRealNetProfit', fmtRp(realNetProfit));
       setTxt('lblFeeActiveTabBadge', `Tab ${activePlatformTab}`);
       setTxt('statFeeRateSummary', `Shopee ${shopeeFeePct}% • TikTok ${tiktokFeePct}%`);
+
+      // 🏷️ Update Detail Rincian Potongan Biaya (Menu Keuangan & Laba)
+      setTxt('lblDetailPotonganTabBadge', `Aktif: Tab ${activePlatformTab} (${totalOrders} Pesanan)`);
+      setTxt('statDetailDiskonToko', strDiskonPenjual);
+      setTxt('statDetailDiskonPlatform', strDiskonPlatform);
+      setTxt('statDetailFeeAdmin', '- ' + fmtRp(estFee));
+      setTxt('statDetailHppModal', '- ' + strHpp);
+      const activeFeeRateLabel = activePlatformTab === 'Shopee'
+        ? `Shopee ${shopeeFeePct}%`
+        : (activePlatformTab === 'TikTok'
+          ? `TikTok ${tiktokFeePct}%`
+          : `Shopee ${shopeeFeePct}% • TikTok ${tiktokFeePct}%`);
+      setTxt('statDetailFeeRateBadge', activeFeeRateLabel);
+      setTxt('statDetailHppRateBadge', `@Rp ${defaultHppPerPcs.toLocaleString('id-ID')} / pcs`);
+
+      // 🏷️ Update Alur Arus Kas Lengkap (5 Langkah)
+      setTxt('statFlowKotor', strKotor);
+      setTxt('statFlowDiskonToko', '- ' + strDiskonPenjual);
+      setTxt('statFlowBersih', strBersih);
+      setTxt('statFlowFeeAdmin', '- ' + fmtRp(estFee));
+      setTxt('statFlowNetCash', fmtRp(netCashIn));
+
+      // 🏷️ Update Banner Rincian Potongan Biaya di Beranda
+      setTxt('lblHomePotonganPlatform', `Tab ${activePlatformTab} • ${totalOrders} Pesanan`);
+      setTxt('statHomeDiskonToko', strDiskonPenjual);
+      setTxt('statHomeDiskonPlatform', strDiskonPlatform);
+      setTxt('statHomeFeeAdmin', fmtRp(estFee));
+      setTxt('statHomeFeeRate', activeFeeRateLabel);
+      setTxt('statHomeNetCashIn', fmtRp(netCashIn));
 
       // Sinkronkan input fee & target ke input box jika elemen ada
       const inpShopee = document.getElementById('inputShopeeFee');
