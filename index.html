@@ -1646,10 +1646,17 @@
           try {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array', cellDates: true, dateNF: 'yyyy-mm-dd hh:mm:ss' });
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
-            const jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, dateNF: 'yyyy-mm-dd hh:mm:ss' });
-            processParsedRawRows(jsonRows, file.name);
+            const skipSheets = ['ringkasan_mingguan', 'laporan_harian'];
+            const orderSheets = workbook.SheetNames.filter(name => !skipSheets.includes(name.trim().toLowerCase()));
+            const sheetsToRead = orderSheets.length > 0 ? orderSheets : workbook.SheetNames;
+            sheetsToRead.forEach(sheetName => {
+              const worksheet = workbook.Sheets[sheetName];
+              if (!worksheet) return;
+              const jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, dateNF: 'yyyy-mm-dd hh:mm:ss' });
+              if (jsonRows && jsonRows.length > 1) {
+                processParsedRawRows(jsonRows, file.name + (sheetsToRead.length > 1 ? ` [${sheetName}]` : ''));
+              }
+            });
           } catch (err) {
             showToast('Gagal membaca Excel: ' + err.message, false);
           }
@@ -1779,18 +1786,18 @@
           shopeeOrders = merged;
           saveStateToStorage();
           setActivePlatformTab('Shopee');
-          if (updatedCount === 0 || addedCount === newShopee.length) {
-            // Auto-set filter date range to match uploaded file
-          const newDates = newShopee.map(o => extractISODate(o.waktuPesan)).filter(Boolean).sort();
-          if (newDates.length > 0) {
+          const allDates = merged.map(o => extractISODate(o.waktuPesan)).filter(Boolean).sort();
+          if (allDates.length > 0) {
             const sInp = document.getElementById('filterStartDate');
             const eInp = document.getElementById('filterEndDate');
-            if (sInp) sInp.value = newDates[0];
-            if (eInp) eInp.value = newDates[newDates.length - 1];
+            if (sInp) sInp.value = allDates[0];
+            if (eInp) eInp.value = allDates[allDates.length - 1];
           }
-          showToast(`Berhasil upload ${newShopee.length} pesanan Shopee (${newDates.length > 0 ? newDates[0] + ' s/d ' + newDates[newDates.length - 1] : ''})!`);
+          const rangeText = allDates.length > 0 ? `${allDates[0]} s/d ${allDates[allDates.length - 1]}` : '';
+          if (updatedCount === 0 || addedCount === newShopee.length) {
+            showToast(`Berhasil upload ${newShopee.length} pesanan Shopee (${rangeText})!`);
           } else {
-            showToast(`Shopee diperbarui: +${addedCount} pesanan baru ditambahkan, ${updatedCount} data disinkronkan (perubahan manual tetap tersimpan)!`);
+            showToast(`Shopee diperbarui (${rangeText}): +${addedCount} baru ditambahkan, ${updatedCount} disinkronkan!`);
           }
         } else {
           showToast(`Tidak ditemukan data pesanan Shopee di ${fileName}`, false);
@@ -1802,18 +1809,18 @@
           tiktokOrders = merged;
           saveStateToStorage();
           setActivePlatformTab('TikTok');
-          if (updatedCount === 0 || addedCount === newTikTok.length) {
-            // Auto-set filter date range to match uploaded file
-          const newDates = newTikTok.map(o => extractISODate(o.waktuPesan)).filter(Boolean).sort();
-          if (newDates.length > 0) {
+          const allDates = merged.map(o => extractISODate(o.waktuPesan)).filter(Boolean).sort();
+          if (allDates.length > 0) {
             const sInp = document.getElementById('filterStartDate');
             const eInp = document.getElementById('filterEndDate');
-            if (sInp) sInp.value = newDates[0];
-            if (eInp) eInp.value = newDates[newDates.length - 1];
+            if (sInp) sInp.value = allDates[0];
+            if (eInp) eInp.value = allDates[allDates.length - 1];
           }
-          showToast(`Berhasil upload ${newTikTok.length} pesanan TikTok (${newDates.length > 0 ? newDates[0] + ' s/d ' + newDates[newDates.length - 1] : ''})!`);
+          const rangeText = allDates.length > 0 ? `${allDates[0]} s/d ${allDates[allDates.length - 1]}` : '';
+          if (updatedCount === 0 || addedCount === newTikTok.length) {
+            showToast(`Berhasil upload ${newTikTok.length} pesanan TikTok (${rangeText})!`);
           } else {
-            showToast(`TikTok diperbarui: +${addedCount} pesanan baru ditambahkan, ${updatedCount} data disinkronkan (perubahan manual tetap tersimpan)!`);
+            showToast(`TikTok diperbarui (${rangeText}): +${addedCount} baru ditambahkan, ${updatedCount} disinkronkan!`);
           }
         } else {
           showToast(`Tidak ditemukan data pesanan TikTok di ${fileName}`, false);
