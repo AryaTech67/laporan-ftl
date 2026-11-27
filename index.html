@@ -1684,9 +1684,11 @@
           if (idx !== -1) {
             result[idx] = {
               ...incoming,
-              kategori: existing.kategori || incoming.kategori,
-              jalurCheckout: existing.jalurCheckout || incoming.jalurCheckout,
-              status: existing.status || incoming.status,
+              kategori: existing._manualKategori ? (existing.kategori || incoming.kategori) : incoming.kategori,
+              _manualKategori: Boolean(existing._manualKategori),
+              jalurCheckout: existing._manualKategori ? (existing.jalurCheckout || incoming.jalurCheckout) : incoming.jalurCheckout,
+              status: existing._manualStatus ? (existing.status || incoming.status) : incoming.status,
+              _manualStatus: Boolean(existing._manualStatus),
               statusReturFisik: existing.statusReturFisik || incoming.statusReturFisik,
               tglReturFisik: existing.tglReturFisik || incoming.tglReturFisik
             };
@@ -1968,6 +1970,11 @@
 
     function parseTikTokRows(headers, rows) {
       const normalizeKey = (s) => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+      const isRealText = (v) => {
+        const t = String(v || '').trim().toLowerCase();
+        return Boolean(t && !['-', '--', '0', 'n/a', 'na', 'none', 'null'].includes(t));
+      };
+
       const colMap = {};
       if (Array.isArray(headers)) {
         headers.forEach((h, idx) => {
@@ -2016,7 +2023,7 @@
         // Detect headerless legacy FTL TikTok layout if headers array was empty
         const isLegacyHeaderless = !hasHeaders && row.length >= 65 && /\d{2}\/\d{2}\/\d{4}/.test(String(row[2] || ''));
 
-        const firstCol = getVal(row, ['Order ID', 'ID Pesanan', 'No. Pesanan'], 0);
+        const firstCol = getVal(row, ['Order ID', 'ID Pesanan', 'No. Pesanan'], 0, false);
         const fcLow = firstCol.toLowerCase();
         if (
           !firstCol ||
@@ -2038,18 +2045,18 @@
         }
         if (orderId.length < 6) return;
 
-        const col1Val = getVal(row, ['Keterangan', 'Kategori / Channel', 'Kategori', 'Seller Note', 'Note', 'Catatan Penjual'], isLegacyHeaderless ? 1 : -1);
+        const col1Val = getVal(row, ['Keterangan', 'Kategori / Channel', 'Kategori', 'Seller Note', 'Note', 'Catatan Penjual'], isLegacyHeaderless ? 1 : -1, false);
         const rawStatus = getVal(row, ['Order Status', 'Status Pesanan', 'Order Substatus', 'Status'], isLegacyHeaderless ? 3 : 1);
         const waktu = getVal(row, ['Created Time', 'Waktu Pesanan Dibuat', 'Waktu Dibuat', 'Order Creation Time', 'Waktu Pesanan'], isLegacyHeaderless ? 2 : 23);
         const namaProduk = getVal(row, ['Product Name', 'Nama Produk'], isLegacyHeaderless ? 9 : 7);
         const variasi = getVal(row, ['Variation', 'Variasi', 'Nama Variasi'], isLegacyHeaderless ? 10 : 8);
-        const qty = parseInt(getVal(row, ['Quantity', 'Jumlah', 'Qty'], isLegacyHeaderless ? 11 : 9), 10) || 1;
-        const unitPrice = parseMoney(getVal(row, ['SKU Unit Original Price', 'Harga Asli Satuan SKU', 'Harga Satuan', 'Harga Awal'], isLegacyHeaderless ? 13 : 11));
-        const subtotalBeforeDisc = parseMoney(getVal(row, ['SKU Subtotal Before Discount', 'Subtotal SKU Sebelum Diskon', 'Subtotal Sebelum Diskon'], isLegacyHeaderless ? 14 : 12));
-        const platformDisc = parseMoney(getVal(row, ['SKU Platform Discount', 'Diskon Platform SKU', 'Diskon Platform'], isLegacyHeaderless ? 15 : 13));
-        const sellerDisc = parseMoney(getVal(row, ['SKU Seller Discount', 'Diskon Penjual SKU', 'Diskon Penjual'], isLegacyHeaderless ? 16 : 14));
+        const qty = parseInt(getVal(row, ['Quantity', 'Qty', 'Jumlah', 'Kuantitas'], isLegacyHeaderless ? 11 : 9, false), 10) || 1;
+        const unitPrice = parseMoney(getVal(row, ['SKU Unit Original Price', 'Harga Asli Satuan SKU', 'Harga Satuan Asli SKU', 'Harga Asli Unit SKU', 'Harga Asli SKU', 'Harga Satuan', 'Harga Awal'], isLegacyHeaderless ? 13 : 11));
+        const subtotalBeforeDisc = parseMoney(getVal(row, ['SKU Subtotal Before Discount', 'Subtotal SKU Sebelum Diskon', 'Subtotal Sebelum Diskon', 'Subtotal Harga Produk'], isLegacyHeaderless ? 14 : 12));
+        const platformDisc = parseMoney(getVal(row, ['SKU Platform Discount', 'Diskon Platform SKU', 'Diskon Platform', 'Subsidi Platform'], isLegacyHeaderless ? 15 : 13));
+        const sellerDisc = parseMoney(getVal(row, ['SKU Seller Discount', 'Diskon Penjual SKU', 'Diskon Penjual', 'Diskon Toko'], isLegacyHeaderless ? 16 : 14));
         const subtotalAfterDisc = parseMoney(getVal(row, ['SKU Subtotal After Discount', 'Subtotal SKU Setelah Diskon', 'Subtotal Setelah Diskon'], isLegacyHeaderless ? -1 : 15));
-        const orderAmount = parseMoney(getVal(row, ['Order Amount', 'Jumlah Pesanan', 'Total Pembayaran', 'Total Amount', 'Jumlah Pembayaran'], isLegacyHeaderless ? 30 : 21));
+        const orderAmount = parseMoney(getVal(row, ['Order Amount', 'Order Total', 'Jumlah Pesanan', 'Total Pesanan', 'Total Pembayaran', 'Total Pembayaran Pembeli', 'Total Amount', 'Jumlah Pembayaran', 'Buyer Paid', 'Total Harga'], isLegacyHeaderless ? 30 : 21));
 
         const cancelTime = getVal(row, ['Cancelled Time', 'Canceled Time', 'Waktu Pembatalan', 'Waktu Dibatalkan'], isLegacyHeaderless ? 36 : -1);
         const cancelReason = getVal(row, ['Cancel Reason', 'Alasan Pembatalan', 'Alasan Batal'], isLegacyHeaderless ? 38 : -1);
@@ -2062,7 +2069,7 @@
         const kota = getVal(row, ['Regency and City', 'City', 'Kota/Kabupaten', 'Kota / Kabupaten', 'Kota'], isLegacyHeaderless ? 51 : -1);
         const metodeBayar = getVal(row, ['Payment Method', 'Metode Pembayaran'], isLegacyHeaderless ? 56 : -1);
         const orderChannel = getVal(row, ['Order Channel', 'Saluran Pesanan', 'Purchase Channel'], isLegacyHeaderless ? 64 : -1);
-        const creatorHandle = getVal(row, ['Creator Handle', 'Creator Username', 'Nama Kreator'], isLegacyHeaderless ? 65 : -1);
+        const creatorHandle = getVal(row, ['Creator Handle', 'Creator Username', 'Nama Kreator', 'Nama Pengguna Kreator', 'Affiliate Username'], isLegacyHeaderless ? 65 : -1);
         const purchaseChannel = getVal(row, ['Purchase Channel', 'Metode Pembelian'], isLegacyHeaderless ? 59 : -1);
 
         let hargaKotor = subtotalBeforeDisc > 0 ? subtotalBeforeDisc : (unitPrice * qty);
@@ -2072,39 +2079,51 @@
         const finalSellerDisc = sellerDisc > 0 ? sellerDisc : (platformDisc === 0 ? totalPotongan : 0);
         const finalPlatformDisc = platformDisc;
 
-        let category = 'SALES (Real)';
+        const hasCreator = isRealText(creatorHandle);
+        const prodLow = (namaProduk || '').toLowerCase();
+        const isSampleProd = prodLow.includes('sample') || prodLow.includes('sampel');
+        const ocLow = (orderChannel || '').trim().toLowerCase();
         const c1Upper = (col1Val || '').trim().toUpperCase();
+
+        let category = 'SALES (Real)';
         if (/\b(KOL|AFFILIATE)\b/i.test(col1Val) || c1Upper.includes('SAMPLE') || c1Upper.includes('ENDORSE')) {
           category = 'AFFILIATE / KOL';
         } else if (/\bFO\b/i.test(col1Val) || c1Upper === 'FO' || c1Upper.includes('FAKE ORDER')) {
           category = 'FO (Fake Order)';
         } else if (/\bSALES\b/i.test(col1Val) || c1Upper.includes('REAL')) {
           category = 'SALES (Real)';
-        } else if (totalBayar === 0 || (unitPrice === 0 && subtotalBeforeDisc === 0) || namaProduk.toLowerCase().includes('sampel') || namaProduk.toLowerCase().includes('sample')) {
-          category = 'AFFILIATE / KOL';
-        } else if (orderChannel.toLowerCase() === 'videos' || orderChannel.toLowerCase() === 'live' || (creatorHandle && creatorHandle !== '0' && creatorHandle !== '-')) {
+        } else if (hasCreator || isSampleProd) {
           category = 'AFFILIATE / KOL';
         }
 
         let jalurCheckout = 'Etalase Toko';
-        const crHandle = (creatorHandle && creatorHandle !== '0' && creatorHandle !== '-') ? creatorHandle : '';
-        if (crHandle) {
-          jalurCheckout = 'Creator / Endorsement';
-        } else if (col1Val && col1Val.toUpperCase().includes('KOL')) {
-          jalurCheckout = 'Creator / Endorsement';
-        } else if (orderChannel.toLowerCase() === 'videos') {
-          jalurCheckout = 'Video TikTok';
-        } else if (orderChannel.toLowerCase() === 'live') {
-          jalurCheckout = 'TikTok LIVE';
-        } else if (col1Val && col1Val.toUpperCase().includes('FO')) {
+        if (hasCreator) {
+          if (ocLow.includes('video')) {
+            jalurCheckout = `Video Affiliate (@${creatorHandle.replace(/^@/, '')})`;
+          } else if (ocLow.includes('live')) {
+            jalurCheckout = `LIVE Affiliate (@${creatorHandle.replace(/^@/, '')})`;
+          } else {
+            jalurCheckout = `Creator / Endorsement (@${creatorHandle.replace(/^@/, '')})`;
+          }
+        } else if (/\bKOL\b/i.test(col1Val) || c1Upper.includes('SAMPLE') || c1Upper.includes('ENDORSE') || isSampleProd) {
+          jalurCheckout = 'KOL / Sample Gratis';
+        } else if (/\bAFFILIATE\b/i.test(col1Val)) {
+          jalurCheckout = 'Video Affiliate';
+        } else if (c1Upper.includes('FO') || /\bFO\b/i.test(col1Val)) {
           jalurCheckout = 'Fake Order (FO)';
-        } else if (col1Val && col1Val.toUpperCase().includes('SALES')) {
+        } else if (/\bSALES\b/i.test(col1Val)) {
           jalurCheckout = `Sales Real (${col1Val})`;
-        } else if (orderChannel.toLowerCase().includes('card') || orderChannel.toLowerCase().includes('product')) {
+        } else if (ocLow === 'videos' || ocLow.includes('video')) {
+          jalurCheckout = 'Video Toko FTL';
+        } else if (ocLow === 'live') {
+          jalurCheckout = 'LIVE Toko FTL';
+        } else if (ocLow.includes('card') || ocLow.includes('product') || ocLow.includes('produk')) {
           jalurCheckout = 'Product Cards (Etalase)';
-        } else if (orderChannel) {
+        } else if (totalBayar === 0) {
+          jalurCheckout = 'Promo / Gratis (Rp 0)';
+        } else if (isRealText(orderChannel)) {
           jalurCheckout = orderChannel;
-        } else if (purchaseChannel) {
+        } else if (isRealText(purchaseChannel)) {
           jalurCheckout = purchaseChannel;
         }
 
@@ -3171,6 +3190,7 @@
       const dataset = platform === 'Shopee' ? shopeeOrders : tiktokOrders;
       if (dataset[idx]) {
         dataset[idx].kategori = newCategory;
+        dataset[idx]._manualKategori = true;
         saveStateToStorage();
         refreshUI();
         showToast(`Kategori diubah ke ${newCategory}`);
@@ -3181,6 +3201,7 @@
       const dataset = platform === 'Shopee' ? shopeeOrders : tiktokOrders;
       if (dataset[idx]) {
         dataset[idx].status = newStatus;
+        dataset[idx]._manualStatus = true;
         if (newStatus === 'Batal' && !dataset[idx].statusReturFisik) {
           dataset[idx].statusReturFisik = 'Menunggu Sortiran';
         }
@@ -3237,7 +3258,7 @@
       }
       const currentData = getActiveDataset();
       selectedOrderIndices.forEach(idx => {
-        if (currentData[idx]) currentData[idx].kategori = cat;
+        if (currentData[idx]) { currentData[idx].kategori = cat; currentData[idx]._manualKategori = true; }
       });
       selectedOrderIndices.clear();
       const checkAllBox = document.getElementById('checkAll');
@@ -3256,6 +3277,7 @@
       selectedOrderIndices.forEach(idx => {
         if (currentData[idx]) {
           currentData[idx].status = statusVal;
+          currentData[idx]._manualStatus = true;
           if (statusVal === 'Batal') currentData[idx].statusReturFisik = 'Menunggu Sortiran';
         }
       });
@@ -3345,7 +3367,13 @@
         // Badge Jalur Checkout (Distinction between Video Affiliate and Toko Resmi per Kak Mia)
         const jc = (o.jalurCheckout || o.kategori || '').toLowerCase();
         let checkoutBadge = '';
-        if (jc.includes('creator') || jc.includes('endorse') || jc.includes('kol') || jc.includes('affiliate') || jc.includes('@') || jc.includes('sample')) {
+        if (jc.includes('kol') || jc.includes('sample') || jc.includes('endorse')) {
+          checkoutBadge = `<span class="inline-flex items-center gap-1 font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 text-[10px] whitespace-nowrap">🎁 KOL / Sample</span>`;
+        } else if (jc.includes('video toko')) {
+          checkoutBadge = `<span class="inline-flex items-center gap-1 font-bold text-[#35433a] bg-[#abcbb2]/30 px-2 py-0.5 rounded-lg border border-[#abcbb2] text-[10px] whitespace-nowrap font-brand">🏪 Video Toko FTL</span>`;
+        } else if (jc.includes('live toko')) {
+          checkoutBadge = `<span class="inline-flex items-center gap-1 font-bold text-[#35433a] bg-[#abcbb2]/30 px-2 py-0.5 rounded-lg border border-[#abcbb2] text-[10px] whitespace-nowrap font-brand">🔴 LIVE Toko FTL</span>`;
+        } else if (jc.includes('creator') || jc.includes('affiliate') || jc.includes('@')) {
           checkoutBadge = `<span class="inline-flex items-center gap-1 font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200 text-[10px] whitespace-nowrap">🎬 Video Affiliate</span>`;
         } else if (jc.includes('video')) {
           checkoutBadge = `<span class="inline-flex items-center gap-1 font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200 text-[10px] whitespace-nowrap">🎬 Video Affiliate</span>`;
