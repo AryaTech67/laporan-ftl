@@ -270,7 +270,7 @@
   <!-- 🖥️ MAIN WRAPPER (Topbar + View Pane) -->
   <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
     <!-- Topbar Header -->
-    <header class="bg-white border-b border-[#d2ded6] h-16 flex items-center justify-between px-3 sm:px-6 shrink-0 z-10 shadow-2xs">
+    <header class="bg-white border-b border-[#d2ded6] min-h-16 py-2 sm:py-0 sm:h-16 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 px-3 sm:px-6 shrink-0 z-10 shadow-2xs">
       <div class="flex items-center gap-2.5 sm:gap-3 overflow-hidden">
         <button type="button" onclick="toggleSidebar(true)" class="p-2 text-[#666a6c] hover:text-[#35433a] hover:bg-[#e9f1ec] rounded-xl border border-[#d2ded6] md:hidden cursor-pointer" title="Buka Menu">
           <i data-lucide="menu" class="w-5 h-5"></i>
@@ -282,19 +282,19 @@
       </div>
 
       <!-- Platform Workspace Tabs (Shopee / TikTok / Gabungan) -->
-      <div id="platformTabsContainer" class="flex items-center gap-1 bg-[#f4f7f5] p-1 rounded-xl border border-[#d2ded6]">
+      <div id="platformTabsContainer" class="flex items-center gap-1 bg-[#f4f7f5] p-1 rounded-xl border border-[#d2ded6] overflow-x-auto max-w-full shrink-0">
         <button id="tabShopee" onclick="setActivePlatformTab('Shopee')" 
-                class="px-2.5 sm:px-3 py-1 rounded-lg font-bold text-[11px] sm:text-xs transition flex items-center gap-1 bg-[#EE4D2D] text-white shadow-xs font-brand cursor-pointer">
+                class="px-2.5 sm:px-3 py-1 rounded-lg font-bold text-[11px] sm:text-xs transition flex items-center gap-1 bg-[#EE4D2D] text-white shadow-xs font-brand cursor-pointer whitespace-nowrap shrink-0">
           <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
           <span>Shopee (<span id="tabCountShopee" class="font-mono">0</span>)</span>
         </button>
         <button id="tabTikTok" onclick="setActivePlatformTab('TikTok')" 
-                class="px-2.5 sm:px-3 py-1 rounded-lg font-medium text-[11px] sm:text-xs transition flex items-center gap-1 text-[#666a6c] hover:text-[#35433a] font-brand cursor-pointer">
+                class="px-2.5 sm:px-3 py-1 rounded-lg font-medium text-[11px] sm:text-xs transition flex items-center gap-1 text-[#666a6c] hover:text-[#35433a] font-brand cursor-pointer whitespace-nowrap shrink-0">
           <i data-lucide="music-2" class="w-3.5 h-3.5"></i>
           <span>TikTok (<span id="tabCountTikTok" class="font-mono">0</span>)</span>
         </button>
         <button id="tabGabungan" onclick="setActivePlatformTab('Gabungan')" 
-                class="px-2.5 sm:px-3 py-1 rounded-lg font-medium text-[11px] sm:text-xs transition flex items-center gap-1 text-[#666a6c] hover:text-[#35433a] font-brand cursor-pointer">
+                class="px-2.5 sm:px-3 py-1 rounded-lg font-medium text-[11px] sm:text-xs transition flex items-center gap-1 text-[#666a6c] hover:text-[#35433a] font-brand cursor-pointer whitespace-nowrap shrink-0">
           <i data-lucide="layers" class="w-3.5 h-3.5"></i>
           <span>Gabungan (<span id="tabCountGabungan" class="font-mono">0</span>)</span>
         </button>
@@ -1134,7 +1134,7 @@
             <span class="text-[10px] text-slate-400">Perhitungan Transparan Arus Kas Masuk</span>
           </div>
           
-          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center">
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 text-center">
             <div class="p-2 rounded-lg bg-slate-800/80 border border-slate-700">
               <span class="text-[10px] text-slate-400 block">1. Omset Kotor</span>
               <span class="text-sm font-bold text-white tabular-nums" id="statFlowKotor">Rp 0</span>
@@ -1144,15 +1144,19 @@
               <span class="text-sm font-bold text-orange-400 tabular-nums" id="statFlowDiskonToko">- Rp 0</span>
             </div>
             <div class="p-2 rounded-lg bg-slate-800/80 border border-slate-700">
-              <span class="text-[10px] text-emerald-400 block">3. = Omset Bersih</span>
+              <span class="text-[10px] text-purple-400 block">3. - Subsidi Platform</span>
+              <span class="text-sm font-bold text-purple-400 tabular-nums" id="statFlowDiskonPlatform">- Rp 0</span>
+            </div>
+            <div class="p-2 rounded-lg bg-slate-800/80 border border-slate-700">
+              <span class="text-[10px] text-emerald-400 block">4. = Omset Bersih</span>
               <span class="text-sm font-bold text-emerald-400 tabular-nums" id="statFlowBersih">Rp 0</span>
             </div>
             <div class="p-2 rounded-lg bg-slate-800/80 border border-slate-700">
-              <span class="text-[10px] text-rose-400 block">4. - Fee Admin</span>
+              <span class="text-[10px] text-rose-400 block">5. - Fee Admin</span>
               <span class="text-sm font-bold text-rose-400 tabular-nums" id="statFlowFeeAdmin">- Rp 0</span>
             </div>
-            <div class="p-2 rounded-lg bg-emerald-950/80 border border-emerald-600/60 col-span-2 sm:col-span-1">
-              <span class="text-[10px] text-emerald-300 font-semibold block">5. = Kas Masuk Riil (Net)</span>
+            <div class="p-2 rounded-lg bg-emerald-950/80 border border-emerald-600/60">
+              <span class="text-[10px] text-emerald-300 font-semibold block">6. = Kas Masuk Riil (Net)</span>
               <span class="text-sm font-extrabold text-emerald-400 tabular-nums" id="statFlowNetCash">Rp 0</span>
             </div>
           </div>
@@ -2109,7 +2113,7 @@
       const transparencyBox = document.getElementById('transparencyDetailBox');
 
       if (isShopee) {
-        setTxt('statSourcePlatform', 'Shopee Seller Center');
+
         if (transparencyBox) {
           transparencyBox.innerHTML = `
             <div class="bg-white p-2 rounded-xl border border-indigo-100">
@@ -2139,7 +2143,7 @@
           `;
         }
       } else if (isTikTok) {
-        setTxt('statSourcePlatform', 'TikTok Seller Center');
+
         if (transparencyBox) {
           transparencyBox.innerHTML = `
             <div class="bg-white p-2 rounded-xl border border-indigo-100">
@@ -2169,7 +2173,7 @@
           `;
         }
       } else {
-        setTxt('statSourcePlatform', 'Shopee & TikTok Gabungan');
+
         if (transparencyBox) {
           transparencyBox.innerHTML = `
             <div class="bg-white p-2 rounded-xl border border-indigo-100">
@@ -2217,11 +2221,11 @@
       const netCashIn = Math.max(0, omsetBersih - estFee);
       const realNetProfit = estimasiLaba - estFee;
 
-      setTxt('statEstMarketplaceFee', '- ' + fmtRp(estFee));
-      setTxt('statNetCashIn', fmtRp(netCashIn));
-      setTxt('statRealNetProfit', fmtRp(realNetProfit));
-      setTxt('lblFeeActiveTabBadge', `Tab ${activePlatformTab}`);
-      setTxt('statFeeRateSummary', `Shopee ${shopeeFeePct}% • TikTok ${tiktokFeePct}%`);
+
+
+
+
+
 
       // 🏷️ Update Detail Rincian Potongan Biaya (Menu Keuangan & Laba)
       setTxt('lblDetailPotonganTabBadge', `Aktif: Tab ${activePlatformTab} (${totalOrders} Pesanan)`);
@@ -2237,9 +2241,10 @@
       setTxt('statDetailFeeRateBadge', activeFeeRateLabel);
       setTxt('statDetailHppRateBadge', `@Rp ${defaultHppPerPcs.toLocaleString('id-ID')} / pcs`);
 
-      // 🏷️ Update Alur Arus Kas Lengkap (5 Langkah)
+      // 🏷️ Update Alur Arus Kas Lengkap (6 Langkah)
       setTxt('statFlowKotor', strKotor);
       setTxt('statFlowDiskonToko', '- ' + strDiskonPenjual);
+      setTxt('statFlowDiskonPlatform', '- ' + strDiskonPlatform);
       setTxt('statFlowBersih', strBersih);
       setTxt('statFlowFeeAdmin', '- ' + fmtRp(estFee));
       setTxt('statFlowNetCash', fmtRp(netCashIn));
@@ -2373,6 +2378,8 @@
             omsetKotor: 0,
             totalDiskon: 0,
             omsetBersih: 0,
+            feeAdmin: 0,
+            netCash: 0,
             totalHpp: 0,
             laba: 0
           };
@@ -2387,14 +2394,21 @@
           mObj.batalOrders += 1;
           mObj.batalPcs += qty;
         } else {
-          mObj.suksesOrders += 1;
+          if (o.status === 'Selesai') {
+            mObj.suksesOrders += 1;
           mObj.suksesPcs += qty;
           mObj.omsetKotor += (o.hargaKotor || o.totalBayar || 0);
           mObj.totalDiskon += (o.potongan || 0);
           mObj.omsetBersih += (o.totalBayar || 0);
           const hpp = qty * defaultHppPerPcs;
           mObj.totalHpp += hpp;
-          mObj.laba += ((o.totalBayar || 0) - hpp);
+          const mRate = o.platform === 'TikTok' ? (tiktokFeePct / 100) : (shopeeFeePct / 100);
+          const mFee = (o.totalBayar || 0) * mRate;
+          const mNet = Math.max(0, (o.totalBayar || 0) - mFee);
+          mObj.feeAdmin += mFee;
+          mObj.netCash += mNet;
+          mObj.laba += (mNet - hpp);
+          }
         }
       });
 
@@ -2710,7 +2724,11 @@
         }
       }
 
-      const filtered = currentData.map((o, idxInPlatform) => ({ ...o, idxInPlatform })).filter(o => {
+      const filtered = currentData.map((o, idxInActive) => ({
+        ...o,
+        idxInActive,
+        idxInPlatform: (activePlatformTab === 'Gabungan' && o.platform === 'TikTok') ? (idxInActive - shopeeOrders.length) : idxInActive
+      })).filter(o => {
         if (catFilter !== 'ALL' && o.kategori !== catFilter) return false;
         if (statusFilter !== 'ALL' && o.status !== statusFilter) return false;
         if (dateMode === 'BATAL_ONLY' && o.status !== 'Batal') return false;
@@ -2907,7 +2925,7 @@
           ? '<span class="font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-200">Shopee</span>'
           : '<span class="font-bold text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300">TikTok</span>';
 
-        const isChecked = selectedOrderIndices.has(o.idxInPlatform) ? 'checked' : '';
+        const isChecked = selectedOrderIndices.has(o.idxInActive) ? 'checked' : '';
 
         const catSelect = `
           <select onchange="updateRowCategory('${o.platform}', ${o.idxInPlatform}, this.value)" 
@@ -2973,7 +2991,7 @@
         return `
           <tr class="hover:bg-slate-50/80 transition-colors ${o.status === 'Batal' ? 'bg-rose-50/30' : ''}">
             <td class="px-2.5 py-2 text-center no-print">
-              <input type="checkbox" ${isChecked} onchange="toggleSelectRow(${o.idxInPlatform}, this.checked)" class="rounded text-orange-600 cursor-pointer">
+              <input type="checkbox" ${isChecked} onchange="toggleSelectRow(${o.idxInActive}, this.checked)" class="rounded text-orange-600 cursor-pointer">
             </td>
             <td class="px-2 py-2 text-center text-slate-400 font-medium">${idx + 1}</td>
             <td class="px-2.5 py-2 whitespace-nowrap">${platBadge}</td>
@@ -3063,12 +3081,13 @@
 
       const totalOrders = exportData.length;
       const totalQty = exportData.reduce((acc, o) => acc + (o.qty || 1), 0);
-      const totalKotor = exportData.reduce((acc, o) => acc + (o.hargaKotor || o.totalBayar || 0), 0);
-      const totalDiskonToko = exportData.reduce((acc, o) => acc + (o.diskonPenjual !== undefined ? o.diskonPenjual : (o.potongan || 0)), 0);
-      const totalDiskonPlatform = exportData.reduce((acc, o) => acc + (o.diskonPlatform || 0), 0);
-      const totalPotongan = exportData.reduce((acc, o) => acc + (o.potongan || 0), 0);
-      const totalBersih = exportData.reduce((acc, o) => acc + (o.totalBayar || 0), 0);
-      const totalFeeAdmin = exportData.reduce((acc, o) => {
+      const suksesExport = exportData.filter(o => o.status === 'Selesai');
+      const totalKotor = suksesExport.reduce((acc, o) => acc + (o.hargaKotor || o.totalBayar || 0), 0);
+      const totalDiskonToko = suksesExport.reduce((acc, o) => acc + (o.diskonPenjual !== undefined ? o.diskonPenjual : (o.potongan || 0)), 0);
+      const totalDiskonPlatform = suksesExport.reduce((acc, o) => acc + (o.diskonPlatform || 0), 0);
+      const totalPotongan = suksesExport.reduce((acc, o) => acc + (o.potongan || 0), 0);
+      const totalBersih = suksesExport.reduce((acc, o) => acc + (o.totalBayar || 0), 0);
+      const totalFeeAdmin = suksesExport.reduce((acc, o) => {
         const rate = o.platform === 'TikTok' ? (tiktokFeePct / 100) : (shopeeFeePct / 100);
         return acc + ((o.status === 'Selesai' ? (o.totalBayar || 0) : 0) * rate);
       }, 0);
@@ -3093,9 +3112,9 @@
         aoa.push(['RINGKASAN VOLUME PRODUK KELUAR PER BULAN:']);
         aoa.push(['Bulan', 'Total Pesanan', 'Pcs Selesai', 'Pcs Batal', 'Omset Bersih (Rp)', 'Fee Admin (Rp)', 'Kas Masuk Net (Rp)', 'Laba Riil (Rp)']);
         monthlyData.forEach(m => {
-          const mFee = (m.omsetBersih || 0) * ((activePlatformTab === 'TikTok' ? tiktokFeePct : shopeeFeePct) / 100);
-          const mNetCash = Math.max(0, m.omsetBersih - mFee);
-          const mLaba = mNetCash - (m.suksesPcs * defaultHppPerPcs);
+          const mFee = m.feeAdmin || 0;
+          const mNetCash = m.netCash !== undefined ? m.netCash : Math.max(0, (m.omsetBersih || 0) - mFee);
+          const mLaba = m.laba || 0;
           aoa.push([
             m.label,
             m.totalOrders,
@@ -3259,11 +3278,14 @@
 
       const totalOrders = exportData.length;
       const totalQty = exportData.reduce((acc, o) => acc + (o.qty || 1), 0);
-      const totalKotor = exportData.reduce((acc, o) => acc + (o.hargaKotor || o.totalBayar || 0), 0);
-      const totalDiskon = exportData.reduce((acc, o) => acc + (o.potongan || 0), 0);
-      const totalBersih = exportData.reduce((acc, o) => acc + (o.totalBayar || 0), 0);
+      const suksesExport = exportData.filter(o => o.status === 'Selesai');
+      const totalKotor = suksesExport.reduce((acc, o) => acc + (o.hargaKotor || o.totalBayar || 0), 0);
+      const totalDiskon = suksesExport.reduce((acc, o) => acc + (o.potongan || 0), 0);
+      const totalBersih = suksesExport.reduce((acc, o) => acc + (o.totalBayar || 0), 0);
       const totalHpp = exportData.reduce((acc, o) => acc + ((o.status === 'Selesai' ? (o.qty || 1) : 0) * defaultHppPerPcs), 0);
-      const totalLaba = totalBersih - totalHpp;
+      const totalFeeAdmin = suksesExport.reduce((acc, o) => acc + ((o.totalBayar || 0) * (o.platform === 'TikTok' ? (tiktokFeePct / 100) : (shopeeFeePct / 100))), 0);
+      const totalKasMasuk = Math.max(0, totalBersih - totalFeeAdmin);
+      const totalLaba = totalKasMasuk - totalHpp;
       const rangeInfo = getDatasetDateRange(exportData);
 
       const headers = [
@@ -3277,7 +3299,9 @@
 
       const rows = exportData.map((o, idx) => {
         const estHpp = (o.status === 'Selesai' ? (o.qty || 1) : 0) * defaultHppPerPcs;
-        const laba = (o.totalBayar || 0) - estHpp;
+        const rowFee = (o.status === 'Selesai' ? (o.totalBayar || 0) : 0) * (o.platform === 'TikTok' ? (tiktokFeePct / 100) : (shopeeFeePct / 100));
+        const rowNetCash = Math.max(0, (o.totalBayar || 0) - rowFee);
+        const laba = o.status === 'Selesai' ? (rowNetCash - estHpp) : 0;
         return [
           idx + 1,
           cleanCell(o.platform),
@@ -3394,12 +3418,15 @@
 
         const totalOrders = exportData.length;
         const totalQty = exportData.reduce((acc, o) => acc + (o.qty || 1), 0);
-        const totalKotor = exportData.reduce((acc, o) => acc + (o.hargaKotor || o.totalBayar || 0), 0);
-        const totalDiskon = exportData.reduce((acc, o) => acc + (o.potongan || 0), 0);
-        const totalBersih = exportData.reduce((acc, o) => acc + (o.totalBayar || 0), 0);
+      const suksesExport = exportData.filter(o => o.status === 'Selesai');
+        const totalKotor = suksesExport.reduce((acc, o) => acc + (o.hargaKotor || o.totalBayar || 0), 0);
+        const totalDiskon = suksesExport.reduce((acc, o) => acc + (o.potongan || 0), 0);
+        const totalBersih = suksesExport.reduce((acc, o) => acc + (o.totalBayar || 0), 0);
         const suksesPcs = exportData.filter(o => o.status === 'Selesai').reduce((acc, o) => acc + (o.qty || 1), 0);
         const totalHpp = suksesPcs * defaultHppPerPcs;
-        const totalLaba = totalBersih - totalHpp;
+        const totalFeeAdmin = suksesExport.reduce((acc, o) => acc + ((o.totalBayar || 0) * (o.platform === 'TikTok' ? (tiktokFeePct / 100) : (shopeeFeePct / 100))), 0);
+      const totalKasMasuk = Math.max(0, totalBersih - totalFeeAdmin);
+      const totalLaba = totalKasMasuk - totalHpp;
         const rangeInfo = getDatasetDateRange(exportData);
         const todayStr = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
 
@@ -3457,7 +3484,9 @@
 
         const tableBody = exportData.map((o, idx) => {
           const estHpp = (o.status === 'Selesai' ? (o.qty || 1) : 0) * defaultHppPerPcs;
-          const laba = (o.totalBayar || 0) - estHpp;
+          const rowFee = (o.status === 'Selesai' ? (o.totalBayar || 0) : 0) * (o.platform === 'TikTok' ? (tiktokFeePct / 100) : (shopeeFeePct / 100));
+        const rowNetCash = Math.max(0, (o.totalBayar || 0) - rowFee);
+        const laba = o.status === 'Selesai' ? (rowNetCash - estHpp) : 0;
           return [
             String(idx + 1),
             o.platform,
